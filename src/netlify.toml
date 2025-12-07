@@ -9,4 +9,3 @@
 
 [build.environment]
   NODE_VERSION = "18"
-  VITE_API_URL = "https://quiz-backend-6qoh.onrender.com/api"
