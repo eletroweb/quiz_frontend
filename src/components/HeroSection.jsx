@@ -2,7 +2,10 @@ import React, { useState, useEffect } from 'react';
 import { Box, Container, Typography, Button, IconButton, Grid } from '@mui/material';
 import { KeyboardArrowLeft, KeyboardArrowRight } from '@mui/icons-material';
 import axios from 'axios';
-import homePageDesign from '../assets/home_page_design.png'; // Usando a imagem como referência visual se necessário, ou placeholder
+import api from '../services/api';
+import homePageDesign from '../assets/home_page_design.png';
+
+const API_BASE_URL = import.meta.env.VITE_API_URL?.replace('/api', '') || 'http://localhost:3001';
 
 function HeroSection() {
     const [banners, setBanners] = useState([]);
@@ -15,7 +18,7 @@ function HeroSection() {
 
     const fetchBanners = async () => {
         try {
-            const response = await axios.get('http://localhost:3001/api/banners/ativos');
+            const response = await api.get('/banners/ativos');
             setBanners(response.data.filter(b => b.tipo === 'hero'));
             setLoading(false);
         } catch (error) {
@@ -184,7 +187,7 @@ function HeroSection() {
                             {banner.imagem_url ? (
                                 <Box
                                     component="img"
-                                    src={`http://localhost:3001${banner.imagem_url}`}
+                                    src={`${API_BASE_URL}${banner.imagem_url}`}
                                     alt={banner.titulo}
                                     sx={{
                                         maxWidth: '100%',

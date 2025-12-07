@@ -31,6 +31,9 @@ import {
 } from '@mui/icons-material';
 import axios from 'axios';
 import { useAuth } from '../../contexts/AuthContext';
+import api from '../../services/api';
+
+const API_BASE_URL = import.meta.env.VITE_API_URL?.replace('/api', '') || 'http://localhost:3001';
 
 function Banners() {
     const { token } = useAuth();
@@ -57,9 +60,7 @@ function Banners() {
 
     const fetchBanners = async () => {
         try {
-            const response = await axios.get('http://localhost:3001/api/banners', {
-                headers: { Authorization: `Bearer ${token}` }
-            });
+            const response = await api.get('/banners');
             setBanners(response.data);
             setLoading(false);
         } catch (error) {
@@ -81,7 +82,7 @@ function Banners() {
                 imagem_url: banner.imagem_url || ''
             });
             setEditingId(banner.id);
-            setImagePreview(banner.imagem_url ? `http://localhost:3001${banner.imagem_url}` : null);
+            setImagePreview(banner.imagem_url ? `${API_BASE_URL}${banner.imagem_url}` : null);
         } else {
             setFormData({
                 titulo: '',
@@ -132,9 +133,8 @@ function Banners() {
                 const formDataImage = new FormData();
                 formDataImage.append('imagem', selectedImage);
 
-                const uploadResponse = await axios.post('http://localhost:3001/api/banners/upload', formDataImage, {
+                const uploadResponse = await api.post('/banners/upload', formDataImage, {
                     headers: {
-                        Authorization: `Bearer ${token}`,
                         'Content-Type': 'multipart/form-data'
                     }
                 });
@@ -147,13 +147,9 @@ function Banners() {
             };
 
             if (editingId) {
-                await axios.put(`http://localhost:3001/api/banners/${editingId}`, bannerData, {
-                    headers: { Authorization: `Bearer ${token}` }
-                });
+                await api.put(`/banners/${editingId}`, bannerData);
             } else {
-                await axios.post('http://localhost:3001/api/banners', bannerData, {
-                    headers: { Authorization: `Bearer ${token}` }
-                });
+                await api.post('/banners', bannerData);
             }
 
             fetchBanners();
@@ -167,9 +163,7 @@ function Banners() {
     const handleDelete = async (id) => {
         if (window.confirm('Tem certeza que deseja excluir este banner?')) {
             try {
-                await axios.delete(`http://localhost:3001/api/banners/${id}`, {
-                    headers: { Authorization: `Bearer ${token}` }
-                });
+                await api.delete(`/banners/${id}`);
                 fetchBanners();
             } catch (error) {
                 console.error('Erro ao excluir banner:', error);
@@ -179,11 +173,9 @@ function Banners() {
 
     const handleToggleActive = async (banner) => {
         try {
-            await axios.put(`http://localhost:3001/api/banners/${banner.id}`, {
+            await api.put(`/banners/${banner.id}`, {
                 ...banner,
                 ativo: !banner.ativo
-            }, {
-                headers: { Authorization: `Bearer ${token}` }
             });
             fetchBanners();
         } catch (error) {
@@ -223,7 +215,7 @@ function Banners() {
                                 <TableCell>
                                     {banner.imagem_url && (
                                         <img
-                                            src={`http://localhost:3001${banner.imagem_url}`}
+                                            src={`${API_BASE_URL}${banner.imagem_url}`}
                                             alt={banner.titulo}
                                             style={{ width: 100, height: 50, objectFit: 'cover', borderRadius: 4 }}
                                         />

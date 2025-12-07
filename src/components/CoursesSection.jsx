@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { Box, Container, Typography, Card, CardContent, CardMedia, Button } from '@mui/material';
 import StarIcon from '@mui/icons-material/Star';
 import axios from 'axios';
+import api from '../services/api';
 import Slider from 'react-slick';
 import 'slick-carousel/slick/slick.css';
 import 'slick-carousel/slick/slick-theme.css';
@@ -16,7 +17,7 @@ function CoursesSection() {
 
     const fetchCursos = async () => {
         try {
-            const response = await axios.get('http://localhost:3001/api/cursos');
+            const response = await api.get('/cursos');
             setCursos(response.data);
             setLoading(false);
         } catch (error) {
