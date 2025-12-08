@@ -24,7 +24,10 @@ export default function CursosAdmin() {
         nome: '',
         descricao: '',
         imagem_url: '',
-        ordem: 0
+        ordem: 0,
+        preco: '',
+        promotional_price: '',
+        status_badge: ''
     });
     const [uploadingImage, setUploadingImage] = useState(false);
     const [imagePreview, setImagePreview] = useState('');
@@ -54,7 +57,10 @@ export default function CursosAdmin() {
                 nome: curso.nome,
                 descricao: curso.descricao || '',
                 imagem_url: curso.imagem_url || '',
-                ordem: curso.ordem || 0
+                ordem: curso.ordem || 0,
+                preco: curso.preco || '',
+                promotional_price: curso.promotional_price || '',
+                status_badge: curso.status_badge || ''
             });
         } else {
             setEditingCurso(null);
@@ -62,7 +68,10 @@ export default function CursosAdmin() {
                 nome: '',
                 descricao: '',
                 imagem_url: '',
-                ordem: 0
+                ordem: 0,
+                preco: '',
+                promotional_price: '',
+                status_badge: ''
             });
         }
         setOpenDialog(true);
@@ -347,6 +356,37 @@ export default function CursosAdmin() {
                             onChange={(e) => setFormData({ ...formData, imagem_url: e.target.value })}
                             sx={{ mb: 2 }}
                         />
+
+                        <Grid container spacing={2} sx={{ mb: 2 }}>
+                            <Grid item xs={6}>
+                                <TextField
+                                    fullWidth
+                                    label="Preço (R$)"
+                                    type="number"
+                                    value={formData.preco}
+                                    onChange={(e) => setFormData({ ...formData, preco: e.target.value })}
+                                />
+                            </Grid>
+                            <Grid item xs={6}>
+                                <TextField
+                                    fullWidth
+                                    label="Preço Promocional (R$)"
+                                    type="number"
+                                    value={formData.promotional_price}
+                                    onChange={(e) => setFormData({ ...formData, promotional_price: e.target.value })}
+                                    helperText="Deixe vazio se não houver promoção"
+                                />
+                            </Grid>
+                        </Grid>
+
+                        <TextField
+                            fullWidth
+                            label="Status Badge (ex: Edital Aberto)"
+                            value={formData.status_badge}
+                            onChange={(e) => setFormData({ ...formData, status_badge: e.target.value })}
+                            sx={{ mb: 2 }}
+                        />
+
                         <TextField
                             fullWidth
                             label="Ordem"

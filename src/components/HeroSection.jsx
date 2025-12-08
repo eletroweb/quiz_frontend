@@ -187,7 +187,7 @@ function HeroSection() {
                             {banner.imagem_url ? (
                                 <Box
                                     component="img"
-                                    src={`${API_BASE_URL}${banner.imagem_url}`}
+                                    src={banner.imagem_url?.startsWith('http') ? banner.imagem_url : `${API_BASE_URL}${banner.imagem_url}`}
                                     alt={banner.titulo}
                                     sx={{
                                         maxWidth: '100%',
