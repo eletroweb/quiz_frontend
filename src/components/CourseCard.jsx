@@ -18,6 +18,8 @@ const CourseCard = ({ course }) => {
         ? (course.imagem_url.startsWith('http') ? course.imagem_url : `${API_BASE_URL}${course.imagem_url}`)
         : null;
 
+    const isOwned = !!course.owned;
+
     return (
         <>
             <Card
@@ -174,27 +176,50 @@ const CourseCard = ({ course }) => {
                     </Box>
 
                     {/* Botão */}
-                    <Button
-                        variant="contained"
-                        fullWidth
-                        startIcon={<ShoppingCart sx={{ fontSize: 18 }} />}
-                        onClick={() => setCheckoutOpen(true)}
-                        sx={{
-                            bgcolor: '#2563EB', // Azul vibrante
-                            fontWeight: 700,
-                            textTransform: 'none',
-                            py: 1.2,
-                            borderRadius: 2,
-                            fontSize: '0.9rem',
-                            boxShadow: '0 4px 6px -1px rgba(37, 99, 235, 0.1), 0 2px 4px -1px rgba(37, 99, 235, 0.06)',
-                            '&:hover': {
-                                bgcolor: '#1D4ED8',
-                                boxShadow: '0 10px 15px -3px rgba(37, 99, 235, 0.2)'
-                            }
-                        }}
-                    >
-                        COMPRAR
-                    </Button>
+                    {/* Botão */}
+                    {isOwned ? (
+                        <Button
+                            variant="contained"
+                            fullWidth
+                            startIcon={<OndemandVideo sx={{ fontSize: 18 }} />}
+                            onClick={() => window.location.href = `/curso/${course.id}`} // Redirecionar para o curso
+                            sx={{
+                                bgcolor: '#166534', // Verde
+                                fontWeight: 700,
+                                textTransform: 'none',
+                                py: 1.2,
+                                borderRadius: 2,
+                                fontSize: '0.9rem',
+                                '&:hover': {
+                                    bgcolor: '#15803d',
+                                }
+                            }}
+                        >
+                            ACESSAR
+                        </Button>
+                    ) : (
+                        <Button
+                            variant="contained"
+                            fullWidth
+                            startIcon={<ShoppingCart sx={{ fontSize: 18 }} />}
+                            onClick={() => setCheckoutOpen(true)}
+                            sx={{
+                                bgcolor: '#2563EB', // Azul vibrante
+                                fontWeight: 700,
+                                textTransform: 'none',
+                                py: 1.2,
+                                borderRadius: 2,
+                                fontSize: '0.9rem',
+                                boxShadow: '0 4px 6px -1px rgba(37, 99, 235, 0.1), 0 2px 4px -1px rgba(37, 99, 235, 0.06)',
+                                '&:hover': {
+                                    bgcolor: '#1D4ED8',
+                                    boxShadow: '0 10px 15px -3px rgba(37, 99, 235, 0.2)'
+                                }
+                            }}
+                        >
+                            COMPRAR
+                        </Button>
+                    )}
 
                     <Button
                         size="small"
