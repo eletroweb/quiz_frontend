@@ -15,13 +15,12 @@ export default function Login() {
     const [email, setEmail] = useState('');
     const [password, setPassword] = useState('');
     const [name, setName] = useState('');
-    const [adminPin, setAdminPin] = useState('');
     const [showPassword, setShowPassword] = useState(false);
     const [error, setError] = useState('');
     const [loading, setLoading] = useState(false);
     const navigate = useNavigate();
 
-    const ADMIN_PIN = '419556'; // PIN do administrador
+    const ADMIN_PIN = undefined;
 
     async function handleLogin(e) {
         e.preventDefault();
@@ -29,19 +28,7 @@ export default function Login() {
             setError('');
             setLoading(true);
             await signInWithEmailAndPassword(auth, email, password);
-
-            // Verificar se é admin
-            if (adminPin) {
-                if (adminPin === ADMIN_PIN) {
-                    navigate('/admin');
-                } else {
-                    setError('PIN de administrador incorreto');
-                    await auth.signOut();
-                    return;
-                }
-            } else {
-                navigate('/dashboard');
-            }
+            navigate('/dashboard');
         } catch (err) {
             console.error(err);
             if (err.code === 'auth/user-not-found') {
@@ -186,27 +173,7 @@ export default function Login() {
                                 }}
                             />
 
-                            <Divider sx={{ my: 2 }}>
-                                <Typography variant="caption" color="text.secondary">
-                                    Administrador? Digite o PIN
-                                </Typography>
-                            </Divider>
-
-                            <TextField
-                                fullWidth
-                                label="PIN Admin (opcional)"
-                                type="password"
-                                value={adminPin}
-                                onChange={(e) => setAdminPin(e.target.value)}
-                                sx={{ mb: 3 }}
-                                InputProps={{
-                                    startAdornment: (
-                                        <InputAdornment position="start">
-                                            <AdminPanelSettings color="action" />
-                                        </InputAdornment>
-                                    ),
-                                }}
-                            />
+                            
 
                             <Button
                                 type="submit"
