@@ -15,6 +15,7 @@ node_modules
 .env
 .env.local
 .env.production
+dist/
 
 # Editor directories and files
 .vscode/*
