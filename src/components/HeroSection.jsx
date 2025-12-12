@@ -19,7 +19,8 @@ function HeroSection() {
     const fetchBanners = async () => {
         try {
             const response = await api.get('/banners/ativos');
-            setBanners(response.data.filter(b => b.tipo === 'hero'));
+            const data = Array.isArray(response.data) ? response.data : [];
+            setBanners(data.filter(b => b.tipo === 'hero'));
             setLoading(false);
         } catch (error) {
             console.error('Erro ao carregar banners:', error);
