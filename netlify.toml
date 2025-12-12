@@ -3,22 +3,10 @@
   publish = "dist"
 
 [[redirects]]
-  from = "/api/*"
-  to = "https://quiz-backend-6qoh.onrender.com/api/:splat"
-  status = 200
-  force = true
-
-[[redirects]]
-  from = "/api"
-  to = "https://quiz-backend-6qoh.onrender.com/api"
-  status = 200
-  force = true
-
-[[redirects]]
   from = "/*"
   to = "/index.html"
   status = 200
 
 [build.environment]
   NODE_VERSION = "18"
-  VITE_API_URL = "/api"
+  VITE_API_URL = "https://quiz-backend-6qoh.onrender.com/api"
