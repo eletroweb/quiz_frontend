@@ -15,6 +15,7 @@ export default function Perfil() {
         email: '',
     });
     const [success, setSuccess] = useState(false);
+    const [disconnectMsg, setDisconnectMsg] = useState('');
 
     useEffect(() => {
         if (userProfile) {
@@ -218,6 +219,22 @@ export default function Perfil() {
                                     Fazer Upgrade
                                 </Button>
                             )}
+                            <Button
+                                variant="outlined"
+                                fullWidth
+                                sx={{ mt: 2 }}
+                                onClick={async () => {
+                                    try {
+                                        await api.post('/users/me/sessions/kill-others');
+                                        setDisconnectMsg('Outros dispositivos foram desconectados.');
+                                    } catch (e) {
+                                        setDisconnectMsg('Falha ao desconectar outras sessões.');
+                                    }
+                                }}
+                            >
+                                Desconectar outros dispositivos
+                            </Button>
+                            {disconnectMsg && <Alert sx={{ mt: 2 }} severity="info">{disconnectMsg}</Alert>}
                         </CardContent>
                     </Card>
 

@@ -5,10 +5,12 @@ import Slider from 'react-slick';
 import 'slick-carousel/slick/slick.css';
 import 'slick-carousel/slick/slick-theme.css';
 import CourseCard from './CourseCard';
+import { useAuth } from '../contexts/AuthContext';
 
 function CoursesSection() {
     const [cursos, setCursos] = useState([]);
     const [loading, setLoading] = useState(true);
+    const { userProfile } = useAuth();
 
     useEffect(() => {
         fetchCursos();
@@ -82,7 +84,10 @@ function CoursesSection() {
                     '& .slick-prev:before, & .slick-next:before': { color: '#4F46E5', fontSize: 30 }
                 }}>
                     <Slider {...sliderSettings}>
-                        {cursos.map((curso, index) => (
+                        {(userProfile && (userProfile.plan === 'annual' || userProfile.plan === 'lifetime')
+                          ? cursos
+                          : cursos.filter(c => c.owned || c.includedInPlan))
+                          .map((curso, index) => (
                             <Box key={curso.id || index} sx={{ px: 1, pb: 2 }}>
                                 <CourseCard course={curso} />
                             </Box>
