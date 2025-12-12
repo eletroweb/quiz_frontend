@@ -1,16 +1,20 @@
 import axios from 'axios';
 
-const primaryBase = import.meta.env.VITE_API_URL || '';
-const inferredProd = (typeof window !== 'undefined' && window.location.hostname && window.location.hostname.includes('quizconcursos.com'))
-    ? 'https://quiz-backend-6qoh.onrender.com/api'
-    : '';
-const fallbackDev = 'http://localhost:3001/api';
+const envBase = import.meta.env.VITE_API_URL;
+let baseURL;
+
+if (envBase && /^https?:\/\//.test(envBase)) {
+  const cleaned = envBase.replace(/\/+$/, '');
+  baseURL = cleaned.endsWith('/api') ? cleaned : `${cleaned}/api`;
+} else if (typeof window !== 'undefined' && window.location.hostname && window.location.hostname.includes('quizconcursos.com')) {
+  baseURL = 'https://quiz-backend-6qoh.onrender.com/api';
+} else {
+  baseURL = 'http://localhost:3001/api';
+}
 
 const api = axios.create({
-    baseURL: primaryBase || inferredProd || fallbackDev,
-    headers: {
-        'Content-Type': 'application/json'
-    }
+  baseURL,
+  headers: { 'Content-Type': 'application/json' }
 });
 
 // Interceptor para adicionar o token de autenticação
