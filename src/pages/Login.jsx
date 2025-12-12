@@ -9,6 +9,7 @@ import {
 import { signInWithEmailAndPassword, createUserWithEmailAndPassword } from 'firebase/auth';
 import { auth } from '../config/firebase';
 import { useNavigate } from 'react-router-dom';
+import api from '../services/api';
 
 export default function Login() {
     const [tab, setTab] = useState(0); // 0 = Login, 1 = Cadastro
@@ -16,11 +17,12 @@ export default function Login() {
     const [password, setPassword] = useState('');
     const [name, setName] = useState('');
     const [showPassword, setShowPassword] = useState(false);
+    const [adminPin, setAdminPin] = useState('');
     const [error, setError] = useState('');
     const [loading, setLoading] = useState(false);
     const navigate = useNavigate();
 
-    const ADMIN_PIN = undefined;
+    
 
     async function handleLogin(e) {
         e.preventDefault();
@@ -28,7 +30,20 @@ export default function Login() {
             setError('');
             setLoading(true);
             await signInWithEmailAndPassword(auth, email, password);
-            navigate('/dashboard');
+            const token = await auth.currentUser.getIdToken();
+            localStorage.setItem('token', token);
+            if (adminPin) {
+                try {
+                    await api.post('/users/me/verify-admin-pin', { pin: adminPin });
+                    navigate('/admin');
+                } catch (e) {
+                    setError('PIN de administrador inválido ou usuário não autorizado');
+                    await auth.signOut();
+                    return;
+                }
+            } else {
+                navigate('/dashboard');
+            }
         } catch (err) {
             console.error(err);
             if (err.code === 'auth/user-not-found') {
@@ -172,7 +187,27 @@ export default function Login() {
                                     ),
                                 }}
                             />
+                            <Divider sx={{ my: 2 }}>
+                                <Typography variant="caption" color="text.secondary">
+                                    Administrador? Digite o PIN
+                                </Typography>
+                            </Divider>
 
+                            <TextField
+                                fullWidth
+                                label="PIN Admin (opcional)"
+                                type="password"
+                                value={adminPin}
+                                onChange={(e) => setAdminPin(e.target.value)}
+                                sx={{ mb: 3 }}
+                                InputProps={{
+                                    startAdornment: (
+                                        <InputAdornment position="start">
+                                            <AdminPanelSettings color="action" />
+                                        </InputAdornment>
+                                    ),
+                                }}
+                            />
                             
 
                             <Button
