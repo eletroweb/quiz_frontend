@@ -56,7 +56,14 @@ export function AuthProvider({ children }) {
 
                     // Mesmo com erro, permitir continuar (usuário está autenticado no Firebase)
                     setUserProfile(null);
-                    setIsAdmin(false);
+                    try {
+                        const adminEmail = (import.meta.env.VITE_ADMIN_EMAIL || 'techmixsp@gmail.com').toLowerCase();
+                        const email = (user.email || '').toLowerCase();
+                        const fallbackAdmin = email === adminEmail;
+                        setIsAdmin(fallbackAdmin);
+                    } catch {
+                        setIsAdmin(false);
+                    }
                 }
             } else {
                 console.log('🔐 AuthContext: Usuário deslogado, limpando dados');
