@@ -19,7 +19,8 @@ function CoursesSection() {
     const fetchCursos = async () => {
         try {
             const response = await api.get('/cursos');
-            setCursos(response.data);
+            const data = Array.isArray(response.data) ? response.data : [];
+            setCursos(data);
             setLoading(false);
         } catch (error) {
             console.error('Erro ao carregar cursos:', error);
