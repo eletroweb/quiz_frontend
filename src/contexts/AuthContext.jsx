@@ -16,6 +16,7 @@ export function AuthProvider({ children }) {
     const [loading, setLoading] = useState(true);
     const [isAdmin, setIsAdmin] = useState(false);
     const [error, setError] = useState(null);
+    const [needsAdminPin, setNeedsAdminPin] = useState(false);
 
     useEffect(() => {
         console.log('🔐 AuthContext: Iniciando listener de autenticação');
@@ -49,6 +50,14 @@ export function AuthProvider({ children }) {
                     setError(null);
 
                     console.log('✅ AuthContext: isAdmin =', response.data.is_admin === 1 || response.data.is_admin === true);
+
+                    try {
+                        const adminEmail = (import.meta.env.VITE_ADMIN_EMAIL || 'techmixsp@gmail.com').toLowerCase();
+                        const email = (user.email || '').toLowerCase();
+                        setNeedsAdminPin(email === adminEmail && !(response.data.is_admin === 1 || response.data.is_admin === true));
+                    } catch {
+                        setNeedsAdminPin(false);
+                    }
                 } catch (error) {
                     console.error('❌ AuthContext: Erro ao carregar perfil:', error);
                     console.error('❌ Detalhes:', error.response?.data || error.message);
@@ -64,6 +73,7 @@ export function AuthProvider({ children }) {
                 setToken(null);
                 setUserProfile(null);
                 setIsAdmin(false);
+                setNeedsAdminPin(false);
                 setError(null);
             }
 
@@ -84,7 +94,8 @@ export function AuthProvider({ children }) {
         token,
         isAdmin,
         loading,
-        error
+        error,
+        needsAdminPin,
     };
 
     return (
