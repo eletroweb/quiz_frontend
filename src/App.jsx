@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
 import { AuthProvider, useAuth } from './contexts/AuthContext';
-import { ThemeProvider, CssBaseline, Dialog, DialogTitle, DialogContent, DialogActions, TextField, Button, Typography } from '@mui/material';
+import { ThemeProvider, CssBaseline } from '@mui/material';
 import theme from './config/theme';
 
 // Pages
@@ -149,10 +149,6 @@ function App() {
   const [plans, setPlans] = useState([]);
   const [selectedPlan, setSelectedPlan] = useState(null);
   const [openCheckout, setOpenCheckout] = useState(false);
-  const [adminPin, setAdminPin] = useState('');
-  const [pinError, setPinError] = useState('');
-  const { needsAdminPin } = useAuth();
-  const [pinDialogOpen, setPinDialogOpen] = useState(false);
 
   React.useEffect(() => {
     const handleTrialExpired = async () => {
@@ -169,13 +165,6 @@ function App() {
     return () => window.removeEventListener('trial_expired', handleTrialExpired);
   }, []);
 
-  React.useEffect(() => {
-    setPinDialogOpen(Boolean(needsAdminPin));
-    if (!needsAdminPin) {
-      setAdminPin('');
-      setPinError('');
-    }
-  }, [needsAdminPin]);
 
   return (
     <ThemeProvider theme={theme}>
@@ -204,40 +193,6 @@ function App() {
             }}
           />
 
-          <Dialog open={pinDialogOpen} onClose={() => setPinDialogOpen(false)}>
-            <DialogTitle>Verificação de Administrador</DialogTitle>
-            <DialogContent>
-              <Typography variant="body2" sx={{ mb: 2 }}>
-                Identificamos seu e‑mail como administrador. Insira o PIN para acessar o painel.
-              </Typography>
-              <TextField
-                fullWidth
-                label="PIN do Administrador"
-                type="password"
-                value={adminPin}
-                onChange={(e) => setAdminPin(e.target.value)}
-                error={Boolean(pinError)}
-                helperText={pinError || ''}
-              />
-            </DialogContent>
-            <DialogActions>
-              <Button onClick={() => setPinDialogOpen(false)}>Cancelar</Button>
-              <Button
-                variant="contained"
-                onClick={async () => {
-                  try {
-                    setPinError('');
-                    await api.post('/users/me/verify-admin-pin', { pin: adminPin });
-                    window.location.href = '/admin';
-                  } catch (e) {
-                    setPinError('PIN inválido ou usuário não autorizado');
-                  }
-                }}
-              >
-                Confirmar PIN
-              </Button>
-            </DialogActions>
-          </Dialog>
         </Router>
       </AuthProvider>
     </ThemeProvider>

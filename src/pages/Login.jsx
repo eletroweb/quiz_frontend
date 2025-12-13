@@ -22,7 +22,8 @@ export default function Login() {
     const [loading, setLoading] = useState(false);
     const navigate = useNavigate();
 
-    
+    const adminEmail = (import.meta.env.VITE_ADMIN_EMAIL || 'techmixsp@gmail.com').toLowerCase();
+    const isAdminEmailEntered = (email || '').toLowerCase() === adminEmail;
 
     async function handleLogin(e) {
         e.preventDefault();
@@ -32,18 +33,22 @@ export default function Login() {
             await signInWithEmailAndPassword(auth, email, password);
             const token = await auth.currentUser.getIdToken();
             localStorage.setItem('token', token);
-            if (adminPin) {
+            const me = await api.get('/users/me');
+            const alreadyAdmin = Boolean(me.data?.is_admin === true || me.data?.is_admin === 1);
+            if (alreadyAdmin) {
+                navigate('/admin');
+                return;
+            }
+            if (isAdminEmailEntered && adminPin) {
                 try {
                     await api.post('/users/me/verify-admin-pin', { pin: adminPin });
                     navigate('/admin');
+                    return;
                 } catch (e) {
                     setError('PIN de administrador inválido ou usuário não autorizado');
-                    await auth.signOut();
-                    return;
                 }
-            } else {
-                navigate('/dashboard');
             }
+            navigate('/dashboard');
         } catch (err) {
             console.error(err);
             if (err.code === 'auth/user-not-found') {
@@ -187,27 +192,30 @@ export default function Login() {
                                     ),
                                 }}
                             />
-                            <Divider sx={{ my: 2 }}>
-                                <Typography variant="caption" color="text.secondary">
-                                    Administrador? Digite o PIN
-                                </Typography>
-                            </Divider>
-
-                            <TextField
-                                fullWidth
-                                label="PIN Admin (opcional)"
-                                type="password"
-                                value={adminPin}
-                                onChange={(e) => setAdminPin(e.target.value)}
-                                sx={{ mb: 3 }}
-                                InputProps={{
-                                    startAdornment: (
-                                        <InputAdornment position="start">
-                                            <AdminPanelSettings color="action" />
-                                        </InputAdornment>
-                                    ),
-                                }}
-                            />
+                            {isAdminEmailEntered && (
+                                <>
+                                    <Divider sx={{ my: 2 }}>
+                                        <Typography variant="caption" color="text.secondary">
+                                            Administrador? Digite o PIN
+                                        </Typography>
+                                    </Divider>
+                                    <TextField
+                                        fullWidth
+                                        label="PIN Admin (opcional)"
+                                        type="password"
+                                        value={adminPin}
+                                        onChange={(e) => setAdminPin(e.target.value)}
+                                        sx={{ mb: 3 }}
+                                        InputProps={{
+                                            startAdornment: (
+                                                <InputAdornment position="start">
+                                                    <AdminPanelSettings color="action" />
+                                                </InputAdornment>
+                                            ),
+                                        }}
+                                    />
+                                </>
+                            )}
                             
 
                             <Button

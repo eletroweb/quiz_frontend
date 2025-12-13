@@ -12,7 +12,9 @@ node_modules
 *.local
 
 # Environment variables
-.env
+.env*
+.env.development
+.env.example
 .env.local
 .env.production
 dist/
