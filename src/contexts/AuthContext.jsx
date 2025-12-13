@@ -88,6 +88,24 @@ export function AuthProvider({ children }) {
         };
     }, []);
 
+    async function reloadProfile() {
+        if (!currentUser) return;
+        try {
+            const response = await api.get('/users/me');
+            setUserProfile(response.data);
+            setIsAdmin(response.data.is_admin === 1 || response.data.is_admin === true);
+            try {
+                const adminEmail = (import.meta.env.VITE_ADMIN_EMAIL || 'techmixsp@gmail.com').toLowerCase();
+                const email = (currentUser.email || '').toLowerCase();
+                setNeedsAdminPin(email === adminEmail && !(response.data.is_admin === 1 || response.data.is_admin === true));
+            } catch {
+                setNeedsAdminPin(false);
+            }
+        } catch (e) {
+            console.error('reloadProfile falhou:', e);
+        }
+    }
+
     const value = {
         currentUser,
         userProfile,
@@ -96,6 +114,7 @@ export function AuthProvider({ children }) {
         loading,
         error,
         needsAdminPin,
+        reloadProfile,
     };
 
     return (

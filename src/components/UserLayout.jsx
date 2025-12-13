@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import {
     AppBar, Box, Toolbar, Typography, IconButton, Drawer, List,
-    ListItem, ListItemIcon, ListItemText, Divider, Avatar, Menu, MenuItem
+    ListItemButton, ListItemIcon, ListItemText, Divider, Avatar, Menu, MenuItem
 } from '@mui/material';
 import {
     Menu as MenuIcon, Dashboard, School, Quiz, Assessment,
@@ -46,8 +46,7 @@ export default function UserLayout() {
             <Divider />
             <List sx={{ px: 1, py: 2 }}>
                 {menuItems.map((item) => (
-                    <ListItem
-                        button
+                    <ListItemButton
                         key={item.text}
                         onClick={() => navigate(item.path)}
                         selected={location.pathname === item.path}
@@ -68,13 +67,12 @@ export default function UserLayout() {
                     >
                         <ListItemIcon sx={{ minWidth: 40 }}>{item.icon}</ListItemIcon>
                         <ListItemText primary={item.text} />
-                    </ListItem>
+                    </ListItemButton>
                 ))}
             </List>
             <Divider />
             <List sx={{ px: 1 }}>
-                <ListItem
-                    button
+                <ListItemButton
                     onClick={() => navigate('/perfil')}
                     sx={{ borderRadius: 2 }}
                 >
@@ -82,9 +80,8 @@ export default function UserLayout() {
                         <AccountCircle />
                     </ListItemIcon>
                     <ListItemText primary="Perfil" />
-                </ListItem>
-                <ListItem
-                    button
+                </ListItemButton>
+                <ListItemButton
                     onClick={() => auth.signOut()}
                     sx={{ borderRadius: 2 }}
                 >
@@ -92,7 +89,7 @@ export default function UserLayout() {
                         <Logout />
                     </ListItemIcon>
                     <ListItemText primary="Sair" />
-                </ListItem>
+                </ListItemButton>
             </List>
         </div>
     );

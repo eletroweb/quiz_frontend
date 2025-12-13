@@ -10,6 +10,7 @@ import { signInWithEmailAndPassword, createUserWithEmailAndPassword } from 'fire
 import { auth } from '../config/firebase';
 import { useNavigate } from 'react-router-dom';
 import api from '../services/api';
+import { useAuth } from '../contexts/AuthContext';
 
 export default function Login() {
     const [tab, setTab] = useState(0); // 0 = Login, 1 = Cadastro
@@ -21,6 +22,7 @@ export default function Login() {
     const [error, setError] = useState('');
     const [loading, setLoading] = useState(false);
     const navigate = useNavigate();
+    const { reloadProfile } = useAuth();
 
     const adminEmail = (import.meta.env.VITE_ADMIN_EMAIL || 'techmixsp@gmail.com').toLowerCase();
     const isAdminEmailEntered = (email || '').toLowerCase() === adminEmail;
@@ -33,6 +35,7 @@ export default function Login() {
             await signInWithEmailAndPassword(auth, email, password);
             const token = await auth.currentUser.getIdToken();
             localStorage.setItem('token', token);
+            await reloadProfile();
             const me = await api.get('/users/me');
             const alreadyAdmin = Boolean(me.data?.is_admin === true || me.data?.is_admin === 1);
             if (alreadyAdmin) {
@@ -42,10 +45,24 @@ export default function Login() {
             if (isAdminEmailEntered && adminPin) {
                 try {
                     await api.post('/users/me/verify-admin-pin', { pin: adminPin });
+                    await reloadProfile();
                     navigate('/admin');
                     return;
                 } catch (e) {
-                    setError('PIN de administrador inválido ou usuário não autorizado');
+                    const code = e?.response?.data?.code;
+                    if (code === 'ADMIN_PIN_MISSING') {
+                        try {
+                            await api.post('/users/me/admin-pin', { pin: adminPin });
+                            await api.post('/users/me/verify-admin-pin', { pin: adminPin });
+                            await reloadProfile();
+                            navigate('/admin');
+                            return;
+                        } catch {
+                            setError('PIN não configurado no servidor. Tente novamente.');
+                        }
+                    } else {
+                        setError('PIN de administrador inválido ou usuário não autorizado');
+                    }
                 }
             }
             navigate('/dashboard');
