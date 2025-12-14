@@ -87,7 +87,7 @@ function CoursesSection() {
                     <Slider {...sliderSettings}>
                         {(userProfile && (userProfile.plan === 'annual' || userProfile.plan === 'lifetime')
                           ? cursos
-                          : cursos.filter(c => c.owned || c.includedInPlan))
+                          : cursos)
                           .map((curso, index) => (
                             <Box key={curso.id || index} sx={{ px: 1, pb: 2 }}>
                                 <CourseCard course={curso} />

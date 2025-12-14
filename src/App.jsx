@@ -29,6 +29,7 @@ import Simulados from './pages/user/Simulados';
 import Ranking from './pages/user/Ranking';
 import Planos from './pages/user/Planos';
 import Perfil from './pages/user/Perfil';
+import Curso from './pages/user/Curso';
 
 function PrivateRoute({ children }) {
   const { currentUser } = useAuth();
@@ -131,6 +132,14 @@ function AppRoutes() {
         </PrivateRoute>
       }>
         <Route index element={<Perfil />} />
+      </Route>
+
+      <Route path="/curso/:id" element={
+        <PrivateRoute>
+          <UserLayout />
+        </PrivateRoute>
+      }>
+        <Route index element={<Curso />} />
       </Route>
 
 

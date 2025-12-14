@@ -29,7 +29,22 @@ export default function CheckoutDialog({ open, onClose, plan, course, onSuccess 
         }
     }, [open, tab]);
 
-    // ... (keep timer effects)
+    useEffect(() => {
+        if (tab !== 0) return;
+        if (!pixData) return;
+        const expires = Number(pixData.expiresIn || 360);
+        setTimeLeft(expires);
+    }, [pixData, tab]);
+
+    useEffect(() => {
+        if (tab !== 0) return;
+        if (!pixData) return;
+        if (timeLeft <= 0) return;
+        const id = setInterval(() => {
+            setTimeLeft((t) => (t > 0 ? t - 1 : 0));
+        }, 1000);
+        return () => clearInterval(id);
+    }, [tab, pixData, timeLeft]);
 
     const generatePixPayment = async () => {
         setLoading(true);
@@ -57,7 +72,22 @@ export default function CheckoutDialog({ open, onClose, plan, course, onSuccess 
         }
     };
 
-    // ... (keep copyPixCode and formatTime)
+    const copyPixCode = async () => {
+        const text = pixData?.pixCode;
+        if (!text) return;
+        try {
+            await navigator.clipboard.writeText(text);
+            setCopied(true);
+            setTimeout(() => setCopied(false), 1500);
+        } catch (_) {}
+    };
+
+    const formatTime = (seconds) => {
+        const s = Math.max(0, Number(seconds) || 0);
+        const mm = String(Math.floor(s / 60)).padStart(2, '0');
+        const ss = String(s % 60).padStart(2, '0');
+        return `${mm}:${ss}`;
+    };
 
     if (!item) return null;
 

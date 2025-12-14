@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import {
     Box, Grid, Card, CardContent, Typography, LinearProgress,
-    Paper, Avatar, Chip
+    Paper, Avatar, Chip, Button, Stack
 } from '@mui/material';
 import {
     TrendingUp, CheckCircle, Timer, EmojiEvents
@@ -15,9 +15,12 @@ export default function UserDashboard() {
     const navigate = useNavigate();
     const [stats, setStats] = useState(null);
     const [loading, setLoading] = useState(true);
+    const [myCourses, setMyCourses] = useState([]);
+    const [courseStats, setCourseStats] = useState({});
 
     useEffect(() => {
         loadStats();
+        loadMyCourses();
     }, []);
 
     const loadStats = async () => {
@@ -30,6 +33,28 @@ export default function UserDashboard() {
             setStats({});
         } finally {
             setLoading(false);
+        }
+    };
+    
+    const loadMyCourses = async () => {
+        try {
+            const response = await api.get('/cursos');
+            const list = Array.isArray(response.data) ? response.data : [];
+            const owned = list.filter(c => !!c.owned);
+            setMyCourses(owned);
+            const statsMap = {};
+            await Promise.all(owned.map(async (c) => {
+                try {
+                    const s = await api.get(`/curso-progress/${c.id}/stats`);
+                    statsMap[c.id] = s.data;
+                } catch {
+                    statsMap[c.id] = null;
+                }
+            }));
+            setCourseStats(statsMap);
+        } catch (error) {
+            console.error('Erro ao carregar meus cursos:', error);
+            setMyCourses([]);
         }
     };
 
@@ -186,6 +211,68 @@ export default function UserDashboard() {
                         }}
                     />
                 </Box>
+            </Paper>
+
+            {/* Meus Cursos */}
+            <Paper sx={{ p: 3, mt: 3, borderRadius: 3 }}>
+                <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 2 }}>
+                    <Typography variant="h6" fontWeight="bold">Seus Cursos</Typography>
+                    <Button variant="text" onClick={() => navigate('/')}>Ver todos</Button>
+                </Box>
+                {myCourses.length === 0 ? (
+                    <Typography variant="body2" color="text.secondary">Nenhum curso adquirido ainda.</Typography>
+                ) : (
+                    <Grid container spacing={2}>
+                        {myCourses.map((c) => {
+                            const s = courseStats[c.id];
+                            const overallPercent = s
+                                ? (() => {
+                                    const totals = (s.progresso_por_modulo || []).reduce((acc, m) => {
+                                        acc.total += Number(m.total_conteudos || 0);
+                                        acc.done += Number(m.conteudos_concluidos || 0);
+                                        return acc;
+                                    }, { total: 0, done: 0 });
+                                    return totals.total > 0 ? Math.round((totals.done / totals.total) * 100) : 0;
+                                })()
+                                : 0;
+                            return (
+                                <Grid item xs={12} md={6} key={c.id}>
+                                    <Card sx={{ borderRadius: 3 }}>
+                                        <CardContent>
+                                            <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 1 }}>
+                                                <Typography variant="h6" fontWeight="bold">{c.nome}</Typography>
+                                                <Button variant="contained" onClick={() => navigate(`/curso/${c.id}`)}>Continuar</Button>
+                                            </Box>
+                                            <Typography variant="body2" color="text.secondary">
+                                                Progresso geral: {overallPercent}%
+                                            </Typography>
+                                            <LinearProgress value={overallPercent} variant="determinate" sx={{ my: 1 }} />
+                                            {s?.proximo_conteudo && (
+                                                <Box sx={{ mb: 1 }}>
+                                                    <Typography variant="body2">Próximo conteúdo:</Typography>
+                                                    <Stack direction="row" spacing={1} alignItems="center">
+                                                        <Chip label={s.proximo_conteudo.modulo_nome} size="small" />
+                                                        <Typography variant="body2" fontWeight="500">{s.proximo_conteudo.titulo}</Typography>
+                                                    </Stack>
+                                                </Box>
+                                            )}
+                                            <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 1, mt: 1 }}>
+                                                {(s?.progresso_por_modulo || []).map((m) => (
+                                                    <Chip
+                                                        key={m.modulo_id}
+                                                        label={`${m.modulo_nome}: ${Math.round(Number(m.percentual || 0))}%`}
+                                                        variant="outlined"
+                                                        size="small"
+                                                    />
+                                                ))}
+                                            </Box>
+                                        </CardContent>
+                                    </Card>
+                                </Grid>
+                            );
+                        })}
+                    </Grid>
+                )}
             </Paper>
 
             {/* Ações Rápidas */}
