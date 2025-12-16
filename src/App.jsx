@@ -179,7 +179,7 @@ function App() {
     <ThemeProvider theme={theme}>
       <CssBaseline />
       <AuthProvider>
-        <Router>
+        <Router basename={import.meta.env.BASE_URL}>
           <AppRoutes />
 
           <TrialExpiredDialog
