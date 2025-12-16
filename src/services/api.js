@@ -4,8 +4,16 @@ const envBase = import.meta.env.VITE_API_URL;
 let baseURL;
 
 if (envBase && /^https?:\/\//.test(envBase)) {
-    const cleaned = envBase.replace(/\/+$/, '');
-    baseURL = cleaned.endsWith('/api') ? cleaned : `${cleaned}/api`;
+    try {
+        const cleanUrl = envBase.replace(/["']/g, "").trim();
+        const url = new URL(cleanUrl);
+        if (!url.pathname.endsWith('/api')) {
+            url.pathname = url.pathname.replace(/\/+$/, '') + '/api';
+        }
+        baseURL = url.toString().replace(/\/+$/, '');
+    } catch (e) {
+        baseURL = 'https://quiz-backend-6qoh.onrender.com/api';
+    }
 } else if (typeof window !== 'undefined' && window.location.hostname && (window.location.hostname.includes('quizconcursos.com') || window.location.hostname.includes('eletroweb.github.io'))) {
     baseURL = 'https://quiz-backend-6qoh.onrender.com/api';
 } else {
