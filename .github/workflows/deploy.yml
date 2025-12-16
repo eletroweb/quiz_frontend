@@ -47,6 +47,6 @@ jobs:
       name: github-pages
       url: https://${{ github.repository_owner }}.github.io/quiz_frontend/
 
-      steps:
+    steps:
       - name: Deploy to GitHub Pages
         uses: actions/deploy-pages@v4
