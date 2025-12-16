@@ -4,17 +4,17 @@ const envBase = import.meta.env.VITE_API_URL;
 let baseURL;
 
 if (envBase && /^https?:\/\//.test(envBase)) {
-  const cleaned = envBase.replace(/\/+$/, '');
-  baseURL = cleaned.endsWith('/api') ? cleaned : `${cleaned}/api`;
-} else if (typeof window !== 'undefined' && window.location.hostname && window.location.hostname.includes('quizconcursos.com')) {
-  baseURL = 'https://quiz-backend-6qoh.onrender.com/api';
+    const cleaned = envBase.replace(/\/+$/, '');
+    baseURL = cleaned.endsWith('/api') ? cleaned : `${cleaned}/api`;
+} else if (typeof window !== 'undefined' && window.location.hostname && (window.location.hostname.includes('quizconcursos.com') || window.location.hostname.includes('eletroweb.github.io'))) {
+    baseURL = 'https://quiz-backend-6qoh.onrender.com/api';
 } else {
-  baseURL = 'http://localhost:3001/api';
+    baseURL = 'http://localhost:3001/api';
 }
 
 const api = axios.create({
-  baseURL,
-  headers: { 'Content-Type': 'application/json' }
+    baseURL,
+    headers: { 'Content-Type': 'application/json' }
 });
 
 // Interceptor para adicionar o token de autenticação
