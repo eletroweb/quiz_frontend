@@ -1,4 +1,5 @@
 import axios from 'axios';
+import { auth } from '../config/firebase';
 
 const envBase = import.meta.env.VITE_API_URL;
 let baseURL;
@@ -27,8 +28,19 @@ const api = axios.create({
 
 // Interceptor para adicionar o token de autenticação
 api.interceptors.request.use(
-    (config) => {
-        const token = localStorage.getItem('token');
+    async (config) => {
+        let token = localStorage.getItem('token');
+
+        if (auth.currentUser) {
+            try {
+                // Força atualização do token se necessário
+                token = await auth.currentUser.getIdToken();
+                localStorage.setItem('token', token);
+            } catch (error) {
+                console.error('Erro ao obter token atualizado:', error);
+            }
+        }
+
         if (token) {
             config.headers.Authorization = `Bearer ${token}`;
         }

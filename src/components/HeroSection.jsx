@@ -203,7 +203,7 @@ function HeroSection() {
                                     sx={{
                                         width: '100%',
                                         height: '100%',
-                                        background: 'url(/src/assets/home_page_design.png)', // Tenta usar a imagem salva se disponível, ou fallback
+                                        background: `url(${homePageDesign})`, // Tenta usar a imagem salva se disponível, ou fallback
                                         backgroundSize: 'contain',
                                         backgroundRepeat: 'no-repeat',
                                         backgroundPosition: 'center',
