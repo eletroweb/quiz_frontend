@@ -4,7 +4,13 @@ import { auth } from '../config/firebase';
 const envBase = import.meta.env.VITE_API_URL;
 let baseURL;
 
-if (envBase && /^https?:\/\//.test(envBase)) {
+// Lógica de seleção da API:
+// 1. Se estiver rodando no navegador em localhost, DEVE usar o backend local (evita conflito de dados)
+if (typeof window !== 'undefined' && (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1')) {
+    baseURL = 'http://localhost:3001/api';
+}
+// 2. Se tiver variável de ambiente definida e não for localhost (ex: build de prod)
+else if (envBase && /^https?:\/\//.test(envBase)) {
     try {
         const cleanUrl = envBase.replace(/["']/g, "").trim();
         const url = new URL(cleanUrl);
@@ -15,16 +21,18 @@ if (envBase && /^https?:\/\//.test(envBase)) {
     } catch (e) {
         baseURL = 'https://quiz-backend-6qoh.onrender.com/api';
     }
-} else if (typeof window !== 'undefined' && window.location.hostname && (window.location.hostname.includes('quizconcursos.com') || window.location.hostname.includes('eletroweb.github.io'))) {
+}
+// 3. Fallback para produção
+else {
     baseURL = 'https://quiz-backend-6qoh.onrender.com/api';
-} else {
-    baseURL = 'http://localhost:3001/api';
 }
 
 const api = axios.create({
     baseURL,
     headers: { 'Content-Type': 'application/json' }
 });
+
+console.log('🔌 API Base URL:', baseURL);
 
 // Interceptor para adicionar o token de autenticação
 api.interceptors.request.use(
