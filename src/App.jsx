@@ -19,7 +19,6 @@ import Payments from './pages/admin/Payments';
 import CursosAdmin from './pages/admin/CursosAdmin';
 import CursoEditor from './pages/admin/CursoEditor';
 import PlanosConfig from './pages/admin/PlanosConfig';
-import PlanosConfig from './pages/admin/PlanosConfig';
 import Banners from './pages/admin/Banners';
 import NewsAdmin from './pages/admin/NewsAdmin';
 import AdminLayout from './components/AdminLayout';
