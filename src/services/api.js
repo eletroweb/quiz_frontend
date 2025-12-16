@@ -66,7 +66,10 @@ api.interceptors.response.use(
         if (error.response?.status === 401) {
             // Token inválido ou expirado
             localStorage.removeItem('token');
-            window.location.href = '/login';
+            localStorage.removeItem('token');
+            // Redireciona respeitando o base path (ex: /quiz_frontend/login)
+            const basePath = import.meta.env.BASE_URL === '/' ? '' : import.meta.env.BASE_URL.replace(/\/$/, '');
+            window.location.href = `${basePath}/login`;
         } else if (error.response?.status === 403 && error.response?.data?.code === 'TRIAL_EXPIRED') {
             // Trial expirado - dispara evento para abrir dialog
             window.dispatchEvent(new CustomEvent('trial_expired', {

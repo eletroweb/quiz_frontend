@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { Box, Container, Typography, Button, IconButton, Grid } from '@mui/material';
 import { KeyboardArrowLeft, KeyboardArrowRight } from '@mui/icons-material';
 import axios from 'axios';
@@ -11,6 +12,7 @@ function HeroSection() {
     const [banners, setBanners] = useState([]);
     const [currentBanner, setCurrentBanner] = useState(0);
     const [loading, setLoading] = useState(true);
+    const navigate = useNavigate();
 
     useEffect(() => {
         fetchBanners();
@@ -144,7 +146,17 @@ function HeroSection() {
                             <Button
                                 variant="contained"
                                 size="large"
-                                onClick={() => banner.link_url ? window.location.href = banner.link_url : window.location.href = '/login'}
+                                onClick={() => {
+                                    if (banner.link_url) {
+                                        if (banner.link_url.startsWith('http')) {
+                                            window.location.href = banner.link_url;
+                                        } else {
+                                            navigate(banner.link_url);
+                                        }
+                                    } else {
+                                        navigate('/login');
+                                    }
+                                }}
                                 sx={{
                                     background: '#F97316', // Laranja vibrante
                                     color: 'white',
