@@ -13,10 +13,7 @@ node_modules
 
 # Environment variables
 .env*
-.env.development
-.env.example
-.env.local
-.env.production
+!.env.example
 dist/
 
 # Editor directories and files
