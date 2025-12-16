@@ -58,9 +58,10 @@ function HeroSection() {
         <Box
             sx={{
                 position: 'relative',
-                minHeight: { xs: '400px', md: '450px' },
-                maxHeight: { xs: '500px', md: '550px' },
-                height: { xs: 'auto', md: '500px' },
+                width: '100%',
+                minHeight: { xs: '400px', md: 'auto' }, // Mobile mantém altura mínima
+                height: { xs: 'auto', md: 'auto' },
+                aspectRatio: { md: '16/9' }, // Desktop: Proporção 16:9 (ex: 1280x720)
                 display: 'flex',
                 alignItems: 'center',
                 background: 'linear-gradient(135deg, #4F46E5 0%, #7C3AED 100%)', // Gradiente Roxo/Azul vibrante
@@ -173,7 +174,7 @@ function HeroSection() {
                             sx={{
                                 position: 'relative',
                                 height: '100%',
-                                maxHeight: '350px',
+                                maxHeight: '80%',
                                 display: 'flex',
                                 alignItems: 'center',
                                 justifyContent: 'center',

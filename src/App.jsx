@@ -19,7 +19,9 @@ import Payments from './pages/admin/Payments';
 import CursosAdmin from './pages/admin/CursosAdmin';
 import CursoEditor from './pages/admin/CursoEditor';
 import PlanosConfig from './pages/admin/PlanosConfig';
+import PlanosConfig from './pages/admin/PlanosConfig';
 import Banners from './pages/admin/Banners';
+import NewsAdmin from './pages/admin/NewsAdmin';
 import AdminLayout from './components/AdminLayout';
 import UserLayout from './components/UserLayout';
 import UserDashboard from './pages/user/Dashboard';
@@ -75,6 +77,7 @@ function AppRoutes() {
         <Route path="campanhas" element={<Campaigns />} />
         <Route path="pagamentos" element={<Payments />} />
         <Route path="banners" element={<Banners />} />
+        <Route path="noticias" element={<NewsAdmin />} />
       </Route>
 
       {/* Rotas do Usuário */}

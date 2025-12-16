@@ -15,6 +15,7 @@ import CampaignIcon from '@mui/icons-material/Campaign';
 import PaymentIcon from '@mui/icons-material/Payment';
 import SettingsIcon from '@mui/icons-material/Settings';
 import ImageIcon from '@mui/icons-material/Image';
+import ArticleIcon from '@mui/icons-material/Article';
 import { Outlet, useNavigate, useLocation } from 'react-router-dom';
 import { auth } from '../config/firebase';
 
@@ -41,6 +42,7 @@ export default function AdminLayout() {
         { text: 'Configuração de Planos', icon: <SettingsIcon />, path: '/admin/planos-config' },
         { text: 'Campanhas', icon: <CampaignIcon />, path: '/admin/campanhas' },
         { text: 'Banners', icon: <ImageIcon />, path: '/admin/banners' },
+        { text: 'Notícias', icon: <ArticleIcon />, path: '/admin/noticias' },
         { text: 'Pagamentos', icon: <PaymentIcon />, path: '/admin/pagamentos' },
     ];
 
