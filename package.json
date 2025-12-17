@@ -1,6 +1,5 @@
 {
   "name": "frontend",
-  "homepage": "https://quizconcursos.com/",
   "private": true,
   "version": "0.1.0",
   "type": "module",
