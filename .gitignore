@@ -14,7 +14,6 @@ node_modules
 # Environment variables
 .env*
 !.env.example
-dist/
 
 # Editor directories and files
 .vscode/*
