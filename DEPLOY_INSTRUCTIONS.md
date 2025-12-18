@@ -63,21 +63,48 @@ O arquivo `_redirects` já está configurado para redirecionamento correto.
 
 **Sintoma:** `Failed to load module script: Expected a JavaScript-or-Wasm module script but the server responded with a MIME type of "text/jsx"`
 
-**Solução:** Já configurado em `.htaccess` / `web.config`. Se persistir, configure manualmente:
+**Causa:** O servidor está servindo arquivos JavaScript com MIME type incorreto.
 
-**Apache:**
+**Soluções:**
 
-```
+1. **Apache (.htaccess)** - Já configurado, mas verifique:
+
+```apache
 AddType application/javascript js
 AddType application/javascript mjs
+AddType application/javascript jsx
 ```
 
-**Nginx:**
+2. **Nginx** - Use o arquivo `nginx.conf.example` como referência:
 
 ```nginx
 types {
-    application/javascript js mjs;
+    application/javascript js mjs jsx;
 }
+```
+
+3. **IIS** - Já configurado em `web.config`. Se não funcionar:
+
+   - Abra IIS Manager
+   - Vá para MIME Types
+   - Certifique-se de que `.js`, `.mjs` e `.jsx` mapeiam para `application/javascript`
+
+4. **cPanel/Plesk** - Configure MIME types via painel:
+
+   - Acesse Configurações → MIME Types
+   - Adicione: `.js` → `application/javascript`
+   - Adicione: `.jsx` → `application/javascript`
+   - Adicione: `.mjs` → `application/javascript`
+
+5. **Verificar no servidor:**
+
+```bash
+# Linux/Mac
+file -i dist/assets/index.js
+
+# Deve retornar algo como:
+# dist/assets/index.js: text/plain; charset=utf-8
+# Se retornar text/jsx, o MIME type está errado
 ```
 
 ## Verificação Pós-Deploy

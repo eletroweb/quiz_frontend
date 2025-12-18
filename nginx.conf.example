@@ -1,0 +1,46 @@
+# Nginx configuration for Vue/React SPA with proper MIME types
+# Add this to your server block in nginx.conf
+
+server {
+    listen 80;
+    server_name quizconcursos.com www.quizconcursos.com;
+
+    root /var/www/quiz-frontend/dist;
+    index index.html;
+
+    # Proper MIME types
+    types {
+        application/javascript js mjs;
+        application/javascript jsx;
+        text/css css;
+        image/svg+xml svg svgz;
+        application/font-woff woff;
+        application/font-woff2 woff2;
+        application/vnd.ms-fontobject eot;
+        application/x-font-ttf ttf;
+    }
+
+    # Cache static assets
+    location ~* \.(js|css|png|jpg|jpeg|gif|ico|svg|woff|woff2|ttf|eot)$ {
+        expires 1y;
+        add_header Cache-Control "public, immutable";
+    }
+
+    # Don't cache index.html
+    location = /index.html {
+        expires 0;
+        add_header Cache-Control "public, max-age=0, must-revalidate";
+    }
+
+    # SPA routing - serve index.html for all non-static requests
+    location / {
+        try_files $uri $uri/ /index.html;
+    }
+
+    # Gzip compression
+    gzip on;
+    gzip_types text/html text/plain text/css text/xml text/javascript
+               application/x-javascript application/xml+rss application/json;
+    gzip_min_length 1000;
+    gzip_proxied any;
+}
