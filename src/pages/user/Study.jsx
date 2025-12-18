@@ -56,7 +56,7 @@ export default function Study() {
     try {
       setLoading(true);
       // Buscar cursos do usuário (do dashboard ou perfil)
-      const response = await api.get("/user-courses");
+      const response = await api.get("/cursos/user-courses");
       setUserCourses(response.data);
       if (response.data.length > 0) {
         setSelectedCurso(response.data[0]);
@@ -86,7 +86,7 @@ export default function Study() {
 
   const loadCursoMaterias = async (cursoId) => {
     try {
-      const response = await api.get(`/curso-materias/${cursoId}`);
+      const response = await api.get(`/cursos/curso-materias/${cursoId}`);
       setMaterias(response.data);
       if (response.data.length > 0) {
         setSelectedMateria(response.data[0].id);
