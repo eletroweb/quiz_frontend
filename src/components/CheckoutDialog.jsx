@@ -42,6 +42,7 @@ export default function CheckoutDialog({
   const [paymentStatus, setPaymentStatus] = useState("pending");
   const [timeLeft, setTimeLeft] = useState(360); // 6 minutos em segundos
   const [copied, setCopied] = useState(false);
+  const [error, setError] = useState("");
 
   const item = plan || course;
   const type = course ? "course" : "plan";
@@ -78,9 +79,10 @@ export default function CheckoutDialog({
 
   const generatePixPayment = async () => {
     setLoading(true);
+    setError("");
     try {
       if (!item?.id) {
-        console.error("Item ID não disponível");
+        setError("Item ID não disponível");
         setLoading(false);
         return;
       }
@@ -90,6 +92,12 @@ export default function CheckoutDialog({
       setPixData(response.data);
     } catch (error) {
       console.error("Erro ao gerar PIX:", error);
+      const errorMsg =
+        error.response?.data?.error ||
+        error.response?.data?.details ||
+        error.message ||
+        "Erro desconhecido";
+      setError(`Erro ao gerar PIX: ${errorMsg}`);
     } finally {
       setLoading(false);
     }
@@ -97,9 +105,10 @@ export default function CheckoutDialog({
 
   const handleMercadoPago = async () => {
     setLoading(true);
+    setError("");
     try {
       if (!item?.id) {
-        console.error("Item ID não disponível");
+        setError("Item ID não disponível");
         setLoading(false);
         return;
       }
@@ -110,6 +119,12 @@ export default function CheckoutDialog({
       window.location.href = response.data.initPoint;
     } catch (error) {
       console.error("Erro ao criar preferência:", error);
+      const errorMsg =
+        error.response?.data?.error ||
+        error.response?.data?.details ||
+        error.message ||
+        "Erro desconhecido";
+      setError(`Erro ao gerar checkout: ${errorMsg}`);
       setLoading(false);
     }
   };
@@ -195,6 +210,13 @@ export default function CheckoutDialog({
         {/* Conteúdo PIX */}
         {itemPrice > 0 && tab === 0 && (
           <Box>
+            {error && (
+              <Alert severity="error" sx={{ mb: 2 }}>
+                <Typography variant="body2" fontWeight="bold">
+                  {error}
+                </Typography>
+              </Alert>
+            )}
             {loading ? (
               <Box display="flex" justifyContent="center" p={4}>
                 <CircularProgress />
@@ -350,8 +372,8 @@ export default function CheckoutDialog({
               </>
             ) : (
               <Alert severity="error">
-                Erro ao gerar código PIX. Tente novamente ou entre em contato
-                com o suporte.
+                {error ||
+                  "Erro ao gerar código PIX. Tente novamente ou entre em contato com o suporte."}
               </Alert>
             )}
           </Box>
@@ -360,6 +382,13 @@ export default function CheckoutDialog({
         {/* Conteúdo Mercado Pago */}
         {itemPrice > 0 && tab === 1 && (
           <Box>
+            {error && (
+              <Alert severity="error" sx={{ mb: 2 }}>
+                <Typography variant="body2" fontWeight="bold">
+                  {error}
+                </Typography>
+              </Alert>
+            )}
             <Typography variant="body1" mb={2}>
               Você será redirecionado para o checkout seguro do Mercado Pago.
             </Typography>
