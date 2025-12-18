@@ -28,8 +28,7 @@ import {
   Article,
   ExpandMore,
   School,
-  BookOpen,
-  Clock,
+  LibraryBooks,
   CheckCircle,
   ArrowBack,
   Menu as MenuIcon,
@@ -194,7 +193,7 @@ export default function Study() {
               }}
             >
               <ListItemIcon sx={{ minWidth: 40 }}>
-                <BookOpen fontSize="small" />
+                <LibraryBooks fontSize="small" />
               </ListItemIcon>
               <ListItemText
                 primary={curso.nome || curso.title}
@@ -260,7 +259,7 @@ export default function Study() {
                   onClick={() => handleCursoChange(curso)}
                 >
                   <ListItemIcon>
-                    <BookOpen />
+                    <LibraryBooks />
                   </ListItemIcon>
                   <ListItemText
                     primary={curso.nome || curso.title}
@@ -292,7 +291,7 @@ export default function Study() {
                 }}
               >
                 <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
-                  <BookOpen fontSize="small" />
+                  <LibraryBooks fontSize="small" />
                   <Typography variant="subtitle2" fontWeight={600}>
                     Matérias
                   </Typography>
