@@ -92,12 +92,20 @@ export default function CheckoutDialog({
       setPixData(response.data);
     } catch (error) {
       console.error("Erro ao gerar PIX:", error);
-      const errorMsg =
-        error.response?.data?.error ||
-        error.response?.data?.details ||
-        error.message ||
-        "Erro desconhecido";
-      setError(`Erro ao gerar PIX: ${errorMsg}`);
+
+      if (error.response?.status === 401) {
+        setError("Sessão expirada. Por favor, faça login novamente.");
+        setTimeout(() => {
+          window.location.href = "/login";
+        }, 2000);
+      } else {
+        const errorMsg =
+          error.response?.data?.error ||
+          error.response?.data?.details ||
+          error.message ||
+          "Erro desconhecido";
+        setError(`Erro ao gerar PIX: ${errorMsg}`);
+      }
     } finally {
       setLoading(false);
     }
@@ -119,12 +127,20 @@ export default function CheckoutDialog({
       window.location.href = response.data.initPoint;
     } catch (error) {
       console.error("Erro ao criar preferência:", error);
-      const errorMsg =
-        error.response?.data?.error ||
-        error.response?.data?.details ||
-        error.message ||
-        "Erro desconhecido";
-      setError(`Erro ao gerar checkout: ${errorMsg}`);
+
+      if (error.response?.status === 401) {
+        setError("Sessão expirada. Por favor, faça login novamente.");
+        setTimeout(() => {
+          window.location.href = "/login";
+        }, 2000);
+      } else {
+        const errorMsg =
+          error.response?.data?.error ||
+          error.response?.data?.details ||
+          error.message ||
+          "Erro desconhecido";
+        setError(`Erro ao gerar checkout: ${errorMsg}`);
+      }
       setLoading(false);
     }
   };
