@@ -23,7 +23,6 @@ jobs:
         with:
           node-version: 18
           cache: npm
-          cache-dependency-path: package-lock.json
 
       - name: Install dependencies
         run: npm install
@@ -50,8 +49,7 @@ jobs:
     needs: build
     environment:
       name: github-pages
-      url: https://${{ github.repository_owner }}.github.io/quiz_frontend/
-
+      url: https://quizconcursos.com
     steps:
       - name: Deploy to GitHub Pages
         uses: actions/deploy-pages@v4
