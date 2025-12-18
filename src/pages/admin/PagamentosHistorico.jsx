@@ -86,7 +86,7 @@ export default function AdminPagamentosHistorico() {
       p.email,
       p.display_name,
       p.produto,
-      `R$ ${p.valor.toFixed(2)}`,
+      `R$ ${(parseFloat(p.valor) || 0).toFixed(2)}`,
       p.status,
       new Date(p.paid_at).toLocaleDateString("pt-BR"),
     ]);
@@ -154,7 +154,7 @@ export default function AdminPagamentosHistorico() {
           >
             <Typography variant="caption">Valor Total</Typography>
             <Typography variant="h6">
-              R$ {(relatorio.valor_total || 0).toFixed(2)}
+              R$ {(parseFloat(relatorio.valor_total) || 0).toFixed(2)}
             </Typography>
           </Paper>
           <Paper
@@ -287,7 +287,7 @@ export default function AdminPagamentosHistorico() {
                     <Chip label={pag.produto} size="small" variant="outlined" />
                   </TableCell>
                   <TableCell align="right" fontWeight="bold">
-                    R$ {pag.valor.toFixed(2)}
+                    R$ {(parseFloat(pag.valor) || 0).toFixed(2)}
                   </TableCell>
                   <TableCell>
                     <Chip
@@ -368,7 +368,7 @@ export default function AdminPagamentosHistorico() {
                   Valor
                 </Typography>
                 <Typography fontWeight="bold">
-                  R$ {detalhesSelecionado.valor.toFixed(2)}
+                  R$ {(parseFloat(detalhesSelecionado.valor) || 0).toFixed(2)}
                 </Typography>
               </Box>
               <Box>
