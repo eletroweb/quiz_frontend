@@ -46,9 +46,12 @@ export default function CheckoutDialog({
   const item = plan || course;
   const type = course ? "course" : "plan";
   const itemName = item?.nome || item?.name;
-  const itemPrice = course
-    ? item?.promotional_price || item?.preco
-    : item?.preco;
+  const itemPrice =
+    parseFloat(
+      course
+        ? item?.promotional_price || item?.preco || 0
+        : item?.price || item?.preco || 0
+    ) || 0;
 
   useEffect(() => {
     if (open && tab === 0 && !pixData) {
@@ -76,6 +79,11 @@ export default function CheckoutDialog({
   const generatePixPayment = async () => {
     setLoading(true);
     try {
+      if (!item?.id) {
+        console.error("Item ID não disponível");
+        setLoading(false);
+        return;
+      }
       const payload =
         type === "course" ? { cursoId: item.id } : { planId: item.id };
       const response = await api.post("/payments/pix", payload);
@@ -90,6 +98,11 @@ export default function CheckoutDialog({
   const handleMercadoPago = async () => {
     setLoading(true);
     try {
+      if (!item?.id) {
+        console.error("Item ID não disponível");
+        setLoading(false);
+        return;
+      }
       const payload =
         type === "course" ? { cursoId: item.id } : { planId: item.id };
       const response = await api.post("/payments/preference", payload);
@@ -135,37 +148,52 @@ export default function CheckoutDialog({
 
       <DialogContent>
         {/* Informações do Item */}
-        <Box sx={{ mb: 3, p: 2, bgcolor: "primary.light", borderRadius: 2 }}>
-          <Typography variant="h5" fontWeight="bold" color="primary.dark">
-            {itemName}
-          </Typography>
-          <Typography variant="h4" fontWeight="bold" color="primary.main">
-            R$ {(parseFloat(itemPrice) || 0).toFixed(2)}
-          </Typography>
-          <Typography variant="body2" color="text.secondary">
-            {type === "course"
-              ? "Acesso vitalício ao conteúdo"
-              : `${item.duration_days} dias de acesso`}
-          </Typography>
-        </Box>
+        {itemPrice <= 0 ? (
+          <Alert severity="error" sx={{ mb: 2 }}>
+            <Typography variant="body2" fontWeight="bold">
+              Erro: Este produto não possui preço configurado
+            </Typography>
+            <Typography variant="caption">
+              Entre em contato com o suporte para mais informações
+            </Typography>
+          </Alert>
+        ) : (
+          <>
+            <Box
+              sx={{ mb: 3, p: 2, bgcolor: "primary.light", borderRadius: 2 }}
+            >
+              <Typography variant="h5" fontWeight="bold" color="primary.dark">
+                {itemName}
+              </Typography>
+              <Typography variant="h4" fontWeight="bold" color="primary.main">
+                R$ {itemPrice.toFixed(2)}
+              </Typography>
+              <Typography variant="body2" color="text.secondary">
+                {type === "course"
+                  ? "Acesso vitalício ao conteúdo"
+                  : `${item.duration_days} dias de acesso`}
+              </Typography>
+            </Box>
 
-        {/* Tabs de Pagamento */}
-        <Tabs value={tab} onChange={(e, v) => setTab(v)} sx={{ mb: 2 }}>
-          <Tab icon={<QrCode />} label="PIX" />
-          <Tab
-            icon={
-              <img
-                src="https://http2.mlstatic.com/frontend-assets/ui-navigation/5.18.9/mercadolibre/logo__large_plus.png"
-                alt="MP"
-                style={{ height: 20 }}
+            {/* Tabs de Pagamento */}
+            <Tabs value={tab} onChange={(e, v) => setTab(v)} sx={{ mb: 2 }}>
+              <Tab icon={<QrCode />} label="PIX" />
+              <Tab
+                icon={
+                  <img
+                    src="https://http2.mlstatic.com/frontend-assets/ui-navigation/5.18.9/mercadolibre/logo__large_plus.png"
+                    alt="MP"
+                    style={{ height: 20 }}
+                  />
+                }
+                label="Mercado Pago"
               />
-            }
-            label="Mercado Pago"
-          />
-        </Tabs>
+            </Tabs>
+          </>
+        )}
 
         {/* Conteúdo PIX */}
-        {tab === 0 && (
+        {itemPrice > 0 && tab === 0 && (
           <Box>
             {loading ? (
               <Box display="flex" justifyContent="center" p={4}>
@@ -330,7 +358,7 @@ export default function CheckoutDialog({
         )}
 
         {/* Conteúdo Mercado Pago */}
-        {tab === 1 && (
+        {itemPrice > 0 && tab === 1 && (
           <Box>
             <Typography variant="body1" mb={2}>
               Você será redirecionado para o checkout seguro do Mercado Pago.
@@ -340,13 +368,15 @@ export default function CheckoutDialog({
             </Alert>
           </Box>
         )}
+            </>
+        )}
       </DialogContent>
 
       <DialogActions>
         <Button onClick={onClose} disabled={loading}>
           Cancelar
         </Button>
-        {tab === 1 && (
+        {itemPrice > 0 && tab === 1 && (
           <Button
             variant="contained"
             onClick={handleMercadoPago}
