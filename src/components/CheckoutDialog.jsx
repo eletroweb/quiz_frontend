@@ -368,8 +368,6 @@ export default function CheckoutDialog({
             </Alert>
           </Box>
         )}
-            </>
-        )}
       </DialogContent>
 
       <DialogActions>
