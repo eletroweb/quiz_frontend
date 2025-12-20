@@ -1,0 +1,36 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Quiz Concursos</title>
+    <script>
+      // Redirect SPA 404s to the index page with the correct url stored
+      // so that it can be routed appropriately with the SPA
+      (function () {
+        var redirect = sessionStorage.redirect;
+        delete sessionStorage.redirect;
+        if (redirect && redirect !== location.href) {
+          history.replace(redirect);
+        }
+      })();
+    </script>
+  </head>
+  <body>
+    <script>
+      // This page is used for GitHub Pages SPA routing
+      // It captures the 404 and redirects to index.html with the original path
+      var pathSegments = window.location.pathname.split("/").filter(Boolean);
+
+      // Se estiver em um subdiretório, ajuste conforme necessário
+      var indexPath = "/index.html";
+
+      // Armazena o path original e redireciona para index.html
+      sessionStorage.redirect =
+        window.location.pathname +
+        window.location.search +
+        window.location.hash;
+      window.location.href = indexPath;
+    </script>
+  </body>
+</html>

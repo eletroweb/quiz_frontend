@@ -96,7 +96,7 @@ export default function Payments() {
                                     <TableRow key={payment.id}>
                                         <TableCell>{payment.user_name || payment.user_email}</TableCell>
                                         <TableCell>{payment.plan_name}</TableCell>
-                                        <TableCell>R$ {parseFloat(payment.valor).toFixed(2)}</TableCell>
+                                        <TableCell>R$ {(parseFloat(payment.valor) || 0).toFixed(2)}</TableCell>
                                         <TableCell>{new Date(payment.created_at).toLocaleString()}</TableCell>
                                         <TableCell>
                                             <Chip label="Aguardando" color="warning" size="small" />

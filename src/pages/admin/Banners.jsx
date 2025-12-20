@@ -82,7 +82,14 @@ function Banners() {
                 imagem_url: banner.imagem_url || ''
             });
             setEditingId(banner.id);
-            setImagePreview(banner.imagem_url ? `${API_BASE_URL}${banner.imagem_url}` : null);
+            if (banner.imagem_url) {
+                const preview = String(banner.imagem_url).startsWith('http')
+                    ? banner.imagem_url
+                    : `${API_BASE_URL}${banner.imagem_url}`;
+                setImagePreview(preview);
+            } else {
+                setImagePreview(null);
+            }
         } else {
             setFormData({
                 titulo: '',
@@ -215,7 +222,7 @@ function Banners() {
                                 <TableCell>
                                     {banner.imagem_url && (
                                         <img
-                                            src={`${API_BASE_URL}${banner.imagem_url}`}
+                                            src={String(banner.imagem_url).startsWith('http') ? banner.imagem_url : `${API_BASE_URL}${banner.imagem_url}`}
                                             alt={banner.titulo}
                                             style={{ width: 100, height: 50, objectFit: 'cover', borderRadius: 4 }}
                                         />
@@ -322,6 +329,24 @@ function Banners() {
                                         />
                                     }
                                     label="Ativo"
+                                />
+                            </Grid>
+                            <Grid item xs={12}>
+                                <TextField
+                                    fullWidth
+                                    label="Imagem (URL Cloudinary)"
+                                    placeholder="https://res.cloudinary.com/.../image/upload/v.../banner.jpg"
+                                    value={formData.imagem_url}
+                                    onChange={(e) => {
+                                        const url = e.target.value;
+                                        setFormData({ ...formData, imagem_url: url });
+                                        if (url && /^https?:\/\//.test(url)) {
+                                            setImagePreview(url);
+                                        } else if (!selectedImage) {
+                                            setImagePreview(null);
+                                        }
+                                    }}
+                                    helperText="Cole a URL da imagem hospedada (Cloudinary). Se preferir, use o upload abaixo."
                                 />
                             </Grid>
                             <Grid item xs={12}>

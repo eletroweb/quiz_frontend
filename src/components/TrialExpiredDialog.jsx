@@ -105,7 +105,7 @@ export default function TrialExpiredDialog({ open, plans, onSelectPlan }) {
                                         </Typography>
 
                                         <Typography variant="h4" color="primary" fontWeight="bold">
-                                            R$ {parseFloat(plan.price).toFixed(2)}
+                                            R$ {(parseFloat(plan.price) || 0).toFixed(2)}
                                         </Typography>
 
                                         <Typography variant="caption" color="text.secondary">

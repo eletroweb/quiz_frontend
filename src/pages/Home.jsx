@@ -8,6 +8,8 @@ import StatsSection from '../components/StatsSection';
 import CTASection from '../components/CTASection';
 import PublicFooter from '../components/PublicFooter';
 
+import NewsSection from '../components/NewsSection';
+
 function Home() {
     return (
         <Box>
@@ -15,6 +17,7 @@ function Home() {
             <Box id="inicio">
                 <HeroSection />
             </Box>
+            <NewsSection />
             <Box id="concursos">
                 <FeaturesSection />
             </Box>

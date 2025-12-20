@@ -236,10 +236,10 @@ export default function Planos() {
                 }}
             >
                 <Typography variant="h6" fontWeight="bold" gutterBottom>
-                    🛡️ Garantia de 7 dias
+                    🛡️ Acesso liberado por 1 semana para testar.
                 </Typography>
                 <Typography variant="body2">
-                    Não gostou? Devolvemos 100% do seu dinheiro, sem perguntas!
+                    Experimente a metodologia que vai acelerar sua jornada até a aprovação.
                 </Typography>
             </Paper>
         </Box>
