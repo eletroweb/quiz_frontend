@@ -20,17 +20,25 @@
     <script>
       // This page is used for GitHub Pages SPA routing
       // It captures the 404 and redirects to index.html with the original path
-      var pathSegments = window.location.pathname.split("/").filter(Boolean);
 
-      // Se estiver em um subdiretório, ajuste conforme necessário
-      var indexPath = "/index.html";
-
-      // Armazena o path original e redireciona para index.html
-      sessionStorage.redirect =
-        window.location.pathname +
-        window.location.search +
-        window.location.hash;
-      window.location.href = indexPath;
+      // Evitar loop infinito: se já estiver em index.html, não redirecionar
+      if (
+        window.location.pathname === "/index.html" ||
+        window.location.pathname === "/"
+      ) {
+        // Já estamos na página correta, deixar o React Router lidar
+        // Redirecionar para a raiz se estiver em index.html
+        if (window.location.pathname === "/index.html") {
+          window.location.href = "/";
+        }
+      } else {
+        // Armazena o path original e redireciona para index.html
+        sessionStorage.redirect =
+          window.location.pathname +
+          window.location.search +
+          window.location.hash;
+        window.location.href = "/index.html";
+      }
     </script>
   </body>
 </html>
