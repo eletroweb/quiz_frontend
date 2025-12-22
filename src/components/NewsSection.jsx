@@ -21,17 +21,11 @@ const NewsSection = () => {
 
     const fetchNews = async () => {
         try {
-            // Buscar destaques
-            const featuredResponse = await api.get('/news?featured=true&limit=1');
-            if (featuredResponse.data && featuredResponse.data.length > 0) {
-                setFeatured(featuredResponse.data[0]);
-            }
-
-            // Buscar lista geral (excluindo o destaque se possível)
-            const listResponse = await api.get('/news?limit=5');
-            // Filtrar o destaque da lista
-            const listData = listResponse.data.filter(n => n.id !== (featuredResponse.data[0]?.id));
-            setNews(listData);
+            const listResponse = await api.get('/news?limit=12');
+            const data = Array.isArray(listResponse.data) ? listResponse.data : [];
+            const feat = data.find(n => !!n.destaque) || null;
+            setFeatured(feat);
+            setNews(data.filter(n => n.id !== (feat?.id)));
 
             setLoading(false);
         } catch (error) {
