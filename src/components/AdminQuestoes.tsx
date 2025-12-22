@@ -37,6 +37,10 @@ export default function AdminQuestoes() {
   const [loading, setLoading] = useState(false);
   const [showForm, setShowForm] = useState(false);
   const [editingId, setEditingId] = useState<string | null>(null);
+  const [importOpen, setImportOpen] = useState(false);
+  const [importItems, setImportItems] = useState<any[]>([]);
+  const [importLoading, setImportLoading] = useState(false);
+  const [importError, setImportError] = useState<string | null>(null);
   const [form, setForm] = useState<FormData>({
     text: "",
     image_url: "",
@@ -218,6 +222,85 @@ export default function AdminQuestoes() {
     setShowForm(false);
   };
 
+  const normalizeItem = (raw: any) => {
+    const choicesArr =
+      Array.isArray(raw?.choices)
+        ? raw.choices
+        : typeof raw?.choices === "string"
+        ? raw.choices.split("|").map((s: string) => s.trim()).filter(Boolean)
+        : [];
+    let type: "mc" | "tf" = raw?.type === "tf" ? "tf" : "mc";
+    let choices: string[] = choicesArr;
+    if (type === "tf") {
+      choices = ["Certo", "Errado"];
+    } else {
+      if (choices.length !== 4 && choices.length !== 5) {
+        choices = ["", "", "", ""];
+      }
+    }
+    let correct_index =
+      typeof raw?.correct_index === "number" ? raw.correct_index : 0;
+    if (correct_index < 0) correct_index = 0;
+    if (correct_index >= choices.length) correct_index = 0;
+    return {
+      text: String(raw?.text ?? "").trim(),
+      image_url: raw?.image_url ?? null,
+      choices,
+      correct_index,
+      explanation: raw?.explanation ?? null,
+      materia_id: raw?.materia_id ?? null,
+      concurso_id: raw?.concurso_id ?? null,
+      banca: raw?.banca ?? null,
+      ano: raw?.ano ?? null,
+      dificuldade: raw?.dificuldade ?? "medio",
+      type,
+    };
+  };
+
+  const handleImportFile = async (file: File) => {
+    setImportError(null);
+    try {
+      const text = await file.text();
+      const parsed = JSON.parse(text);
+      const arr =
+        Array.isArray(parsed) ? parsed : Array.isArray(parsed?.items) ? parsed.items : [];
+      if (!Array.isArray(arr) || arr.length === 0) {
+        setImportError("Arquivo JSON inválido ou vazio");
+        setImportItems([]);
+        return;
+      }
+      const items = arr.map(normalizeItem).filter((x) => x.text && x.choices.length >= 2);
+      setImportItems(items);
+    } catch (e: any) {
+      setImportError("Falha ao ler o arquivo JSON");
+      setImportItems([]);
+    }
+  };
+
+  const submitImport = async () => {
+    if (!importItems.length) {
+      alert("Nenhum item válido para importar");
+      return;
+    }
+    try {
+      setImportLoading(true);
+      const token = localStorage.getItem("token");
+      const response = await axios.post(
+        `${API_URL}/questoes/import`,
+        { items: importItems },
+        { headers: { Authorization: `Bearer ${token}` } }
+      );
+      alert(`Importação concluída: ${response.data?.imported ?? 0} itens.`);
+      setImportItems([]);
+      setImportOpen(false);
+      carregarQuestoes();
+    } catch (e) {
+      alert("Erro ao importar questões");
+    } finally {
+      setImportLoading(false);
+    }
+  };
+
   return (
     <div className="admin-questoes">
       <h1>Gerenciar Questões</h1>
@@ -228,6 +311,13 @@ export default function AdminQuestoes() {
         style={{ marginBottom: "20px" }}
       >
         {showForm ? "❌ Cancelar" : "➕ Nova Questão"}
+      </button>
+      <button
+        className="btn-outline"
+        onClick={() => setImportOpen(!importOpen)}
+        style={{ marginLeft: "10px", marginBottom: "20px" }}
+      >
+        {importOpen ? "❌ Fechar Importação" : "📥 Importar JSON"}
       </button>
 
       {showForm && (
@@ -420,6 +510,33 @@ export default function AdminQuestoes() {
               : "Criar Questão"}
           </button>
         </form>
+      )}
+
+      {importOpen && (
+        <div className="import-box" style={{ marginBottom: "20px" }}>
+          <h3>Importar Questões via JSON</h3>
+          <input
+            type="file"
+            accept="application/json"
+            onChange={(e) => {
+              const f = e.target.files?.[0];
+              if (f) handleImportFile(f);
+            }}
+          />
+          {importError && <p style={{ color: "red" }}>{importError}</p>}
+          {importItems.length > 0 && (
+            <div style={{ marginTop: "10px" }}>
+              <p>Itens prontos para importar: {importItems.length}</p>
+              <button
+                className="btn-fill"
+                onClick={submitImport}
+                disabled={importLoading}
+              >
+                {importLoading ? "Importando..." : "Importar Agora"}
+              </button>
+            </div>
+          )}
+        </div>
       )}
 
       <div className="questoes-list">
