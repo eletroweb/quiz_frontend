@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { Box, Container, Typography, Grid, Card, CardContent, CardMedia, Button, Divider, Dialog, DialogTitle, DialogContent, DialogActions } from '@mui/material';
 import { CalendarToday, Person } from '@mui/icons-material';
 import api from '../services/api';
+import CheckoutDialog from './CheckoutDialog';
 
 const API_BASE_URL = import.meta.env.VITE_API_URL?.replace('/api', '') || 'http://localhost:3001';
 
@@ -11,6 +12,8 @@ const NewsSection = () => {
     const [loading, setLoading] = useState(true);
     const [selectedNews, setSelectedNews] = useState(null);
     const [openDialog, setOpenDialog] = useState(false);
+    const [checkoutOpen, setCheckoutOpen] = useState(false);
+    const [relatedCourse, setRelatedCourse] = useState(null);
 
     useEffect(() => {
         fetchNews();
@@ -37,14 +40,27 @@ const NewsSection = () => {
         }
     };
 
-    const handleOpenNews = (item) => {
+    const handleOpenNews = async (item) => {
         setSelectedNews(item);
         setOpenDialog(true);
+        setRelatedCourse(null);
+        try {
+            const cursoId = item?.curso_id;
+            if (cursoId) {
+                const resp = await api.get('/cursos');
+                const list = Array.isArray(resp.data) ? resp.data : [];
+                const course = list.find(c => String(c.id) === String(cursoId));
+                if (course) setRelatedCourse(course);
+            }
+        } catch {
+            console.error('Erro ao carregar curso vinculado à notícia');
+        }
     };
 
     const handleCloseNews = () => {
         setOpenDialog(false);
         setSelectedNews(null);
+        setRelatedCourse(null);
     };
 
     if (loading || (news.length === 0 && !featured)) return null;
@@ -109,61 +125,51 @@ const NewsSection = () => {
                         </Grid>
                     )}
 
-                    {/* Lista Lateral (News) */}
+                    {/* Notícias Recentes em Álbum */}
                     <Grid item xs={12} md={7}>
                         {featured && <Box sx={{ borderTop: { xs: '1px solid #e5e7eb', md: 'none' }, mb: 3 }} />}
-
                         <Typography variant="h6" fontWeight="bold" gutterBottom sx={{ textTransform: 'uppercase', borderBottom: '1px solid #000', pb: 1, mb: 3 }}>
                             Recentes
                         </Typography>
-
                         <Grid container spacing={3}>
                             {news.map((item) => (
-                                <Grid item xs={12} key={item.id}>
-                                    <Box
-                                        onClick={() => handleOpenNews(item)}
-                                        sx={{
-                                            cursor: 'pointer',
-                                            transition: 'opacity 0.2s',
-                                            '&:hover': { opacity: 0.8 }
-                                        }}
-                                    >
-                                        <Grid container spacing={2}>
-                                            <Grid item xs={4} sm={3}>
-                                                {item.imagem_url ? (
-                                                    <Box
-                                                        component="img"
-                                                        src={item.imagem_url.startsWith('http') ? item.imagem_url : `${API_BASE_URL}${item.imagem_url}`}
-                                                        alt={item.titulo}
-                                                        sx={{ width: '100%', height: 90, objectFit: 'cover' }}
-                                                    />
-                                                ) : (
-                                                    <Box sx={{ width: '100%', height: 90, bgcolor: '#E2E8F0' }} />
-                                                )}
-                                            </Grid>
-                                            <Grid item xs={8} sm={9}>
-                                                <Typography variant="subtitle1" fontWeight="bold" sx={{ lineHeight: 1.2, mb: 1 }}>
-                                                    {item.titulo}
-                                                </Typography>
-                                                <Typography variant="body2" color="text.secondary" sx={{
-                                                    display: '-webkit-box',
-                                                    WebkitLineClamp: 2,
-                                                    WebkitBoxOrient: 'vertical',
-                                                    overflow: 'hidden',
-                                                    mb: 1
-                                                }}>
-                                                    {item.resumo}
-                                                </Typography>
-                                                <Box sx={{ display: 'flex', alignItems: 'center', color: '#9CA3AF', fontSize: '0.75rem', gap: 2 }}>
-                                                    <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5 }}>
-                                                        <CalendarToday sx={{ fontSize: 12 }} />
-                                                        {formatDate(item.data_publicacao)}
-                                                    </Box>
+                                <Grid item xs={12} sm={6} md={4} key={item.id}>
+                                    <Card sx={{ height: '100%', display: 'flex', flexDirection: 'column' }}>
+                                        {item.imagem_url ? (
+                                            <CardMedia
+                                                component="img"
+                                                height="140"
+                                                image={item.imagem_url.startsWith('http') ? item.imagem_url : `${API_BASE_URL}${item.imagem_url}`}
+                                                alt={item.titulo}
+                                            />
+                                        ) : (
+                                            <Box sx={{ height: 140, bgcolor: '#E2E8F0' }} />
+                                        )}
+                                        <CardContent sx={{ flexGrow: 1 }}>
+                                            <Typography variant="subtitle1" fontWeight="bold" sx={{ lineHeight: 1.3, mb: 1 }}>
+                                                {item.titulo}
+                                            </Typography>
+                                            <Typography variant="body2" color="text.secondary" sx={{
+                                                display: '-webkit-box',
+                                                WebkitLineClamp: 3,
+                                                WebkitBoxOrient: 'vertical',
+                                                overflow: 'hidden'
+                                            }}>
+                                                {item.resumo}
+                                            </Typography>
+                                            <Box sx={{ display: 'flex', alignItems: 'center', color: '#9CA3AF', fontSize: '0.75rem', gap: 2, mt: 1 }}>
+                                                <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5 }}>
+                                                    <CalendarToday sx={{ fontSize: 12 }} />
+                                                    {formatDate(item.data_publicacao)}
                                                 </Box>
-                                            </Grid>
-                                        </Grid>
-                                    </Box>
-                                    <Divider sx={{ my: 2 }} />
+                                            </Box>
+                                        </CardContent>
+                                        <Box sx={{ p: 2, pt: 0, display: 'flex', gap: 1 }}>
+                                            <Button variant="outlined" fullWidth onClick={() => handleOpenNews(item)}>
+                                                Mais detalhes
+                                            </Button>
+                                        </Box>
+                                    </Card>
                                 </Grid>
                             ))}
                         </Grid>
@@ -220,6 +226,11 @@ const NewsSection = () => {
                                 </Box>
                             </DialogContent>
                             <DialogActions>
+                                {relatedCourse && (
+                                    <Button variant="contained" color="primary" onClick={() => setCheckoutOpen(true)}>
+                                        Adquirir curso agora
+                                    </Button>
+                                )}
                                 <Button onClick={handleCloseNews} variant="contained" color="primary">
                                     Fechar
                                 </Button>
@@ -227,6 +238,16 @@ const NewsSection = () => {
                         </>
                     )}
                 </Dialog>
+
+                <CheckoutDialog
+                    open={checkoutOpen}
+                    onClose={() => setCheckoutOpen(false)}
+                    course={relatedCourse}
+                    onSuccess={() => {
+                        setCheckoutOpen(false);
+                        window.location.reload();
+                    }}
+                />
             </Container>
         </Box>
     );

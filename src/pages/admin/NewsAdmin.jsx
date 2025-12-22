@@ -2,7 +2,8 @@ import React, { useState, useEffect } from 'react';
 import {
     Box, Container, Typography, Button, Card, CardContent, CardActions,
     Grid, IconButton, Dialog, DialogTitle, DialogContent, DialogActions,
-    TextField, Alert, FormControlLabel, Switch, CircularProgress, CardMedia
+    TextField, Alert, FormControlLabel, Switch, CircularProgress, CardMedia,
+    FormControl, InputLabel, Select, MenuItem
 } from '@mui/material';
 import {
     Add as AddIcon,
@@ -25,12 +26,18 @@ export default function NewsAdmin() {
         conteudo: '',
         imagem_url: '',
         destaque: false,
-        categoria: 'geral'
+        categoria: 'geral',
+        curso_id: ''
     });
     const [uploadingImage, setUploadingImage] = useState(false);
+    const [cursos, setCursos] = useState([]);
 
     useEffect(() => {
         loadNews();
+    }, []);
+
+    useEffect(() => {
+        loadCursos();
     }, []);
 
     async function loadNews() {
@@ -47,6 +54,15 @@ export default function NewsAdmin() {
         }
     }
 
+    async function loadCursos() {
+        try {
+            const response = await api.get('/cursos');
+            setCursos(Array.isArray(response.data) ? response.data : []);
+        } catch {
+            setCursos([]);
+        }
+    }
+
     function handleOpenDialog(item = null) {
         if (item) {
             setEditingNews(item);
@@ -56,7 +72,8 @@ export default function NewsAdmin() {
                 conteudo: item.conteudo || '',
                 imagem_url: item.imagem_url || '',
                 destaque: item.destaque || false,
-                categoria: item.categoria || 'geral'
+                categoria: item.categoria || 'geral',
+                curso_id: item.curso_id || ''
             });
         } else {
             setEditingNews(null);
@@ -66,7 +83,8 @@ export default function NewsAdmin() {
                 conteudo: '',
                 imagem_url: '',
                 destaque: false,
-                categoria: 'geral'
+                categoria: 'geral',
+                curso_id: ''
             });
         }
         setOpenDialog(true);
@@ -97,7 +115,7 @@ export default function NewsAdmin() {
         try {
             await api.delete(`/news/${id}`);
             loadNews();
-        } catch (err) {
+        } catch {
             setError('Erro ao deletar notícia');
         }
     }
@@ -202,6 +220,22 @@ export default function NewsAdmin() {
                             value={formData.conteudo}
                             onChange={(e) => setFormData({ ...formData, conteudo: e.target.value })}
                         />
+
+                        <FormControl fullWidth>
+                            <InputLabel>Curso vinculado (opcional)</InputLabel>
+                            <Select
+                                label="Curso vinculado (opcional)"
+                                value={formData.curso_id || ''}
+                                onChange={(e) => setFormData({ ...formData, curso_id: e.target.value })}
+                            >
+                                <MenuItem value="">Nenhum</MenuItem>
+                                {cursos.map((c) => (
+                                    <MenuItem key={c.id} value={c.id}>
+                                        {c.nome}
+                                    </MenuItem>
+                                ))}
+                            </Select>
+                        </FormControl>
 
                         <Box border={1} borderColor="divider" p={2} borderRadius={1}>
                             <Typography variant="subtitle2" gutterBottom>Imagem de Capa</Typography>

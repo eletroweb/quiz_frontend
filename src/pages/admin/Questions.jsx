@@ -32,9 +32,13 @@ export default function Questions() {
   const [questions, setQuestions] = useState([]);
   const [materias, setMaterias] = useState([]);
   const [concursos, setConcursos] = useState([]);
-  const [loading, setLoading] = useState(true);
+  const [, setLoading] = useState(true);
   const [open, setOpen] = useState(false);
   const [editingId, setEditingId] = useState(null);
+  const [importOpen, setImportOpen] = useState(false);
+  const [importItems, setImportItems] = useState([]);
+  const [importError, setImportError] = useState("");
+  const [importLoading, setImportLoading] = useState(false);
 
   // Form state
   const [formData, setFormData] = useState({
@@ -141,18 +145,245 @@ export default function Questions() {
     }
   };
 
+  const handleImportFile = async (file) => {
+    setImportError("");
+    try {
+      const isCsv =
+        file.type === "text/csv" || file.name.toLowerCase().endsWith(".csv");
+      const text = await file.text();
+      if (isCsv) {
+        const lines = text.split(/\r?\n/).filter((l) => l.trim().length > 0);
+        const header = lines[0].split(",").map((h) => h.trim());
+        const items = [];
+        for (let i = 1; i < lines.length; i++) {
+          const cols = lines[i].split(",").map((c) => c.trim());
+          const obj = {};
+          header.forEach((h, idx) => {
+            obj[h] = cols[idx] || "";
+          });
+          const choices =
+            typeof obj.choices === "string"
+              ? obj.choices.split("|").map((s) => s.trim()).filter(Boolean)
+              : Array.isArray(obj.choices)
+              ? obj.choices
+              : [];
+          items.push({
+            text: obj.text,
+            choices,
+            correct_index: Number(obj.correct_index || 0),
+            type: obj.type || "mc",
+            explanation: obj.explanation || "",
+            materia_id: obj.materia_id ? Number(obj.materia_id) : null,
+            concurso_id: obj.concurso_id ? Number(obj.concurso_id) : null,
+            banca: obj.banca || "",
+            ano: obj.ano ? Number(obj.ano) : null,
+            dificuldade: obj.dificuldade || "medio",
+            image_url: obj.image_url || "",
+          });
+        }
+        setImportItems(items.filter((it) => !!it.text));
+      } else {
+        const data = JSON.parse(text);
+        const items = Array.isArray(data)
+          ? data
+          : Array.isArray(data.items)
+          ? data.items
+          : [];
+        const normalized = items
+          .map((raw) => ({
+            text: raw?.text,
+            choices: Array.isArray(raw?.choices)
+              ? raw.choices
+              : typeof raw?.choices === "string"
+              ? raw.choices.split("|").map((s) => s.trim()).filter(Boolean)
+              : [],
+            correct_index: Number(raw?.correct_index ?? 0),
+            type: raw?.type || "mc",
+            explanation: raw?.explanation || "",
+            materia_id: raw?.materia_id ?? null,
+            concurso_id: raw?.concurso_id ?? null,
+            banca: raw?.banca ?? "",
+            ano: raw?.ano ?? null,
+            dificuldade: raw?.dificuldade || "medio",
+            image_url: raw?.image_url ?? "",
+          }))
+          .filter((it) => !!it.text);
+        setImportItems(normalized);
+      }
+    } catch {
+      setImportError("Arquivo inválido ou erro ao processar");
+    }
+  };
+
+  const submitImport = async () => {
+    if (importItems.length === 0) {
+      setImportError("Nenhum item para importar");
+      return;
+    }
+    setImportLoading(true);
+    try {
+      const resp = await api.post("/questoes/import", { items: importItems });
+      alert(`Importadas: ${resp.data?.imported || 0}`);
+      setImportItems([]);
+      setImportOpen(false);
+      loadData();
+    } catch {
+      setImportError("Erro ao importar questões");
+    } finally {
+      setImportLoading(false);
+    }
+  };
+
+  const downloadFile = (filename, content, mime) => {
+    const blob = new Blob([content], { type: mime });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = filename;
+    document.body.appendChild(a);
+    a.click();
+    a.remove();
+    URL.revokeObjectURL(url);
+  };
+
+  const downloadJsonTemplate = () => {
+    const template = {
+      items: [
+        {
+          text: "Qual a capital do Brasil?",
+          choices: ["Brasília", "São Paulo", "Rio de Janeiro", "Salvador"],
+          correct_index: 0,
+          type: "mc",
+          explanation: "Brasília é a capital desde 1960.",
+          materia_id: 1,
+          banca: "CESPE",
+          ano: 2022,
+          dificuldade: "facil",
+        },
+        {
+          text: "A água ferve a 100°C ao nível do mar.",
+          choices: ["Certo", "Errado"],
+          correct_index: 0,
+          type: "tf",
+          materia_id: 2,
+          dificuldade: "medio",
+        },
+      ],
+    };
+    downloadFile(
+      "modelo-questoes.json",
+      JSON.stringify(template, null, 2),
+      "application/json"
+    );
+  };
+
+  const downloadCsvTemplate = () => {
+    const header =
+      "text,choices,correct_index,type,explanation,materia_id,concurso_id,banca,ano,dificuldade,image_url";
+    const rows = [
+      [
+        "Qual a capital do Brasil?",
+        "Brasília|São Paulo|Rio de Janeiro|Salvador",
+        "0",
+        "mc",
+        "Brasília é a capital desde 1960.",
+        "1",
+        "",
+        "CESPE",
+        "2022",
+        "facil",
+        "",
+      ],
+      ["A água ferve a 100°C ao nível do mar.", "Certo|Errado", "0", "tf", "", "2", "", "", "", "medio", ""],
+    ];
+    const content = [header, ...rows.map((r) => r.join(","))].join("\n");
+    downloadFile("modelo-questoes.csv", content, "text/csv");
+  };
+
   return (
     <Box>
-      <Box sx={{ display: "flex", justifyContent: "space-between", mb: 3 }}>
+      <Box sx={{ display: "flex", justifyContent: "space-between", mb: 3, gap: 2 }}>
         <Typography variant="h4">Gerenciar Questões</Typography>
-        <Button
-          variant="contained"
-          startIcon={<AddIcon />}
-          onClick={() => handleOpen()}
-        >
-          Nova Questão
-        </Button>
+        <Box sx={{ display: "flex", gap: 1 }}>
+          <Button
+            variant="outlined"
+            onClick={() => setImportOpen(!importOpen)}
+          >
+            Importar JSON/CSV
+          </Button>
+          <Button
+            variant="contained"
+            startIcon={<AddIcon />}
+            onClick={() => handleOpen()}
+          >
+            Nova Questão
+          </Button>
+        </Box>
       </Box>
+
+      {importOpen && (
+        <Paper sx={{ p: 2, mb: 3 }}>
+          <Grid container spacing={2}>
+            <Grid item xs={12} md={6}>
+              <Typography variant="h6" sx={{ mb: 1 }}>
+                Importar Questões
+              </Typography>
+              <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
+                <Button variant="outlined" component="label">
+                  Selecionar arquivo
+                  <input
+                    type="file"
+                    hidden
+                    accept=".json,application/json,.csv,text/csv"
+                    onChange={(e) => {
+                      const f = e.target.files?.[0];
+                      if (f) handleImportFile(f);
+                    }}
+                  />
+                </Button>
+                {importItems.length > 0 && (
+                  <Chip label={`${importItems.length} itens prontos`} />
+                )}
+              </Box>
+              {importError && (
+                <Typography color="error" sx={{ mt: 1 }}>
+                  {importError}
+                </Typography>
+              )}
+              {importItems.length > 0 && (
+                <Box sx={{ mt: 2, display: "flex", gap: 1 }}>
+                  <Button
+                    variant="contained"
+                    onClick={submitImport}
+                    disabled={importLoading}
+                  >
+                    {importLoading ? "Importando..." : "Importar Agora"}
+                  </Button>
+                  <Button variant="text" onClick={() => setImportItems([])}>
+                    Limpar
+                  </Button>
+                </Box>
+              )}
+              <Typography variant="caption" sx={{ mt: 2, display: "block" }}>
+                CSV esperado com cabeçalhos: text,choices,correct_index,type,explanation,materia_id,concurso_id,banca,ano,dificuldade,image_url — choices pode ser "A|B|C|D|E"
+              </Typography>
+            </Grid>
+            <Grid item xs={12} md={6}>
+              <Typography variant="h6" sx={{ mb: 1 }}>
+                Modelos
+              </Typography>
+              <Box sx={{ display: "flex", gap: 1 }}>
+                <Button variant="outlined" onClick={downloadJsonTemplate}>
+                  Baixar modelo JSON
+                </Button>
+                <Button variant="outlined" onClick={downloadCsvTemplate}>
+                  Baixar modelo CSV
+                </Button>
+              </Box>
+            </Grid>
+          </Grid>
+        </Paper>
+      )}
 
       <TableContainer component={Paper}>
         <Table>
