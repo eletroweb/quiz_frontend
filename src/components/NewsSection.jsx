@@ -3,7 +3,7 @@ import { Box, Container, Typography, Grid, Card, CardContent, CardMedia, Button,
 import { CalendarToday, Person } from '@mui/icons-material';
 import api from '../services/api';
 import CheckoutDialog from './CheckoutDialog';
-
+//fazendo teste
 const API_BASE_URL = import.meta.env.VITE_API_URL?.replace('/api', '') || 'http://localhost:3001';
 
 const NewsSection = () => {
