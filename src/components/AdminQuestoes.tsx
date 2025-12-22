@@ -257,13 +257,61 @@ export default function AdminQuestoes() {
     };
   };
 
+  const splitCSVLine = (line: string, delim: string) => {
+    const out: string[] = [];
+    let cur = "";
+    let inQuotes = false;
+    for (let i = 0; i < line.length; i++) {
+      const ch = line[i];
+      if (ch === '"') {
+        if (inQuotes && line[i + 1] === '"') {
+          cur += '"';
+          i++;
+        } else {
+          inQuotes = !inQuotes;
+        }
+      } else if (ch === delim && !inQuotes) {
+        out.push(cur);
+        cur = "";
+      } else {
+        cur += ch;
+      }
+    }
+    out.push(cur);
+    return out.map((s) => s.trim());
+  };
+
+  const parseCSV = (text: string) => {
+    const lines = text.split(/\r?\n/).filter((l) => l.trim().length > 0);
+    if (lines.length === 0) return [];
+    const commaCount = (text.match(/,/g) || []).length;
+    const semiCount = (text.match(/;/g) || []).length;
+    const delim = semiCount > commaCount ? ";" : ",";
+    const headers = splitCSVLine(lines[0], delim).map((h) => h.toLowerCase());
+    const items: any[] = [];
+    for (let i = 1; i < lines.length; i++) {
+      const cols = splitCSVLine(lines[i], delim);
+      const row: any = {};
+      headers.forEach((h, idx) => {
+        row[h] = cols[idx];
+      });
+      items.push(row);
+    }
+    return items;
+  };
+
   const handleImportFile = async (file: File) => {
     setImportError(null);
     try {
       const text = await file.text();
-      const parsed = JSON.parse(text);
-      const arr =
-        Array.isArray(parsed) ? parsed : Array.isArray(parsed?.items) ? parsed.items : [];
+      let arr: any[] = [];
+      const isCSV = /\.csv$/i.test(file.name) || file.type.includes("csv");
+      if (isCSV) {
+        arr = parseCSV(text);
+      } else {
+        const parsed = JSON.parse(text);
+        arr = Array.isArray(parsed) ? parsed : Array.isArray(parsed?.items) ? parsed.items : [];
+      }
       if (!Array.isArray(arr) || arr.length === 0) {
         setImportError("Arquivo JSON inválido ou vazio");
         setImportItems([]);
@@ -299,6 +347,91 @@ export default function AdminQuestoes() {
     } finally {
       setImportLoading(false);
     }
+  };
+
+  const downloadFile = (filename: string, content: string, mime: string) => {
+    const blob = new Blob([content], { type: mime });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = filename;
+    document.body.appendChild(a);
+    a.click();
+    a.remove();
+    URL.revokeObjectURL(url);
+  };
+
+  const downloadJsonTemplate = () => {
+    const template = {
+      items: [
+        {
+          text: "Qual a capital do Brasil?",
+          choices: ["Brasília", "São Paulo", "Rio de Janeiro", "Salvador"],
+          correct_index: 0,
+          type: "mc",
+          explanation: "Brasília é a capital desde 1960.",
+          materia_id: 1,
+          banca: "CESPE",
+          ano: 2022,
+          dificuldade: "facil",
+        },
+        {
+          text: "A água ferve a 100°C ao nível do mar.",
+          choices: ["Certo", "Errado"],
+          correct_index: 0,
+          type: "tf",
+          materia_id: 2,
+          dificuldade: "medio",
+        },
+      ],
+    };
+    downloadFile("questions.json", JSON.stringify(template, null, 2), "application/json");
+  };
+
+  const downloadCsvTemplate = () => {
+    const header =
+      "text,choices,correct_index,type,explanation,materia_id,concurso_id,banca,ano,dificuldade,image_url";
+    const rows = [
+      [
+        "Qual a capital do Brasil?",
+        "Brasília|São Paulo|Rio de Janeiro|Salvador",
+        "0",
+        "mc",
+        "Brasília é a capital desde 1960.",
+        "1",
+        "",
+        "CESPE",
+        "2022",
+        "facil",
+        "",
+      ],
+      [
+        "A água ferve a 100°C ao nível do mar.",
+        "Certo|Errado",
+        "0",
+        "tf",
+        "No nível do mar, 100°C.",
+        "2",
+        "",
+        "",
+        "",
+        "medio",
+        "",
+      ],
+    ];
+    const esc = (s: string) => {
+      const needsQuotes = /[",\n;]/.test(s);
+      let out = s.replace(/"/g, '""');
+      return needsQuotes ? `"${out}"` : out;
+    };
+    const delim = ",";
+    const content =
+      header +
+      "\n" +
+      rows
+        .map((r) => r.map((c) => esc(String(c))).join(delim))
+        .join("\n");
+    downloadFile("questions.csv", content, "text/csv");
   };
 
   return (
@@ -517,7 +650,7 @@ export default function AdminQuestoes() {
           <h3>Importar Questões via JSON</h3>
           <input
             type="file"
-            accept="application/json"
+            accept=".json,application/json,.csv,text/csv"
             onChange={(e) => {
               const f = e.target.files?.[0];
               if (f) handleImportFile(f);
@@ -527,12 +660,30 @@ export default function AdminQuestoes() {
           {importItems.length > 0 && (
             <div style={{ marginTop: "10px" }}>
               <p>Itens prontos para importar: {importItems.length}</p>
+              <p style={{ fontSize: 12, opacity: 0.8 }}>
+                CSV esperado com cabeçalhos: text,choices,correct_index,type,explanation,materia_id,concurso_id,banca,ano,dificuldade,image_url
+                — choices pode ser "A|B|C|D|E"
+              </p>
               <button
                 className="btn-fill"
                 onClick={submitImport}
                 disabled={importLoading}
               >
                 {importLoading ? "Importando..." : "Importar Agora"}
+              </button>
+              <button
+                className="btn-outline"
+                style={{ marginLeft: 10 }}
+                onClick={downloadJsonTemplate}
+              >
+                Baixar modelo JSON
+              </button>
+              <button
+                className="btn-outline"
+                style={{ marginLeft: 10 }}
+                onClick={downloadCsvTemplate}
+              >
+                Baixar modelo CSV
               </button>
             </div>
           )}
