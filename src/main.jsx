@@ -14,6 +14,8 @@ window.addEventListener("error", (event) => {
   }
 });
 
+// Só para teste
+
 // Suppress unhandled promise rejections for MetaMask
 window.addEventListener("unhandledrejection", (event) => {
   if (
