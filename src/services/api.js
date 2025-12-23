@@ -68,22 +68,25 @@ api.interceptors.response.use(
   (response) => response,
   (error) => {
     if (error.response?.status === 401) {
-      // Token inválido ou expirado
-      // NÃO redirecionar automaticamente - deixar que o componente decida
-      localStorage.removeItem("token");
-      console.warn("⚠️ Token expirado ou inválido");
-      // Se não estiver em uma requisição de API sensível, redireciona
-      const isApiError =
-        error.config?.url && !error.config.url.includes("/payments");
-      if (isApiError) {
-        setTimeout(() => {
-          const basePath =
-            import.meta.env.BASE_URL === "/"
-              ? ""
-              : import.meta.env.BASE_URL.replace(/\/$/, "");
-          window.location.href = `${basePath}/login`;
-        }, 500);
+      const originalRequest = error.config;
+      if (!originalRequest._retry) {
+        originalRequest._retry = true;
+        return auth.currentUser
+          ?.getIdToken()
+          .then((newToken) => {
+            if (newToken) {
+              localStorage.setItem("token", newToken);
+              originalRequest.headers = {
+                ...(originalRequest.headers || {}),
+                Authorization: `Bearer ${newToken}`,
+              };
+              return api(originalRequest);
+            }
+            return Promise.reject(error);
+          })
+          .catch(() => Promise.reject(error));
       }
+      return Promise.reject(error);
     } else if (
       error.response?.status === 403 &&
       error.response?.data?.code === "TRIAL_EXPIRED"
