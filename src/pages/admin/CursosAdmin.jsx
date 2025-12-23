@@ -13,7 +13,7 @@ import {
     CloudUpload as CloudUploadIcon
 } from '@mui/icons-material';
 import api from '../../services/api';
-
+//coringa
 export default function CursosAdmin() {
     const [cursos, setCursos] = useState([]);
     const [loading, setLoading] = useState(true);

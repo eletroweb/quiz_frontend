@@ -30,7 +30,7 @@ else if (
 else {
   baseURL = "https://quiz-backend-6qoh.onrender.com/api";
 }
-
+//coringa
 const api = axios.create({
   baseURL,
   headers: { "Content-Type": "application/json" },
