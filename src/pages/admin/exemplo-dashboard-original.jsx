@@ -10,6 +10,13 @@ const STAT_CONFIG = [
   { key: 'contests', title: 'Total de Concursos', icon: Assessment, color: '#ec4899', bgColor: '#fce7f3' },
 ];
 
+const ENDPOINTS = {
+  users: '/users',
+  questions: '/questoes',
+  subjects: '/materias',
+  contests: '/concursos',
+};
+
 const initialStats = { total_users: 0, total_questions: 0, total_subjects: 0, total_contests: 0 };
 
 export default function Dashboard() {
@@ -21,31 +28,25 @@ export default function Dashboard() {
   }, []);
 
   const loadStats = async () => {
-    const [materiasRes, concursosRes] = await Promise.all([
-      api.get('/materias'),
-      api.get('/concursos'),
-    ]);
-    let totalQuestions = 0;
-    const limit = 100;
-    let offset = 0;
-    for (;;) {
-      const qRes = await api.get('/questoes', {
-        params: { limit, offset },
+    try {
+      const [usersRes, questionsRes, subjectsRes, contestsRes] = await Promise.all([
+        api.get(ENDPOINTS.users),
+        api.get(ENDPOINTS.questions),
+        api.get(ENDPOINTS.subjects),
+        api.get(ENDPOINTS.contests),
+      ]);
+
+      setStats({
+        total_users: usersRes.data.length,
+        total_questions: questionsRes.data.length,
+        total_subjects: subjectsRes.data.length,
+        total_contests: contestsRes.data.length,
       });
-      const batch = Array.isArray(qRes.data) ? qRes.data.length : 0;
-      totalQuestions += batch;
-      if (batch < limit) break;
-      offset += limit;
+    } catch (error) {
+      console.error('Erro ao carregar estatísticas:', error);
+    } finally {
+      setLoading(false);
     }
-    const usersRes = await api.get('/users').then(r => r).catch(() => null);
-    const totalUsers = usersRes && Array.isArray(usersRes.data) ? usersRes.data.length : 0;
-    setStats({
-      total_users: totalUsers,
-      total_questions: totalQuestions,
-      total_subjects: Array.isArray(materiasRes.data) ? materiasRes.data.length : 0,
-      total_contests: Array.isArray(concursosRes.data) ? concursosRes.data.length : 0,
-    });
-    setLoading(false);
   };
 
   const Header = () => (

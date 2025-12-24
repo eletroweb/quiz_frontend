@@ -91,7 +91,6 @@ api.interceptors.response.use(
       error.response?.status === 403 &&
       error.response?.data?.code === "TRIAL_EXPIRED"
     ) {
-      // Trial expirado - dispara evento para abrir dialog
       window.dispatchEvent(
         new CustomEvent("trial_expired", {
           detail: error.response.data,

@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useCallback } from "react";
 import {
   Box,
   Grid,
@@ -48,41 +48,62 @@ export default function Study() {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [userCourses, setUserCourses] = useState([]);
 
-  useEffect(() => {
-    loadUserCourses();
+  const loadUserCourses = useCallback(async () => {
+    setLoading(true);
+    const response = await api.get("/cursos/user-courses").then(r => r).catch(() => null);
+    if (response && Array.isArray(response.data)) {
+      setUserCourses(response.data);
+      const first = response.data[0];
+      if (first) {
+        setSelectedCurso(first);
+        const matRes = await api.get(`/cursos/curso-materias/${first.id}`).then(r => r).catch(() => null);
+        if (matRes && Array.isArray(matRes.data)) {
+          setMaterias(matRes.data);
+          const firstMat = matRes.data[0];
+          if (firstMat) {
+            setSelectedMateria(firstMat.id);
+            const contRes = await api.get(`/conteudos?materia_id=${firstMat.id}`).then(r => r).catch(() => null);
+            if (contRes && Array.isArray(contRes.data)) {
+              setConteudos(contRes.data);
+              setSelectedConteudo(null);
+            }
+          }
+        }
+        setLoading(false);
+        return;
+      }
+    }
+    const response2 = await api.get("/cursos").then(r => r).catch(() => null);
+    if (response2 && Array.isArray(response2.data)) {
+      setCursos(response2.data);
+      const first2 = response2.data[0];
+      if (first2) {
+        setSelectedCurso(first2);
+        const matRes2 = await api.get(`/cursos/curso-materias/${first2.id}`).then(r => r).catch(() => null);
+        if (matRes2 && Array.isArray(matRes2.data)) {
+          setMaterias(matRes2.data);
+          const firstMat2 = matRes2.data[0];
+          if (firstMat2) {
+            setSelectedMateria(firstMat2.id);
+            const contRes2 = await api.get(`/conteudos?materia_id=${firstMat2.id}`).then(r => r).catch(() => null);
+            if (contRes2 && Array.isArray(contRes2.data)) {
+              setConteudos(contRes2.data);
+              setSelectedConteudo(null);
+            }
+          }
+        }
+      }
+    }
+    setLoading(false);
   }, []);
 
-  const loadUserCourses = async () => {
-    try {
-      setLoading(true);
-      // Buscar cursos do usuário (do dashboard ou perfil)
-      const response = await api.get("/cursos/user-courses");
-      setUserCourses(response.data);
-      if (response.data.length > 0) {
-        setSelectedCurso(response.data[0]);
-        loadCursoMaterias(response.data[0].id);
-      }
-    } catch (error) {
-      console.error("Erro ao carregar cursos do usuário:", error);
-      // Se endpoint não existe, carregar cursos públicos
-      loadAllCourses();
-    } finally {
-      setLoading(false);
-    }
-  };
+  useEffect(() => {
+    loadUserCourses();
+  }, [loadUserCourses]);
 
-  const loadAllCourses = async () => {
-    try {
-      const response = await api.get("/cursos");
-      setCursos(response.data);
-      if (response.data.length > 0) {
-        setSelectedCurso(response.data[0]);
-        loadCursoMaterias(response.data[0].id);
-      }
-    } catch (error) {
-      console.error("Erro ao carregar cursos:", error);
-    }
-  };
+  
+
+  
 
   const loadCursoMaterias = async (cursoId) => {
     try {
@@ -213,6 +234,7 @@ export default function Study() {
       <Box sx={{ flex: 1, display: "flex", flexDirection: "column", gap: 2 }}>
         {/* HEADER */}
         <Paper sx={{ p: 2, borderRadius: 2, background: "white" }}>
+          {loading && <LinearProgress />}
           <Box
             sx={{
               display: "flex",
