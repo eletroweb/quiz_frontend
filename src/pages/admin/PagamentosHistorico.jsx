@@ -36,13 +36,7 @@ export default function AdminPagamentosHistorico() {
   const [detalhesOpen, setDetalhesOpen] = useState(false);
   const [detalhesSelecionado, setDetalhesSelecionado] = useState(null);
 
-  useEffect(() => {
-  carregarPagamentos();
-  carregarRelatorio();
-}, [carregarPagamentos, carregarRelatorio, page, filters]);
-
-
-  const carregarPagamentos = useCallback(async () => {
+    const carregarPagamentos = useCallback(async () => {
     try {
       setLoading(true);
       const offset = (page - 1) * limit;
@@ -74,6 +68,14 @@ export default function AdminPagamentosHistorico() {
     console.error("Erro ao carregar relatório:", error);
   }
   }, []);
+
+  
+  useEffect(() => {
+  carregarPagamentos();
+  carregarRelatorio();
+}, [carregarPagamentos, carregarRelatorio, page, filters]);
+
+
 
   const exportarCSV = () => {
     const headers = [

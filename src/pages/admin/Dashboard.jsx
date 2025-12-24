@@ -21,19 +21,8 @@ export default function Dashboard() {
 
     const loadStats = async () => {
         try {
-            const [users, questions, subjects, contests] = await Promise.all([
-                api.get('/users'),
-                api.get('/questoes'),
-                api.get('/materias'),
-                api.get('/concursos')
-            ]);
-
-            setStats({
-                total_users: users.data.length,
-                total_questions: questions.data.length,
-                total_subjects: subjects.data.length,
-                total_contests: contests.data.length
-            });
+            const response = await api.get('/admin/stats');
+            setStats(response.data);
         } catch (error) {
             console.error('Erro ao carregar estatísticas:', error);
         }

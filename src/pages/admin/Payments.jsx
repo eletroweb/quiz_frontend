@@ -18,11 +18,6 @@ export default function Payments() {
     const [loading, setLoading] = useState(false);
     const [message, setMessage] = useState({ type: '', text: '' });
 
-    useEffect(() => {
-        loadConfig();
-        loadPendingPayments();
-    }, [loadConfig, loadPendingPayments]);
-
     const loadConfig = useCallback(async () => {
     try {
         const response = await api.get('/payments/config');
@@ -43,6 +38,11 @@ export default function Payments() {
         console.error('Erro ao carregar pagamentos pendentes:', error);
     }
     }, []);
+
+    useEffect(() => {
+        loadConfig();
+        loadPendingPayments();
+    }, [loadConfig, loadPendingPayments]);
 
     async function handleSave() {
         try {

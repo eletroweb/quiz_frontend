@@ -44,12 +44,7 @@ export default function CursoEditor() {
         ordem: 0
     });
 
-    useEffect(() => {
-        loadCurso();
-        loadMaterias();
-        loadBiblioteca();
-    }, [loadCurso, loadMaterias, loadBiblioteca]); 
-
+    
     const loadCurso = useCallback(async () => {
     try {
         setLoading(true);
@@ -82,6 +77,12 @@ export default function CursoEditor() {
     }
     }, []);
 
+    useEffect(() => {
+        loadCurso();
+        loadMaterias();
+        loadBiblioteca();
+    }, [loadCurso, loadMaterias, loadBiblioteca]);
+    
 
     // Módulos
     function handleOpenModuloDialog(modulo = null) {
