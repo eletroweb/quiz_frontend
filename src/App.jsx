@@ -38,6 +38,9 @@ import Ranking from "./pages/user/Ranking";
 import Planos from "./pages/user/Planos";
 import Perfil from "./pages/user/Perfil";
 import Curso from "./pages/user/Curso";
+import PaymentSuccess from "./pages/payment/Success";
+import PaymentFailure from "./pages/payment/Failure";
+import PaymentPending from "./pages/payment/Pending";
 
 function PrivateRoute({ children }) {
   const { currentUser } = useAuth();
@@ -70,6 +73,11 @@ function AppRoutes() {
   return (
     <Routes>
       <Route path="/login" element={<Login />} />
+
+      {/* Pagamento - páginas públicas */}
+      <Route path="/payment/success" element={<PaymentSuccess />} />
+      <Route path="/payment/failure" element={<PaymentFailure />} />
+      <Route path="/payment/pending" element={<PaymentPending />} />
 
       {/* Rotas Admin */}
       <Route
