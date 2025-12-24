@@ -89,6 +89,14 @@ export default function UserDashboard() {
         },
     ];
 
+    if (loading) {
+    return (
+        <Box sx={{ display: 'flex', justifyContent: 'center', mt: 4 }}>
+            <LinearProgress sx={{ width: '100%' }} />
+        </Box>
+    );
+  }
+
     return (
         <Box>
             {/* Cabeçalho de Boas-vindas */}

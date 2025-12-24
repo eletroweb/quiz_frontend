@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import {
     Box, Typography, Button, Paper, TextField, Alert, Divider, Table,
     TableBody, TableCell, TableContainer, TableHead, TableRow, Chip, IconButton
@@ -21,28 +21,28 @@ export default function Payments() {
     useEffect(() => {
         loadConfig();
         loadPendingPayments();
+    }, [loadConfig, loadPendingPayments]);
+
+    const loadConfig = useCallback(async () => {
+    try {
+        const response = await api.get('/payments/config');
+        setConfig(prev => ({
+            ...prev,
+            ...response.data
+        }));
+    } catch (error) {
+        console.error('Erro ao carregar configurações:', error);
+    }
     }, []);
 
-    async function loadConfig() {
-        try {
-            const response = await api.get('/payments/config');
-            setConfig({
-                ...config,
-                ...response.data
-            });
-        } catch (error) {
-            console.error('Erro ao carregar configurações:', error);
-        }
+    const loadPendingPayments = useCallback(async () => {
+    try {
+        const response = await api.get('/payments?status=aguardando_confirmacao');
+        setPendingPayments(response.data);
+    } catch (error) {
+        console.error('Erro ao carregar pagamentos pendentes:', error);
     }
-
-    async function loadPendingPayments() {
-        try {
-            const response = await api.get('/payments?status=aguardando_confirmacao');
-            setPendingPayments(response.data);
-        } catch (error) {
-            console.error('Erro ao carregar pagamentos pendentes:', error);
-        }
-    }
+    }, []);
 
     async function handleSave() {
         try {

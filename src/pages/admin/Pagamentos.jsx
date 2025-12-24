@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import {
     Box, Paper, Typography, Table, TableBody, TableCell, TableContainer,
     TableHead, TableRow, Chip, Button, TextField, MenuItem, Grid,
@@ -32,27 +32,28 @@ export default function Pagamentos() {
     });
 
     useEffect(() => {
-        fetchPayments();
-        fetchStats();
-    }, [filters]);
+    fetchPayments();
+    fetchStats();
+}, [fetchPayments]);
 
-    const fetchPayments = async () => {
-        setLoading(true);
-        try {
-            const params = new URLSearchParams();
-            if (filters.status !== 'all') params.append('status', filters.status);
-            if (filters.startDate) params.append('startDate', filters.startDate);
-            if (filters.endDate) params.append('endDate', filters.endDate);
-            if (filters.planId) params.append('planId', filters.planId);
+    const fetchPayments = useCallback(async () => {
+    setLoading(true);
+    try {
+        const params = new URLSearchParams();
+        if (filters.status !== 'all') params.append('status', filters.status);
+        if (filters.startDate) params.append('startDate', filters.startDate);
+        if (filters.endDate) params.append('endDate', filters.endDate);
+        if (filters.planId) params.append('planId', filters.planId);
 
-            const response = await api.get(`/payments?${params.toString()}`);
-            setPayments(response.data);
-        } catch (error) {
-            console.error('Erro ao buscar pagamentos:', error);
-        } finally {
-            setLoading(false);
-        }
-    };
+        const response = await api.get(`/payments?${params.toString()}`);
+        setPayments(response.data);
+    } catch (error) {
+        console.error('Erro ao buscar pagamentos:', error);
+    } finally {
+        setLoading(false);
+    }
+}, [filters]);
+
 
     const fetchStats = async () => {
         try {

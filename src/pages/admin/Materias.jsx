@@ -92,7 +92,20 @@ export default function Materias() {
                         </TableRow>
                     </TableHead>
                     <TableBody>
-                        {materias.map((m) => (
+                        {loading ? (
+                            <TableRow>
+                                <TableCell colSpan={4} align="center">
+                                    Carregando...
+                            </TableCell>
+                        </TableRow>
+                    ) : materias.length === 0 ? (
+                        <TableRow>
+                            <TableCell colSpan={4} align="center">
+                                Nenhuma matéria cadastrada
+                            </TableCell>
+                        </TableRow>
+                    ) : (
+                        materias.map((m) => (
                             <TableRow key={m.id}>
                                 <TableCell>{m.id}</TableCell>
                                 <TableCell>{m.nome}</TableCell>
@@ -101,13 +114,18 @@ export default function Materias() {
                                     <IconButton onClick={() => handleOpen(m)} size="small">
                                         <EditIcon />
                                     </IconButton>
-                                    <IconButton onClick={() => handleDelete(m.id)} size="small" color="error">
+                                    <IconButton
+                                        onClick={() => handleDelete(m.id)}
+                                        size="small"
+                                        color="error"
+                                    >
                                         <DeleteIcon />
                                     </IconButton>
                                 </TableCell>
                             </TableRow>
-                        ))}
-                    </TableBody>
+                        ))
+                    )}
+            </TableBody>
                 </Table>
             </TableContainer>
 

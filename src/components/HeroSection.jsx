@@ -9,7 +9,7 @@ import {
   Grid,
 } from "@mui/material";
 import { KeyboardArrowLeft, KeyboardArrowRight } from "@mui/icons-material";
-import axios from "axios";
+
 import api from "../services/api";
 import homePageDesign from "../assets/home_page_design.png";
 
@@ -19,7 +19,7 @@ const API_BASE_URL =
 function HeroSection() {
   const [banners, setBanners] = useState([]);
   const [currentBanner, setCurrentBanner] = useState(0);
-  const [loading, setLoading] = useState(true);
+  
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -31,10 +31,10 @@ function HeroSection() {
       const response = await api.get("/banners/ativos");
       const data = Array.isArray(response.data) ? response.data : [];
       setBanners(data.filter((b) => b.tipo === "hero"));
-      setLoading(false);
+     
     } catch (error) {
       console.error("Erro ao carregar banners:", error);
-      setLoading(false);
+     
     }
   };
 

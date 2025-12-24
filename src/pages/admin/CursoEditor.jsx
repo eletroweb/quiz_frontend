@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import {
     Box, Container, Typography, Button, Paper, TextField, IconButton,
@@ -48,39 +48,40 @@ export default function CursoEditor() {
         loadCurso();
         loadMaterias();
         loadBiblioteca();
+    }, [loadCurso, loadMaterias, loadBiblioteca]); 
+
+    const loadCurso = useCallback(async () => {
+    try {
+        setLoading(true);
+        const response = await api.get(`/cursos/${id}`);
+        setCurso(response.data);
+        setError('');
+    } catch (err) {
+        console.error('Erro ao carregar curso:', err);
+        setError('Erro ao carregar curso');
+    } finally {
+        setLoading(false);
+    }
     }, [id]);
 
-    async function loadCurso() {
-        try {
-            setLoading(true);
-            const response = await api.get(`/cursos/${id}`);
-            setCurso(response.data);
-            setError('');
-        } catch (err) {
-            console.error('Erro ao carregar curso:', err);
-            setError('Erro ao carregar curso');
-        } finally {
-            setLoading(false);
-        }
+    const loadMaterias = useCallback(async () => {
+    try {
+        const response = await api.get('/materias');
+        setMaterias(response.data);
+    } catch (err) {
+        console.error('Erro ao carregar matérias:', err);
     }
+    }, []);
 
-    async function loadMaterias() {
-        try {
-            const response = await api.get('/materias');
-            setMaterias(response.data);
-        } catch (err) {
-            console.error('Erro ao carregar matérias:', err);
-        }
+    const loadBiblioteca = useCallback(async () => {
+    try {
+        const response = await api.get('/conteudos');
+        setBibliotecaConteudos(response.data);
+    } catch (err) {
+        console.error('Erro ao carregar biblioteca:', err);
     }
+    }, []);
 
-    async function loadBiblioteca() {
-        try {
-            const response = await api.get('/conteudos');
-            setBibliotecaConteudos(response.data);
-        } catch (err) {
-            console.error('Erro ao carregar biblioteca:', err);
-        }
-    }
 
     // Módulos
     function handleOpenModuloDialog(modulo = null) {

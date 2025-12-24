@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useCallback } from "react";
 import {
   Dialog,
   DialogTitle,
@@ -25,8 +25,6 @@ import {
   Close,
 } from "@mui/icons-material";
 import { QRCodeSVG } from "qrcode.react";
-import { formatDistanceToNow } from "date-fns";
-import { ptBR } from "date-fns/locale";
 import api from "../services/api";
 
 export default function CheckoutDialog({
@@ -34,13 +32,12 @@ export default function CheckoutDialog({
   onClose,
   plan,
   course,
-  onSuccess,
 }) {
-  const [tab, setTab] = useState(0); // 0 = PIX, 1 = Mercado Pago
+  const [tab, setTab] = useState(0);
   const [loading, setLoading] = useState(false);
   const [pixData, setPixData] = useState(null);
-  const [paymentStatus, setPaymentStatus] = useState("pending");
-  const [timeLeft, setTimeLeft] = useState(360); // 6 minutos em segundos
+  const [paymentStatus] = useState("pending");
+  const [timeLeft, setTimeLeft] = useState(360);
   const [copied, setCopied] = useState(false);
   const [error, setError] = useState("");
 
@@ -54,11 +51,47 @@ export default function CheckoutDialog({
         : item?.price || item?.preco || 0
     ) || 0;
 
+  const generatePixPayment = useCallback(async () => {
+    setLoading(true);
+    setError("");
+
+    try {
+      if (!item?.id) {
+        setError("Item ID não disponível");
+        return;
+      }
+
+      const payload =
+        type === "course" ? { cursoId: item.id } : { planId: item.id };
+
+      const response = await api.post("/payments/pix", payload);
+      setPixData(response.data);
+    } catch (err) {
+      console.error("Erro ao gerar PIX:", err);
+
+      if (err.response?.status === 401) {
+        setError("Sessão expirada. Por favor, faça login novamente.");
+        setTimeout(() => {
+          window.location.href = "/login";
+        }, 2000);
+      } else {
+        const errorMsg =
+          err.response?.data?.error ||
+          err.response?.data?.details ||
+          err.message ||
+          "Erro desconhecido";
+        setError(`Erro ao gerar PIX: ${errorMsg}`);
+      }
+    } finally {
+      setLoading(false);
+    }
+  }, [item, type]);
+
   useEffect(() => {
     if (open && tab === 0 && !pixData) {
       generatePixPayment();
     }
-  }, [open, tab]);
+  }, [open, tab, pixData, generatePixPayment]);
 
   useEffect(() => {
     if (tab !== 0) return;
@@ -71,76 +104,46 @@ export default function CheckoutDialog({
     if (tab !== 0) return;
     if (!pixData) return;
     if (timeLeft <= 0) return;
+
     const id = setInterval(() => {
       setTimeLeft((t) => (t > 0 ? t - 1 : 0));
     }, 1000);
+
     return () => clearInterval(id);
   }, [tab, pixData, timeLeft]);
-
-  const generatePixPayment = async () => {
-    setLoading(true);
-    setError("");
-    try {
-      if (!item?.id) {
-        setError("Item ID não disponível");
-        setLoading(false);
-        return;
-      }
-      const payload =
-        type === "course" ? { cursoId: item.id } : { planId: item.id };
-      const response = await api.post("/payments/pix", payload);
-      setPixData(response.data);
-    } catch (error) {
-      console.error("Erro ao gerar PIX:", error);
-
-      if (error.response?.status === 401) {
-        setError("Sessão expirada. Por favor, faça login novamente.");
-        setTimeout(() => {
-          window.location.href = "/login";
-        }, 2000);
-      } else {
-        const errorMsg =
-          error.response?.data?.error ||
-          error.response?.data?.details ||
-          error.message ||
-          "Erro desconhecido";
-        setError(`Erro ao gerar PIX: ${errorMsg}`);
-      }
-    } finally {
-      setLoading(false);
-    }
-  };
 
   const handleMercadoPago = async () => {
     setLoading(true);
     setError("");
+
     try {
       if (!item?.id) {
         setError("Item ID não disponível");
-        setLoading(false);
         return;
       }
+
       const payload =
         type === "course" ? { cursoId: item.id } : { planId: item.id };
-      const response = await api.post("/payments/preference", payload);
-      // Redirecionar para checkout do Mercado Pago
-      window.location.href = response.data.initPoint;
-    } catch (error) {
-      console.error("Erro ao criar preferência:", error);
 
-      if (error.response?.status === 401) {
+      const response = await api.post("/payments/preference", payload);
+      window.location.href = response.data.initPoint;
+    } catch (err) {
+      console.error("Erro ao criar preferência:", err);
+
+      if (err.response?.status === 401) {
         setError("Sessão expirada. Por favor, faça login novamente.");
         setTimeout(() => {
           window.location.href = "/login";
         }, 2000);
       } else {
         const errorMsg =
-          error.response?.data?.error ||
-          error.response?.data?.details ||
-          error.message ||
+          err.response?.data?.error ||
+          err.response?.data?.details ||
+          err.message ||
           "Erro desconhecido";
         setError(`Erro ao gerar checkout: ${errorMsg}`);
       }
+    } finally {
       setLoading(false);
     }
   };
@@ -148,11 +151,14 @@ export default function CheckoutDialog({
   const copyPixCode = async () => {
     const text = pixData?.pixCode;
     if (!text) return;
+
     try {
       await navigator.clipboard.writeText(text);
       setCopied(true);
       setTimeout(() => setCopied(false), 1500);
-    } catch (_) {}
+    } catch (err) {
+      console.warn("Falha ao copiar PIX", err);
+    }
   };
 
   const formatTime = (seconds) => {

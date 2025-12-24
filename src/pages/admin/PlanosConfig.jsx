@@ -1,10 +1,10 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import {
     Box, Typography, Paper, Tabs, Tab, Switch, TextField,
-    FormControlLabel, Button, Grid, Divider, Alert, CircularProgress,
+    FormControlLabel, Grid, Divider, Alert, CircularProgress,
     Accordion, AccordionSummary, AccordionDetails, Chip
 } from '@mui/material';
-import { ExpandMore, Save, Settings } from '@mui/icons-material';
+import { ExpandMore, Settings } from '@mui/icons-material';
 import api from '../../services/api';
 
 const PLAN_LABELS = {
@@ -38,11 +38,10 @@ export default function PlanosConfig() {
     const planTypes = ['trial', 'monthly', 'annual', 'lifetime'];
     const currentPlan = planTypes[currentTab];
 
-    useEffect(() => {
-        loadFeatures();
-    }, []);
-
-    async function loadFeatures() {
+    // ===============================
+    // LOAD FEATURES
+    // ===============================
+    const loadFeatures = useCallback(async () => {
         try {
             setLoading(true);
             const response = await api.get('/plan-features');
@@ -53,43 +52,59 @@ export default function PlanosConfig() {
         } finally {
             setLoading(false);
         }
-    }
+    }, []);
 
-    async function handleSaveFeature(featureKey, value) {
-        try {
-            setSaving(true);
-            await api.put(`/plan-features/${currentPlan}/${featureKey}`, {
-                feature_value: value,
-                description: FEATURE_LABELS[featureKey] || featureKey
-            });
+    useEffect(() => {
+        loadFeatures();
+    }, [loadFeatures]);
 
-            // Atualiza estado local
-            setFeatures(prev => ({
-                ...prev,
-                [currentPlan]: prev[currentPlan].map(f =>
-                    f.feature_key === featureKey ? { ...f, feature_value: value } : f
-                )
-            }));
+    // ===============================
+    // SAVE FEATURE
+    // ===============================
+    const handleSaveFeature = useCallback(
+        async (featureKey, value) => {
+            try {
+                setSaving(true);
 
-            setMessage('Recurso atualizado com sucesso!');
-            setTimeout(() => setMessage(''), 3000);
-        } catch (error) {
-            console.error('Erro ao salvar:', error);
-            setMessage('Erro ao salvar recurso');
-        } finally {
-            setSaving(false);
-        }
-    }
+                await api.put(`/plan-features/${currentPlan}/${featureKey}`, {
+                    feature_value: value,
+                    description: FEATURE_LABELS[featureKey] || featureKey
+                });
 
-    function getFeatureValue(featureKey) {
+                setFeatures(prev => ({
+                    ...prev,
+                    [currentPlan]: prev[currentPlan].map(f =>
+                        f.feature_key === featureKey
+                            ? { ...f, feature_value: value }
+                            : f
+                    )
+                }));
+
+                setMessage('Recurso atualizado com sucesso!');
+                setTimeout(() => setMessage(''), 3000);
+            } catch (error) {
+                console.error('Erro ao salvar:', error);
+                setMessage('Erro ao salvar recurso');
+            } finally {
+                setSaving(false);
+            }
+        },
+        [currentPlan]
+    );
+
+    // ===============================
+    // HELPERS
+    // ===============================
+    const getFeatureValue = (featureKey) => {
         const planFeatures = features[currentPlan] || [];
         const feature = planFeatures.find(f => f.feature_key === featureKey);
         return feature?.feature_value || '';
-    }
+    };
 
-    function renderFeatureControl(featureKey) {
+    const renderFeatureControl = (featureKey) => {
         const value = getFeatureValue(featureKey);
-        const isBooleanFeature = featureKey.startsWith('access_') || featureKey.startsWith('can_');
+        const isBooleanFeature =
+            featureKey.startsWith('access_') || featureKey.startsWith('can_');
 
         if (isBooleanFeature) {
             return (
@@ -97,7 +112,12 @@ export default function PlanosConfig() {
                     control={
                         <Switch
                             checked={value === 'true'}
-                            onChange={(e) => handleSaveFeature(featureKey, e.target.checked ? 'true' : 'false')}
+                            onChange={(e) =>
+                                handleSaveFeature(
+                                    featureKey,
+                                    e.target.checked ? 'true' : 'false'
+                                )
+                            }
                             disabled={saving}
                         />
                     }
@@ -106,7 +126,6 @@ export default function PlanosConfig() {
             );
         }
 
-        // Campos numéricos ou "unlimited"
         return (
             <Box>
                 <Typography variant="body2" color="text.secondary" gutterBottom>
@@ -116,7 +135,12 @@ export default function PlanosConfig() {
                     <TextField
                         size="small"
                         value={value === 'unlimited' ? '' : value}
-                        onChange={(e) => handleSaveFeature(featureKey, e.target.value || 'unlimited')}
+                        onChange={(e) =>
+                            handleSaveFeature(
+                                featureKey,
+                                e.target.value || 'unlimited'
+                            )
+                        }
                         placeholder="unlimited"
                         type="number"
                         disabled={saving || value === 'unlimited'}
@@ -126,7 +150,12 @@ export default function PlanosConfig() {
                         control={
                             <Switch
                                 checked={value === 'unlimited'}
-                                onChange={(e) => handleSaveFeature(featureKey, e.target.checked ? 'unlimited' : '0')}
+                                onChange={(e) =>
+                                    handleSaveFeature(
+                                        featureKey,
+                                        e.target.checked ? 'unlimited' : '0'
+                                    )
+                                }
                                 disabled={saving}
                             />
                         }
@@ -135,8 +164,11 @@ export default function PlanosConfig() {
                 </Box>
             </Box>
         );
-    }
+    };
 
+    // ===============================
+    // LOADING
+    // ===============================
     if (loading) {
         return (
             <Box display="flex" justifyContent="center" alignItems="center" minHeight="400px">
@@ -145,6 +177,9 @@ export default function PlanosConfig() {
         );
     }
 
+    // ===============================
+    // RENDER
+    // ===============================
     return (
         <Box>
             <Box display="flex" alignItems="center" mb={3}>
@@ -162,7 +197,7 @@ export default function PlanosConfig() {
 
             <Paper sx={{ mb: 3 }}>
                 <Tabs value={currentTab} onChange={(e, v) => setCurrentTab(v)}>
-                    {planTypes.map((plan, index) => (
+                    {planTypes.map(plan => (
                         <Tab key={plan} label={PLAN_LABELS[plan]} />
                     ))}
                 </Tabs>
@@ -175,13 +210,10 @@ export default function PlanosConfig() {
                 <Divider sx={{ mb: 3 }} />
 
                 <Grid container spacing={3}>
-                    {/* Limites */}
                     <Grid item xs={12}>
                         <Accordion defaultExpanded>
                             <AccordionSummary expandIcon={<ExpandMore />}>
-                                <Typography variant="subtitle1" fontWeight="bold">
-                                    Limites de Uso
-                                </Typography>
+                                <Typography fontWeight="bold">Limites de Uso</Typography>
                             </AccordionSummary>
                             <AccordionDetails>
                                 <Grid container spacing={2}>
@@ -196,13 +228,10 @@ export default function PlanosConfig() {
                         </Accordion>
                     </Grid>
 
-                    {/* Acesso */}
                     <Grid item xs={12}>
                         <Accordion defaultExpanded>
                             <AccordionSummary expandIcon={<ExpandMore />}>
-                                <Typography variant="subtitle1" fontWeight="bold">
-                                    Controle de Acesso
-                                </Typography>
+                                <Typography fontWeight="bold">Controle de Acesso</Typography>
                             </AccordionSummary>
                             <AccordionDetails>
                                 <Grid container spacing={2}>
@@ -220,13 +249,10 @@ export default function PlanosConfig() {
                         </Accordion>
                     </Grid>
 
-                    {/* Funcionalidades */}
                     <Grid item xs={12}>
                         <Accordion defaultExpanded>
                             <AccordionSummary expandIcon={<ExpandMore />}>
-                                <Typography variant="subtitle1" fontWeight="bold">
-                                    Funcionalidades
-                                </Typography>
+                                <Typography fontWeight="bold">Funcionalidades</Typography>
                             </AccordionSummary>
                             <AccordionDetails>
                                 <Grid container spacing={2}>

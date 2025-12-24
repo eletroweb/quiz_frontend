@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useCallback } from "react";
 import {
   Box,
   Typography,
@@ -37,14 +37,16 @@ export default function AdminPagamentosHistorico() {
   const [detalhesSelecionado, setDetalhesSelecionado] = useState(null);
 
   useEffect(() => {
-    carregarPagamentos();
-    carregarRelatorio();
-  }, [page, filters]);
+  carregarPagamentos();
+  carregarRelatorio();
+}, [carregarPagamentos, carregarRelatorio, page, filters]);
 
-  const carregarPagamentos = async () => {
+
+  const carregarPagamentos = useCallback(async () => {
     try {
       setLoading(true);
       const offset = (page - 1) * limit;
+
       const response = await api.get("/pagamentos/historico", {
         params: {
           limit,
@@ -52,6 +54,7 @@ export default function AdminPagamentosHistorico() {
           ...filters,
         },
       });
+
       setPagamentos(response.data.data);
       setTotal(response.data.total);
     } catch (error) {
@@ -60,16 +63,17 @@ export default function AdminPagamentosHistorico() {
     } finally {
       setLoading(false);
     }
-  };
+  }, [page, limit, filters]);
 
-  const carregarRelatorio = async () => {
-    try {
-      const response = await api.get("/pagamentos/relatorio");
-      setRelatorio(response.data);
-    } catch (error) {
-      console.error("Erro ao carregar relatório:", error);
-    }
-  };
+
+  const carregarRelatorio = useCallback(async () => {
+  try {
+    const response = await api.get("/pagamentos/relatorio");
+    setRelatorio(response.data);
+  } catch (error) {
+    console.error("Erro ao carregar relatório:", error);
+  }
+  }, []);
 
   const exportarCSV = () => {
     const headers = [

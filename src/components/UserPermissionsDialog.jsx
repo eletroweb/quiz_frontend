@@ -1,9 +1,9 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import {
     Dialog, DialogTitle, DialogContent, DialogActions, Button,
-    Box, Typography, Switch, FormControlLabel, TextField, Divider,
+    Box, Typography, Switch, FormControlLabel, TextField,
     Accordion, AccordionSummary, AccordionDetails, Chip, Alert,
-    CircularProgress, Grid, Select, MenuItem
+    CircularProgress, Select, MenuItem
 } from '@mui/material';
 import { ExpandMore, Security, RestartAlt } from '@mui/icons-material';
 import api from '../services/api';
@@ -31,37 +31,51 @@ export default function UserPermissionsDialog({ open, onClose, user, onUpdate })
     const [customPermissions, setCustomPermissions] = useState([]);
     const [message, setMessage] = useState('');
 
-    useEffect(() => {
-        if (open && user) {
-            loadPermissions();
-            loadPlans();
-        }
-    }, [open, user]);
-
-    async function loadPlans() {
+    /* =======================
+       LOAD PLANS (ÚNICO)
+    ======================= */
+    const loadPlans = useCallback(async () => {
         try {
             const response = await api.get('/plans');
-            setAvailablePlans(response.data);
+            setAvailablePlans(response.data || []);
         } catch (error) {
             console.error('Erro ao carregar planos:', error);
         }
-    }
+    }, []);
 
-    async function loadPermissions() {
+    /* =======================
+       LOAD PERMISSIONS (ÚNICO)
+    ======================= */
+    const loadPermissions = useCallback(async () => {
+        if (!user) return;
+
         try {
             setLoading(true);
             const response = await api.get(`/user-permissions/${user.id}`);
             setUserPlan(response.data.user_plan);
-            setPlanFeatures(response.data.plan_features);
-            setCustomPermissions(response.data.custom_permissions);
+            setPlanFeatures(response.data.plan_features || []);
+            setCustomPermissions(response.data.custom_permissions || []);
         } catch (error) {
             console.error('Erro ao carregar permissões:', error);
             setMessage('Erro ao carregar permissões do usuário');
         } finally {
             setLoading(false);
         }
-    }
+    }, [user]);
 
+    /* =======================
+       EFFECT
+    ======================= */
+    useEffect(() => {
+        if (open && user) {
+            loadPermissions();
+            loadPlans();
+        }
+    }, [open, user, loadPermissions, loadPlans]);
+
+    /* =======================
+       ACTIONS
+    ======================= */
     async function handleSavePermission(permissionKey, value, override = true) {
         try {
             setSaving(true);
@@ -70,8 +84,10 @@ export default function UserPermissionsDialog({ open, onClose, user, onUpdate })
                 override_plan: override
             });
 
-            // Atualiza estado local
-            const existingIndex = customPermissions.findIndex(p => p.permission_key === permissionKey);
+            const existingIndex = customPermissions.findIndex(
+                p => p.permission_key === permissionKey
+            );
+
             if (existingIndex >= 0) {
                 const updated = [...customPermissions];
                 updated[existingIndex] = {
@@ -81,11 +97,10 @@ export default function UserPermissionsDialog({ open, onClose, user, onUpdate })
                 };
                 setCustomPermissions(updated);
             } else {
-                setCustomPermissions([...customPermissions, {
-                    permission_key: permissionKey,
-                    permission_value: value,
-                    override_plan: override
-                }]);
+                setCustomPermissions([
+                    ...customPermissions,
+                    { permission_key: permissionKey, permission_value: value, override_plan: override }
+                ]);
             }
 
             setMessage('Permissão atualizada!');
@@ -103,12 +118,9 @@ export default function UserPermissionsDialog({ open, onClose, user, onUpdate })
             setSaving(true);
             await api.put(`/users/${user.id}/plan`, { plan: newPlan });
             setUserPlan(newPlan);
-            setMessage('Plano atualizado com sucesso!');
-
-            // Recarregar permissões pois elas dependem do plano
             await loadPermissions();
-
             if (onUpdate) onUpdate();
+            setMessage('Plano atualizado com sucesso!');
         } catch (error) {
             console.error('Erro ao atualizar plano:', error);
             setMessage('Erro ao atualizar plano');
@@ -118,15 +130,13 @@ export default function UserPermissionsDialog({ open, onClose, user, onUpdate })
     }
 
     async function handleResetPermissions() {
-        if (!window.confirm('Resetar todas as permissões customizadas deste usuário?')) {
-            return;
-        }
+        if (!window.confirm('Resetar todas as permissões customizadas deste usuário?')) return;
 
         try {
             setSaving(true);
             await api.post(`/user-permissions/${user.id}/reset`);
             setCustomPermissions([]);
-            setMessage('Permissões resetadas para padrão do plano!');
+            setMessage('Permissões resetadas!');
             if (onUpdate) onUpdate();
         } catch (error) {
             console.error('Erro ao resetar:', error);
@@ -136,24 +146,29 @@ export default function UserPermissionsDialog({ open, onClose, user, onUpdate })
         }
     }
 
+    /* =======================
+       HELPERS VISUAIS
+    ======================= */
     function getPermissionValue(featureKey) {
-        const custom = customPermissions.find(p => p.permission_key === featureKey && p.override_plan);
-        if (custom) {
-            return custom.permission_value;
-        }
+        const custom = customPermissions.find(
+            p => p.permission_key === featureKey && p.override_plan
+        );
+        if (custom) return custom.permission_value;
 
         const planFeature = planFeatures.find(f => f.feature_key === featureKey);
         return planFeature?.feature_value || '';
     }
 
     function hasCustomPermission(featureKey) {
-        return customPermissions.some(p => p.permission_key === featureKey && p.override_plan);
+        return customPermissions.some(
+            p => p.permission_key === featureKey && p.override_plan
+        );
     }
 
     function renderPermissionControl(featureKey) {
         const value = getPermissionValue(featureKey);
         const isCustom = hasCustomPermission(featureKey);
-        const isBooleanFeature = featureKey.startsWith('access_') || featureKey.startsWith('can_');
+        const isBoolean = featureKey.startsWith('access_') || featureKey.startsWith('can_');
 
         return (
             <Box sx={{ mb: 2, p: 2, bgcolor: isCustom ? 'action.selected' : 'background.paper', borderRadius: 1 }}>
@@ -164,12 +179,14 @@ export default function UserPermissionsDialog({ open, onClose, user, onUpdate })
                     {isCustom && <Chip label="Customizado" size="small" color="primary" />}
                 </Box>
 
-                {isBooleanFeature ? (
+                {isBoolean ? (
                     <FormControlLabel
                         control={
                             <Switch
                                 checked={value === 'true'}
-                                onChange={(e) => handleSavePermission(featureKey, e.target.checked ? 'true' : 'false')}
+                                onChange={(e) =>
+                                    handleSavePermission(featureKey, e.target.checked ? 'true' : 'false')
+                                }
                                 disabled={saving}
                             />
                         }
@@ -180,7 +197,9 @@ export default function UserPermissionsDialog({ open, onClose, user, onUpdate })
                         <TextField
                             size="small"
                             value={value === 'unlimited' ? '' : value}
-                            onChange={(e) => handleSavePermission(featureKey, e.target.value || 'unlimited')}
+                            onChange={(e) =>
+                                handleSavePermission(featureKey, e.target.value || 'unlimited')
+                            }
                             placeholder="unlimited"
                             type="number"
                             disabled={saving || value === 'unlimited'}
@@ -190,7 +209,9 @@ export default function UserPermissionsDialog({ open, onClose, user, onUpdate })
                             control={
                                 <Switch
                                     checked={value === 'unlimited'}
-                                    onChange={(e) => handleSavePermission(featureKey, e.target.checked ? 'unlimited' : '0')}
+                                    onChange={(e) =>
+                                        handleSavePermission(featureKey, e.target.checked ? 'unlimited' : '0')
+                                    }
                                     disabled={saving}
                                 />
                             }
@@ -204,6 +225,9 @@ export default function UserPermissionsDialog({ open, onClose, user, onUpdate })
 
     if (!user) return null;
 
+    /* =======================
+       RENDER
+    ======================= */
     return (
         <Dialog open={open} onClose={onClose} maxWidth="md" fullWidth>
             <DialogTitle>
@@ -212,18 +236,19 @@ export default function UserPermissionsDialog({ open, onClose, user, onUpdate })
                     <Box>
                         <Typography variant="h6">Permissões de {user.name}</Typography>
                         <Box display="flex" alignItems="center" gap={1}>
-                            <Typography variant="caption" color="text.secondary">Plano Atual:</Typography>
+                            <Typography variant="caption">Plano Atual:</Typography>
                             <Select
                                 value={userPlan}
                                 onChange={(e) => handleUpdatePlan(e.target.value)}
                                 size="small"
                                 variant="standard"
-                                sx={{ fontSize: '0.875rem' }}
                                 disabled={saving}
                             >
                                 <MenuItem value="trial">Trial</MenuItem>
                                 {availablePlans.map(plan => (
-                                    <MenuItem key={plan.id} value={plan.slug || plan.name.toLowerCase()}>{plan.name}</MenuItem>
+                                    <MenuItem key={plan.id} value={plan.slug || plan.name.toLowerCase()}>
+                                        {plan.name}
+                                    </MenuItem>
                                 ))}
                             </Select>
                         </Box>
@@ -244,16 +269,9 @@ export default function UserPermissionsDialog({ open, onClose, user, onUpdate })
                             </Alert>
                         )}
 
-                        <Alert severity="info" sx={{ mb: 2 }}>
-                            Permissões customizadas sobrescrevem as configurações do plano.
-                            Deixe em branco para usar o padrão do plano.
-                        </Alert>
-
                         <Accordion defaultExpanded>
                             <AccordionSummary expandIcon={<ExpandMore />}>
-                                <Typography variant="subtitle1" fontWeight="bold">
-                                    Limites de Uso
-                                </Typography>
+                                <Typography fontWeight="bold">Limites de Uso</Typography>
                             </AccordionSummary>
                             <AccordionDetails>
                                 {renderPermissionControl('max_questions_per_day')}
@@ -263,9 +281,7 @@ export default function UserPermissionsDialog({ open, onClose, user, onUpdate })
 
                         <Accordion defaultExpanded>
                             <AccordionSummary expandIcon={<ExpandMore />}>
-                                <Typography variant="subtitle1" fontWeight="bold">
-                                    Controle de Acesso
-                                </Typography>
+                                <Typography fontWeight="bold">Controle de Acesso</Typography>
                             </AccordionSummary>
                             <AccordionDetails>
                                 {renderPermissionControl('access_cursos')}
@@ -276,9 +292,7 @@ export default function UserPermissionsDialog({ open, onClose, user, onUpdate })
 
                         <Accordion>
                             <AccordionSummary expandIcon={<ExpandMore />}>
-                                <Typography variant="subtitle1" fontWeight="bold">
-                                    Funcionalidades
-                                </Typography>
+                                <Typography fontWeight="bold">Funcionalidades</Typography>
                             </AccordionSummary>
                             <AccordionDetails>
                                 {renderPermissionControl('can_download_pdf')}

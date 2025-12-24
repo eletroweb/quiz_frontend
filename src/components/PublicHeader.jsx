@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import {
     AppBar,
@@ -50,7 +50,10 @@ function PublicHeader() {
             <Container maxWidth="lg">
                 <Toolbar sx={{ justifyContent: 'space-between', py: 1 }}>
                     {/* Logo */}
-                    <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, cursor: 'pointer' }} onClick={() => navigate('/')}>
+                    <Box
+                        sx={{ display: 'flex', alignItems: 'center', gap: 1, cursor: 'pointer' }}
+                        onClick={() => navigate('/')}
+                    >
                         <SchoolIcon sx={{ fontSize: 32, color: '#4F46E5' }} />
                         <Typography
                             variant="h6"
@@ -72,9 +75,10 @@ function PublicHeader() {
                             {menuItems.map((item) => (
                                 <Button
                                     key={item.label}
-                                    onClick={() => item.path.startsWith('#') ?
-                                        document.querySelector(item.path)?.scrollIntoView({ behavior: 'smooth' }) :
-                                        navigate(item.path)
+                                    onClick={() =>
+                                        item.path.startsWith('#')
+                                            ? document.querySelector(item.path)?.scrollIntoView({ behavior: 'smooth' })
+                                            : navigate(item.path)
                                     }
                                     sx={{
                                         color: '#1a1a1a',

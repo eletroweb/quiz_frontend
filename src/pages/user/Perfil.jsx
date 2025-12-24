@@ -227,7 +227,7 @@ export default function Perfil() {
                                     try {
                                         await api.post('/users/me/sessions/kill-others');
                                         setDisconnectMsg('Outros dispositivos foram desconectados.');
-                                    } catch (e) {
+                                    } catch {
                                         setDisconnectMsg('Falha ao desconectar outras sessões.');
                                     }
                                 }}

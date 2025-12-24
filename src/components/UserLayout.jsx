@@ -18,7 +18,7 @@ export default function UserLayout() {
     const [anchorEl, setAnchorEl] = useState(null);
     const navigate = useNavigate();
     const location = useLocation();
-    const { currentUser, userProfile } = useAuth();
+    const { currentUser } = useAuth(); // ✅ removido userProfile
 
     const handleDrawerToggle = () => {
         setMobileOpen(!mobileOpen);

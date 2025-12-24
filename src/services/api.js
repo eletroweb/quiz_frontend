@@ -14,7 +14,7 @@ if (envBase) {
       url.pathname = url.pathname.replace(/\/+$/, "") + "/api";
     }
     baseURL = url.toString().replace(/\/+$/, "");
-  } catch (e) {
+  } catch {
     baseURL = "https://quiz-backend-6qoh.onrender.com/api";
   }
 }

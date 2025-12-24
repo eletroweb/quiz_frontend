@@ -1,10 +1,10 @@
 import React, { useState, useEffect } from 'react';
 import {
-    Box, Typography, Button, Paper, Table, TableBody, TableCell,
+    Box, Typography, Paper, Table, TableBody, TableCell,
     TableContainer, TableHead, TableRow, IconButton, Chip, TextField,
-    InputAdornment
+    InputAdornment, CircularProgress
 } from '@mui/material';
-import { Search, Block, CheckCircle, Visibility, Security } from '@mui/icons-material';
+import { Search, Block, Visibility, Security } from '@mui/icons-material';
 import api from '../../services/api';
 import UserPermissionsDialog from '../../components/UserPermissionsDialog';
 
@@ -21,6 +21,7 @@ export default function Users() {
 
     async function loadUsers() {
         try {
+            setLoading(true);
             const response = await api.get('/users');
             setUsers(response.data);
         } catch (error) {
@@ -31,8 +32,6 @@ export default function Users() {
     }
 
     async function handleToggleStatus(userId, currentStatus) {
-        // Implementar lógica de banir/ativar
-        // Por enquanto apenas log
         console.log('Toggle status:', userId, currentStatus);
         alert('Funcionalidade de banir/ativar será implementada no backend');
     }
@@ -44,13 +43,38 @@ export default function Users() {
 
     const filteredUsers = users.filter(user =>
         user.email.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        (user.display_name && user.display_name.toLowerCase().includes(searchTerm.toLowerCase()))
+        (user.display_name &&
+            user.display_name.toLowerCase().includes(searchTerm.toLowerCase()))
     );
+
+    // =======================
+    // LOADING
+    // =======================
+    if (loading) {
+        return (
+            <Box
+                display="flex"
+                justifyContent="center"
+                alignItems="center"
+                minHeight="300px"
+            >
+                <CircularProgress />
+            </Box>
+        );
+    }
 
     return (
         <Box>
-            <Box sx={{ display: 'flex', justifyContent: 'space-between', mb: 3, alignItems: 'center' }}>
+            <Box
+                sx={{
+                    display: 'flex',
+                    justifyContent: 'space-between',
+                    mb: 3,
+                    alignItems: 'center',
+                }}
+            >
                 <Typography variant="h4">Gerenciamento de Usuários</Typography>
+
                 <TextField
                     placeholder="Buscar usuários..."
                     size="small"
@@ -78,41 +102,65 @@ export default function Users() {
                             <TableCell align="right">Ações</TableCell>
                         </TableRow>
                     </TableHead>
+
                     <TableBody>
                         {filteredUsers.map((user) => (
-                            <TableRow key={user.id}>
-                                <TableCell>{user.display_name || 'Sem nome'}</TableCell>
+                            <TableRow key={user.id} hover>
+                                <TableCell>
+                                    {user.display_name || 'Sem nome'}
+                                </TableCell>
                                 <TableCell>{user.email}</TableCell>
                                 <TableCell>
                                     <Chip
                                         label={user.plan || 'Free'}
-                                        color={user.plan === 'premium' ? 'primary' : 'default'}
+                                        color={
+                                            user.plan === 'premium'
+                                                ? 'primary'
+                                                : 'default'
+                                        }
                                         size="small"
                                     />
                                 </TableCell>
                                 <TableCell>
                                     <Chip
                                         label={user.is_admin ? 'Admin' : 'Ativo'}
-                                        color={user.is_admin ? 'secondary' : 'success'}
+                                        color={
+                                            user.is_admin
+                                                ? 'secondary'
+                                                : 'success'
+                                        }
                                         size="small"
                                     />
                                 </TableCell>
-                                <TableCell>{new Date(user.created_at).toLocaleDateString()}</TableCell>
+                                <TableCell>
+                                    {new Date(
+                                        user.created_at
+                                    ).toLocaleDateString()}
+                                </TableCell>
                                 <TableCell align="right">
                                     <IconButton
                                         color="primary"
                                         title="Permissões"
-                                        onClick={() => handleOpenPermissions(user)}
+                                        onClick={() =>
+                                            handleOpenPermissions(user)
+                                        }
                                     >
                                         <Security />
                                     </IconButton>
-                                    <IconButton color="primary" title="Ver Detalhes">
+
+                                    <IconButton
+                                        color="primary"
+                                        title="Ver Detalhes"
+                                    >
                                         <Visibility />
                                     </IconButton>
+
                                     <IconButton
                                         color="error"
                                         title="Banir Usuário"
-                                        onClick={() => handleToggleStatus(user.id, true)}
+                                        onClick={() =>
+                                            handleToggleStatus(user.id, true)
+                                        }
                                     >
                                         <Block />
                                     </IconButton>

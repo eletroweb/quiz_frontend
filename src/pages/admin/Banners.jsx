@@ -29,14 +29,13 @@ import {
     Delete as DeleteIcon,
     PhotoCamera as PhotoCameraIcon
 } from '@mui/icons-material';
-import axios from 'axios';
 import { useAuth } from '../../contexts/AuthContext';
 import api from '../../services/api';
 
 const API_BASE_URL = import.meta.env.VITE_API_URL?.replace('/api', '') || 'http://localhost:3001';
 
 function Banners() {
-    const { token } = useAuth();
+    
     const [banners, setBanners] = useState([]);
     const [open, setOpen] = useState(false);
     const [loading, setLoading] = useState(true);

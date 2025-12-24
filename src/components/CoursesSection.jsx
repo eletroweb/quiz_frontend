@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { Box, Container, Typography } from '@mui/material';
 import api from '../services/api';
 import Slider from 'react-slick';
@@ -12,21 +12,21 @@ function CoursesSection() {
     const [loading, setLoading] = useState(true);
     const { userProfile } = useAuth();
 
-    useEffect(() => {
-        fetchCursos();
-    }, []);
-
-    const fetchCursos = async () => {
+    const fetchCursos = useCallback(async () => {
         try {
             const response = await api.get('/cursos');
             const data = Array.isArray(response.data) ? response.data : [];
             setCursos(data);
-            setLoading(false);
         } catch (error) {
             console.error('Erro ao carregar cursos:', error);
+        } finally {
             setLoading(false);
         }
-    };
+    }, []);
+
+    useEffect(() => {
+        fetchCursos();
+    }, [fetchCursos]);
 
     const sliderSettings = {
         dots: true,
@@ -77,24 +77,37 @@ function CoursesSection() {
                     Concursos em Destaque
                 </Typography>
 
-                <Box sx={{
-                    '& .slick-slide': { px: 1.5 },
-                    '& .slick-dots': { bottom: -40 },
-                    '& .slick-prev': { left: -35 },
-                    '& .slick-next': { right: -35 },
-                    '& .slick-prev:before, & .slick-next:before': { color: '#4F46E5', fontSize: 30 }
-                }}>
-                    <Slider {...sliderSettings}>
-                        {(userProfile && (userProfile.plan === 'annual' || userProfile.plan === 'lifetime')
-                          ? cursos
-                          : cursos)
-                          .map((curso, index) => (
-                            <Box key={curso.id || index} sx={{ px: 1, pb: 2 }}>
-                                <CourseCard course={curso} />
-                            </Box>
-                        ))}
-                    </Slider>
-                </Box>
+                {loading ? (
+                    <Typography variant="body1">
+                        Carregando cursos...
+                    </Typography>
+                ) : (
+                    <Box
+                        sx={{
+                            '& .slick-slide': { px: 1.5 },
+                            '& .slick-dots': { bottom: -40 },
+                            '& .slick-prev': { left: -35 },
+                            '& .slick-next': { right: -35 },
+                            '& .slick-prev:before, & .slick-next:before': {
+                                color: '#4F46E5',
+                                fontSize: 30
+                            }
+                        }}
+                    >
+                        <Slider {...sliderSettings}>
+                            {(userProfile &&
+                            (userProfile.plan === 'annual' ||
+                                userProfile.plan === 'lifetime')
+                                ? cursos
+                                : cursos
+                            ).map((curso, index) => (
+                                <Box key={curso.id || index} sx={{ px: 1, pb: 2 }}>
+                                    <CourseCard course={curso} />
+                                </Box>
+                            ))}
+                        </Slider>
+                    </Box>
+                )}
             </Container>
         </Box>
     );
