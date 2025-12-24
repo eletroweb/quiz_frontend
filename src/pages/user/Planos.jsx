@@ -1,11 +1,12 @@
 import React, { useState, useEffect } from 'react';
 import {
     Box, Grid, Card, CardContent, Typography, Button, List,
-    ListItem, ListItemIcon, ListItemText, Chip, Paper, CircularProgress, Alert
+    ListItem, ListItemIcon, ListItemText, Chip, Paper, CircularProgress, Alert, Tabs, Tab
 } from '@mui/material';
 import { Check, Close, Star, Bolt, Rocket } from '@mui/icons-material';
 import api from '../../services/api';
 import CheckoutDialog from '../../components/CheckoutDialog';
+import CourseCard from '../../components/CourseCard';
 
 export default function Planos() {
     const [plans, setPlans] = useState([]);
@@ -14,6 +15,9 @@ export default function Planos() {
     const [error, setError] = useState(null);
     const [selectedPlan, setSelectedPlan] = useState(null);
     const [openCheckout, setOpenCheckout] = useState(false);
+    const [tab, setTab] = useState(0);
+    const [courses, setCourses] = useState([]);
+    const [loadingCourses, setLoadingCourses] = useState(false);
 
     useEffect(() => {
         fetchData();
@@ -34,6 +38,22 @@ export default function Planos() {
             setLoading(false);
         }
     };
+
+    useEffect(() => {
+        const loadCourses = async () => {
+            setLoadingCourses(true);
+            try {
+                const res = await api.get('/cursos');
+                setCourses(Array.isArray(res.data) ? res.data : []);
+            } catch (err) {
+                console.error('Erro ao carregar cursos:', err);
+                setCourses([]);
+            } finally {
+                setLoadingCourses(false);
+            }
+        };
+        loadCourses();
+    }, []);
 
     const handleSubscribeClick = (plan) => {
         setSelectedPlan(plan);
@@ -84,6 +104,19 @@ export default function Planos() {
                 </Typography>
             </Box>
 
+            <Paper sx={{ mb: 3, borderRadius: 3 }}>
+                <Tabs
+                    value={tab}
+                    onChange={(e, v) => setTab(v)}
+                    variant="fullWidth"
+                    sx={{ px: 2 }}
+                >
+                    <Tab label="Planos" />
+                    <Tab label="Cursos" />
+                </Tabs>
+            </Paper>
+
+            {tab === 0 && (
             <Grid container spacing={3}>
                 {plans.map((plan) => {
                     const color = getPlanColor(plan.name);
@@ -215,6 +248,36 @@ export default function Planos() {
                     );
                 })}
             </Grid>
+            )}
+
+            {tab === 1 && (
+                <Box>
+                    <Box sx={{ textAlign: 'center', mb: 2 }}>
+                        <Typography variant="h5" fontWeight="bold">Cursos</Typography>
+                        <Typography variant="body2" color="text.secondary">
+                            Compre cursos individualmente mesmo sem plano
+                        </Typography>
+                    </Box>
+                    {loadingCourses ? (
+                        <Box sx={{ display: 'flex', justifyContent: 'center', p: 5 }}>
+                            <CircularProgress />
+                        </Box>
+                    ) : (
+                        <Grid container spacing={2}>
+                            {courses.map((course) => (
+                                <Grid item xs={12} sm={6} md={4} lg={3} key={course.id}>
+                                    <CourseCard course={course} />
+                                </Grid>
+                            ))}
+                            {courses.length === 0 && (
+                                <Grid item xs={12}>
+                                    <Alert severity="info">Nenhum curso disponível no momento.</Alert>
+                                </Grid>
+                            )}
+                        </Grid>
+                    )}
+                </Box>
+            )}
 
             {/* Checkout Dialog */}
             <CheckoutDialog
