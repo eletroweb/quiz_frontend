@@ -12,11 +12,7 @@
     <script>
       (function () {
         try {
-          var redirect = sessionStorage.redirect;
-          if (redirect && redirect !== location.href) {
-            history.replace(redirect);
-            try { delete sessionStorage.redirect; } catch (e) {}
-          }
+        
           if (window.location && window.location.pathname === "/index.html") {
             window.location.replace("/");
           }
