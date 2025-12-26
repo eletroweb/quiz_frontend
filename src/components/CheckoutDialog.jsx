@@ -64,6 +64,18 @@ export default function CheckoutDialog({
       const payload =
         type === "course" ? { cursoId: item.id } : { planId: item.id };
 
+      // Try to add item to user's cart (if authenticated) so purchases are tracked
+      try {
+        await api.post('/cart/items', {
+          product_type: type === 'course' ? 'course' : 'plan',
+          product_id: item.id,
+          price: itemPrice,
+        });
+      } catch (cartErr) {
+        // ignore cart errors (user may be not authenticated) and continue
+        console.debug('Could not add to cart:', cartErr?.message || cartErr);
+      }
+
       const response = await api.post("/payments/pix", payload);
       setPixData(response.data);
     } catch (err) {
@@ -123,6 +135,16 @@ export default function CheckoutDialog({
 
       const payload =
         type === "course" ? { cursoId: item.id } : { planId: item.id };
+      // Try to add to cart first so we have a server-side record (if user is logged)
+      try {
+        await api.post('/cart/items', {
+          product_type: type === 'course' ? 'course' : 'plan',
+          product_id: item.id,
+          price: itemPrice,
+        });
+      } catch (cartErr) {
+        console.debug('Could not add to cart before preference:', cartErr?.message || cartErr);
+      }
 
       const response = await api.post("/payments/preference", payload);
       window.location.href = response.data.initPoint;
