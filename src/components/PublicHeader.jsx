@@ -34,7 +34,7 @@ function PublicHeader() {
         { label: 'Início', path: '/' },
         { label: 'Concursos', path: '#concursos' },
         { label: 'Cursos', path: '#cursos' },
-        { label: 'Planos', path: '#planos' },
+        { label: 'Planos', path: '/planos' },
     ];
 
     return (

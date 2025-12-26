@@ -1,5 +1,6 @@
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import { Box, Container, Grid, Typography, Link, IconButton } from '@mui/material';
+import { useNavigate } from 'react-router-dom';
 import FacebookIcon from '@mui/icons-material/Facebook';
 import InstagramIcon from '@mui/icons-material/Instagram';
 import TwitterIcon from '@mui/icons-material/Twitter';
@@ -8,34 +9,58 @@ import SchoolIcon from '@mui/icons-material/School';
 
 function PublicFooter() {
     const currentYear = new Date().getFullYear();
+    const navigate = useNavigate();
+    const [config, setConfig] = useState(null);
 
-    const footerLinks = {
-        'Plataforma': [
-            { label: 'Sobre Nós', href: '#' },
-            { label: 'Como Funciona', href: '#' },
-            { label: 'Planos e Preços', href: '/login' },
-            { label: 'Blog', href: '#' }
-        ],
-        'Recursos': [
-            { label: 'Questões', href: '/login' },
-            { label: 'Simulados', href: '/login' },
-            { label: 'Cursos', href: '/login' },
-            { label: 'Ranking', href: '/login' }
-        ],
-        'Suporte': [
-            { label: 'Central de Ajuda', href: '#' },
-            { label: 'Contato', href: '#' },
-            { label: 'FAQ', href: '#' },
-            { label: 'Termos de Uso', href: '#' }
+    useEffect(() => {
+        try {
+            const raw = localStorage.getItem('site_config');
+            if (raw) setConfig(JSON.parse(raw));
+            else setConfig(null);
+        } catch (e) {
+            setConfig(null);
+        }
+    }, []);
+
+    const defaults = {
+        description: 'A melhor plataforma para você se preparar e conquistar sua aprovação nos concursos públicos.',
+        footerLinks: {
+            Plataforma: [
+                { label: 'Sobre Nós', href: '/sobre' },
+                { label: 'Como Funciona', href: '/como-funciona' },
+                { label: 'Planos e Preços', href: '/planos' },
+                { label: 'Blog', href: '/blog' }
+            ],
+            Recursos: [
+                { label: 'Questões', href: '/questoes' },
+                { label: 'Simulados', href: '/simulados' },
+                { label: 'Cursos', href: '/cursos' },
+                { label: 'Ranking', href: '/ranking' }
+            ],
+            Suporte: [
+                { label: 'Central de Ajuda', href: '/suporte' },
+                { label: 'Contato', href: '/contato' },
+                { label: 'FAQ', href: '/faq' },
+                { label: 'Termos de Uso', href: '/termos' }
+            ]
+        },
+        socialLinks: [
+            { icon: 'facebook', href: 'https://facebook.com' },
+            { icon: 'instagram', href: 'https://instagram.com' },
+            { icon: 'twitter', href: 'https://twitter.com' },
+            { icon: 'youtube', href: 'https://youtube.com' }
         ]
     };
 
-    const socialLinks = [
-        { icon: <FacebookIcon />, href: '#', label: 'Facebook' },
-        { icon: <InstagramIcon />, href: '#', label: 'Instagram' },
-        { icon: <TwitterIcon />, href: '#', label: 'Twitter' },
-        { icon: <YouTubeIcon />, href: '#', label: 'YouTube' }
-    ];
+    const data = config || defaults;
+
+    const renderSocialIcon = (name) => {
+        if (name === 'facebook') return <FacebookIcon />;
+        if (name === 'instagram') return <InstagramIcon />;
+        if (name === 'twitter') return <TwitterIcon />;
+        if (name === 'youtube') return <YouTubeIcon />;
+        return <FacebookIcon />;
+    };
 
     return (
         <Box
@@ -58,14 +83,14 @@ function PublicFooter() {
                             </Typography>
                         </Box>
                         <Typography sx={{ color: '#9ca3af', mb: 3, lineHeight: 1.7 }}>
-                            A melhor plataforma para você se preparar e conquistar sua aprovação nos concursos públicos.
+                            {data.description}
                         </Typography>
                         <Box sx={{ display: 'flex', gap: 1 }}>
-                            {socialLinks.map((social, index) => (
+                            {data.socialLinks.map((social, index) => (
                                 <IconButton
                                     key={index}
-                                    href={social.href}
-                                    aria-label={social.label}
+                                    onClick={() => window.open(social.href, '_blank')}
+                                    aria-label={social.icon}
                                     sx={{
                                         color: 'white',
                                         background: 'rgba(255,255,255,0.1)',
@@ -76,14 +101,14 @@ function PublicFooter() {
                                         transition: 'all 0.3s ease'
                                     }}
                                 >
-                                    {social.icon}
+                                    {renderSocialIcon(social.icon)}
                                 </IconButton>
                             ))}
                         </Box>
                     </Grid>
 
                     {/* Links */}
-                    {Object.entries(footerLinks).map(([title, links]) => (
+                    {Object.entries(data.footerLinks).map(([title, links]) => (
                         <Grid item xs={6} md={2.66} key={title}>
                             <Typography variant="h6" sx={{ fontWeight: 700, mb: 2, fontSize: '1rem' }}>
                                 {title}
@@ -92,7 +117,11 @@ function PublicFooter() {
                                 {links.map((link, index) => (
                                     <Link
                                         key={index}
-                                        href={link.href}
+                                        component="button"
+                                        onClick={() => {
+                                            if (link.href && link.href.startsWith('/')) navigate(link.href);
+                                            else if (link.href) window.open(link.href, '_blank');
+                                        }}
                                         sx={{
                                             color: '#9ca3af',
                                             textDecoration: 'none',

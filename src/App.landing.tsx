@@ -13,7 +13,7 @@ export default function App() {
             <a href="#inicio">Início</a>
             <a href="#concursos">Concursos</a>
             <a href="#cursos">Cursos</a>
-            <a href="#planos">Planos</a>
+            <a href="/planos">Planos</a>
             <a className="btn-outline" href="#login">Login</a>
             <a className="btn-fill" href="#cadastro">Cadastre-se</a>
           </nav>

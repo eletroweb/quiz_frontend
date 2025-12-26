@@ -59,6 +59,7 @@ export default function AdminLayout() {
     },
     { text: "Campanhas", icon: <CampaignIcon />, path: "/admin/campanhas" },
     { text: "Banners", icon: <ImageIcon />, path: "/admin/banners" },
+    { text: "Site Config", icon: <SettingsIcon />, path: "/admin/site-config" },
     { text: "Notícias", icon: <ArticleIcon />, path: "/admin/noticias" },
     { text: "Pagamentos", icon: <PaymentIcon />, path: "/admin/pagamentos" },
     {

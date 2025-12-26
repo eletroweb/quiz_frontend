@@ -24,6 +24,7 @@ import Payments from "./pages/admin/Payments";
 import CursosAdmin from "./pages/admin/CursosAdmin";
 import CursoEditor from "./pages/admin/CursoEditor";
 import PlanosConfig from "./pages/admin/PlanosConfig";
+import SiteConfig from "./pages/admin/SiteConfig";
 import Banners from "./pages/admin/Banners";
 import NewsAdmin from "./pages/admin/NewsAdmin";
 import PagamentosHistorico from "./pages/admin/PagamentosHistorico";
@@ -36,6 +37,7 @@ import Study from "./pages/user/Study";
 import Simulados from "./pages/user/Simulados";
 import Ranking from "./pages/user/Ranking";
 import Planos from "./pages/user/Planos";
+import PlanosPublic from "./pages/PlanosPublic";
 import Perfil from "./pages/user/Perfil";
 import Curso from "./pages/user/Curso";
 import PaymentSuccess from "./pages/payment/Success";
@@ -98,6 +100,7 @@ function AppRoutes() {
         <Route path="cursos/:id/editar" element={<CursoEditor />} />
         <Route path="planos" element={<Plans />} />
         <Route path="planos-config" element={<PlanosConfig />} />
+          <Route path="site-config" element={<SiteConfig />} />
         <Route path="campanhas" element={<Campaigns />} />
         <Route path="pagamentos" element={<Payments />} />
         <Route path="pagamentos-historico" element={<PagamentosHistorico />} />
@@ -162,16 +165,7 @@ function AppRoutes() {
         <Route index element={<Ranking />} />
       </Route>
 
-      <Route
-        path="/planos"
-        element={
-          <PrivateRoute>
-            <UserLayout />
-          </PrivateRoute>
-        }
-      >
-        <Route index element={<Planos />} />
-      </Route>
+      <Route path="/planos" element={<PlanosPublic />} />
 
       <Route
         path="/perfil"
