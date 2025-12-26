@@ -119,6 +119,7 @@ function AppRoutes() {
         }
       >
         <Route index element={<UserDashboard />} />
+        <Route path="planos" element={<Planos />} />
       </Route>
 
       <Route

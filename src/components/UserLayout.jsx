@@ -30,7 +30,7 @@ export default function UserLayout() {
         { text: 'Quiz', icon: <Quiz />, path: '/quiz' },
         { text: 'Simulados', icon: <Assessment />, path: '/simulados' },
         { text: 'Ranking', icon: <EmojiEvents />, path: '/ranking' },
-        { text: 'Planos', icon: <CardMembership />, path: '/planos' },
+        { text: 'Planos', icon: <CardMembership />, path: '/dashboard/planos' },
     ];
 
     const drawer = (

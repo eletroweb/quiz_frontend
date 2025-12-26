@@ -225,7 +225,7 @@ export default function UserDashboard() {
             <Paper sx={{ p: 3, mt: 3, borderRadius: 3 }}>
                 <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 2 }}>
                     <Typography variant="h6" fontWeight="bold">Seus Cursos</Typography>
-                    <Button variant="text" onClick={() => navigate('/')}>Ver todos</Button>
+                    <Button variant="text" onClick={() => navigate('/estudar')}>Ver todos</Button>
                 </Box>
                 {myCourses.length === 0 ? (
                     <Typography variant="body2" color="text.secondary">Nenhum curso adquirido ainda.</Typography>
