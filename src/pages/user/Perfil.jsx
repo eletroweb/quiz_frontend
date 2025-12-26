@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
 import {
     Box, Grid, Card, CardContent, Typography, TextField,
     Button, Avatar, Paper, Divider, Alert
@@ -9,6 +10,7 @@ import api from '../../services/api';
 
 export default function Perfil() {
     const { currentUser, userProfile } = useAuth();
+    const navigate = useNavigate();
     const [editing, setEditing] = useState(false);
     const [formData, setFormData] = useState({
         display_name: '',
@@ -214,7 +216,7 @@ export default function Perfil() {
                                         mt: 2,
                                         background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
                                     }}
-                                    onClick={() => window.location.href = '/planos'}
+                                    onClick={() => navigate('/planos')}
                                 >
                                     Fazer Upgrade
                                 </Button>
