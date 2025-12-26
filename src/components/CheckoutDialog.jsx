@@ -88,9 +88,8 @@ export default function CheckoutDialog({
   }, [item, type]);
 
   useEffect(() => {
-    if (open && tab === 0 && !pixData) {
-      generatePixPayment();
-    }
+    // Não gerar PIX automaticamente ao abrir o diálogo;
+    // o usuário deve clicar em "Gerar PIX" para evitar registros indesejados.
   }, [open, tab, pixData, generatePixPayment]);
 
   useEffect(() => {
@@ -242,6 +241,15 @@ export default function CheckoutDialog({
             {loading ? (
               <Box display="flex" justifyContent="center" p={4}>
                 <CircularProgress />
+              </Box>
+            ) : !pixData ? (
+              <Box sx={{ textAlign: 'center', p: 3 }}>
+                <Button variant="contained" onClick={generatePixPayment} disabled={loading} sx={{ mb: 2 }}>
+                  {loading ? 'Gerando...' : 'Gerar PIX'}
+                </Button>
+                <Typography variant="caption" color="text.secondary" display="block">
+                  Clique em "Gerar PIX" para criar o código de pagamento.
+                </Typography>
               </Box>
             ) : paymentStatus === "approved" ? (
               <Alert severity="success" icon={<CheckCircle />}>
