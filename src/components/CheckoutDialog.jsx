@@ -26,6 +26,7 @@ import {
 } from "@mui/icons-material";
 import { QRCodeSVG } from "qrcode.react";
 import api from "../services/api";
+import { useNavigate } from 'react-router-dom';
 
 export default function CheckoutDialog({
   open,
@@ -50,6 +51,8 @@ export default function CheckoutDialog({
         ? item?.promotional_price || item?.preco || 0
         : item?.price || item?.preco || 0
     ) || 0;
+
+  const navigate = useNavigate();
 
   const generatePixPayment = useCallback(async () => {
     setLoading(true);
@@ -84,7 +87,7 @@ export default function CheckoutDialog({
       if (err.response?.status === 401) {
         setError("Sessão expirada. Por favor, faça login novamente.");
         setTimeout(() => {
-          window.location.href = "/login";
+          navigate('/login');
         }, 2000);
       } else {
         const errorMsg =
@@ -154,7 +157,7 @@ export default function CheckoutDialog({
       if (err.response?.status === 401) {
         setError("Sessão expirada. Por favor, faça login novamente.");
         setTimeout(() => {
-          window.location.href = "/login";
+          navigate('/login');
         }, 2000);
       } else {
         const errorMsg =

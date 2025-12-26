@@ -218,7 +218,7 @@ const CourseCard = ({ course }) => {
                             <Button
                                 variant="contained"
                                 fullWidth
-                                onClick={() => window.location.href = `/curso/${course.id}`}
+                                onClick={() => navigate(`/curso/${course.id}`)}
                                 sx={{
                                     bgcolor: '#166534',
                                     fontWeight: 700,
@@ -339,7 +339,7 @@ const CourseCard = ({ course }) => {
                     {isOwned && (
                         <Button
                             variant="contained"
-                            onClick={() => window.location.href = `/curso/${course.id}`}
+                            onClick={() => navigate(`/curso/${course.id}`)}
                             size="large"
                             color="success"
                         >

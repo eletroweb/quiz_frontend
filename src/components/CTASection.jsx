@@ -1,7 +1,9 @@
 import React from 'react';
 import { Box, Container, Typography, Button } from '@mui/material';
+import { useNavigate } from 'react-router-dom';
 
 function CTASection() {
+    const navigate = useNavigate();
     return (
         <Box sx={{ py: 12, textAlign: 'center', background: 'white' }}>
             <Container maxWidth="md">
@@ -33,7 +35,7 @@ function CTASection() {
                     <Button
                         variant="contained"
                         size="large"
-                        href="/cadastro"
+                        onClick={() => navigate('/cadastro')}
                         sx={{
                             background: '#F97316',
                             color: 'white',
@@ -58,7 +60,7 @@ function CTASection() {
                     <Button
                         variant="outlined"
                         size="large"
-                        href="/planos"
+                        onClick={() => navigate('/planos')}
                         sx={{
                             borderColor: '#CBD5E1',
                             color: '#475569',

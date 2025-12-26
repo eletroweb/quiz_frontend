@@ -13,6 +13,7 @@ import {
     CloudUpload as CloudUploadIcon
 } from '@mui/icons-material';
 import api from '../../services/api';
+import { useNavigate } from 'react-router-dom';
 //coringa
 export default function CursosAdmin() {
     const [cursos, setCursos] = useState([]);
@@ -31,6 +32,7 @@ export default function CursosAdmin() {
     });
     const [uploadingImage, setUploadingImage] = useState(false);
     const [imagePreview, setImagePreview] = useState('');
+    const navigate = useNavigate();
 
     useEffect(() => {
         loadCursos();
@@ -236,7 +238,7 @@ export default function CursosAdmin() {
                                 <IconButton
                                     size="small"
                                     color="primary"
-                                    onClick={() => window.location.href = `/admin/cursos/${curso.id}/editar`}
+                                    onClick={() => navigate(`/admin/cursos/${curso.id}/editar`)}
                                     title="Editar conteúdo"
                                 >
                                     <VisibilityIcon />
