@@ -17,11 +17,15 @@ function PublicFooter() {
         const getBase = () => {
             const env = (typeof import.meta !== 'undefined' && import.meta.env && import.meta.env.VITE_API_URL) ? import.meta.env.VITE_API_URL : '';
             if (!env) return '';
-            return env.replace(/\/$/,'');
+            return env.replace(/\/+$/,'');
+        };
+        const joinPath = (base, path) => {
+            if (!base) return path;
+            return base.replace(/\/+$/,'') + '/' + path.replace(/^\/+/, '');
         };
         const load = async () => {
             const base = getBase();
-            const url = base ? `${base}/site-config` : '/api/site-config';
+            const url = base ? joinPath(base, 'site-config') : '/api/site-config';
             try {
                 const res = await fetch(url);
                 if (res.ok) {
