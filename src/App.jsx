@@ -114,13 +114,14 @@ function AppRoutes() {
         <Route path="roles" element={<RolesConfig />} />
         <Route path="banners" element={<Banners />} />
         <Route path="noticias" element={<NewsAdmin />} />
-        <Route path="/sobre" element={<Sobre />} />
-        <Route path="/contato" element={<Contato />} />
-        <Route path="/como-funciona" element={<ComoFunciona />} />
-        <Route path="/planos" element={<Planos />} />
-        <Route path="/blog" element={<Blog />} />
-        <Route path="/faq" element={<Faq />} />
       </Route>
+
+      {/* Rotas públicas */}
+      <Route path="/sobre" element={<Sobre />} />
+      <Route path="/contato" element={<Contato />} />
+      <Route path="/como-funciona" element={<ComoFunciona />} />
+      <Route path="/blog" element={<Blog />} />
+      <Route path="/faq" element={<Faq />} />
 
       {/* Rotas do Usuário */}
       <Route
