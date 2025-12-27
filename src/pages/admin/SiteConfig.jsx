@@ -1,4 +1,5 @@
 import React, { useEffect, useState } from 'react';
+import defaultConfig from '../../config/site_config_default.json';
 import { Box, Typography, TextField, Grid, Button, Paper, IconButton } from '@mui/material';
 import FacebookIcon from '@mui/icons-material/Facebook';
 import InstagramIcon from '@mui/icons-material/Instagram';
@@ -39,11 +40,13 @@ export default function SiteConfig() {
                 else if (!canceled) {
                     const raw = localStorage.getItem('site_config');
                     if (raw) setConfig(JSON.parse(raw));
+                    else setConfig(defaultConfig);
                 }
             } catch (err) {
                 try {
                     const raw = localStorage.getItem('site_config');
-                    if (raw && !canceled) setConfig(JSON.parse(raw));
+                        if (raw && !canceled) setConfig(JSON.parse(raw));
+                        else if (!canceled) setConfig(defaultConfig);
                 } catch (err) { /* ignore */ }
             }
         };

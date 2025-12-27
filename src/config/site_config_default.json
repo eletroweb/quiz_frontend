@@ -1,0 +1,29 @@
+{
+  "description": "A melhor plataforma para você se preparar e conquistar sua aprovação nos concursos públicos.",
+  "footerLinks": {
+    "Plataforma": [
+      { "label": "Sobre Nós", "href": "/sobre" },
+      { "label": "Como Funciona", "href": "/como-funciona" },
+      { "label": "Planos e Preços", "href": "/planos" },
+      { "label": "Blog", "href": "/blog" }
+    ],
+    "Recursos": [
+      { "label": "Questões", "href": "/questoes" },
+      { "label": "Simulados", "href": "/simulados" },
+      { "label": "Cursos", "href": "/cursos" },
+      { "label": "Ranking", "href": "/ranking" }
+    ],
+    "Suporte": [
+      { "label": "Central de Ajuda", "href": "/suporte" },
+      { "label": "Contato", "href": "/contato" },
+      { "label": "FAQ", "href": "/faq" },
+      { "label": "Termos de Uso", "href": "/termos" }
+    ]
+  },
+  "socialLinks": [
+    { "icon": "facebook", "href": "https://facebook.com" },
+    { "icon": "instagram", "href": "https://instagram.com" },
+    { "icon": "twitter", "href": "https://twitter.com" },
+    { "icon": "youtube", "href": "https://youtube.com" }
+  ]
+}

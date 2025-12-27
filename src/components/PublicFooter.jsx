@@ -1,4 +1,5 @@
 import React, { useEffect, useState } from 'react';
+import defaultConfig from '../config/site_config_default.json';
 import { Box, Container, Grid, Typography, Link, IconButton } from '@mui/material';
 import { useNavigate } from 'react-router-dom';
 import FacebookIcon from '@mui/icons-material/Facebook';
@@ -26,22 +27,26 @@ function PublicFooter() {
         const load = async () => {
             const base = getBase();
             const url = base ? joinPath(base, 'site-config') : '/api/site-config';
-            try {
-                const res = await fetch(url);
-                if (res.ok) {
-                    const json = await res.json();
-                    if (!canceled && json && Object.keys(json).length) return setConfig(json);
+                try {
+                    const res = await fetch(url);
+                    if (res.ok) {
+                        const json = await res.json();
+                        if (!canceled && json && Object.keys(json).length) return setConfig(json);
+                    }
+                } catch (err) {
+                    // ignore
                 }
-            } catch (err) {
-                // ignore
-            }
-            try {
-                const raw = localStorage.getItem('site_config');
-                if (raw && !canceled) setConfig(JSON.parse(raw));
-                else if (!canceled) setConfig(null);
-            } catch (err) {
-                if (!canceled) setConfig(null);
-            }
+                try {
+                    const raw = localStorage.getItem('site_config');
+                    if (raw && !canceled) {
+                        setConfig(JSON.parse(raw));
+                    } else if (!canceled) {
+                        // final fallback: bundled default so static builds always show footer content
+                        setConfig(defaultConfig);
+                    }
+                } catch (err) {
+                    if (!canceled) setConfig(defaultConfig);
+                }
         };
         load();
         return () => { canceled = true; };
