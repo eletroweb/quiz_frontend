@@ -100,7 +100,7 @@ export default function CheckoutDialog({
     } finally {
       setLoading(false);
     }
-  }, [item, type]);
+  }, [item, type, itemPrice, navigate]);
 
   useEffect(() => {
     // Não gerar PIX automaticamente ao abrir o diálogo;

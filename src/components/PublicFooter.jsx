@@ -28,14 +28,14 @@ function PublicFooter() {
                     const json = await res.json();
                     if (!canceled && json && Object.keys(json).length) return setConfig(json);
                 }
-            } catch (e) {
+            } catch (err) {
                 // ignore
             }
             try {
                 const raw = localStorage.getItem('site_config');
                 if (raw && !canceled) setConfig(JSON.parse(raw));
                 else if (!canceled) setConfig(null);
-            } catch (e) {
+            } catch (err) {
                 if (!canceled) setConfig(null);
             }
         };

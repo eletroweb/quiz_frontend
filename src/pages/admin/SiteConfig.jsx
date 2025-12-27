@@ -36,11 +36,11 @@ export default function SiteConfig() {
                     const raw = localStorage.getItem('site_config');
                     if (raw) setConfig(JSON.parse(raw));
                 }
-            } catch (e) {
+            } catch (err) {
                 try {
                     const raw = localStorage.getItem('site_config');
                     if (raw && !canceled) setConfig(JSON.parse(raw));
-                } catch (er) { /* ignore */ }
+                } catch (err) { /* ignore */ }
             }
         };
         load();
