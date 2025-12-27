@@ -50,8 +50,8 @@ import ComoFunciona from "../public/ComoFunciona";
 import Planos from "../public/Planos";
 import Blog from "../public/Blog";
 import Faq from "../public/Faq"; 
-import Termos from "../public/Termos";
 import Suporte from "../public/Suporte";
+import Termos from "../public/Termos";
 
 function PrivateRoute({ children }) {
   const { currentUser } = useAuth();
@@ -122,6 +122,7 @@ function AppRoutes() {
       <Route path="/sobre" element={<Sobre />} />
       <Route path="/contato" element={<Contato />} />
       <Route path="/como-funciona" element={<ComoFunciona />} />
+      <Route path="/suporte" element={<Suporte />} />
       <Route path="/blog" element={<Blog />} />
       <Route path="/faq" element={<Faq />} />
       <Route path="/termos" element={<Termos />} />
