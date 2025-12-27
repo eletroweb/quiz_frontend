@@ -43,6 +43,7 @@ import Curso from "./pages/user/Curso";
 import PaymentSuccess from "./pages/payment/Success";
 import PaymentFailure from "./pages/payment/Failure";
 import PaymentPending from "./pages/payment/Pending";
+import CartPage from "./pages/Cart";
 
 function PrivateRoute({ children }) {
   const { currentUser } = useAuth();
@@ -167,6 +168,8 @@ function AppRoutes() {
       </Route>
 
       <Route path="/planos" element={<PlanosPublic />} />
+
+      <Route path="/cart" element={<CartPage />} />
 
       <Route
         path="/perfil"

@@ -27,8 +27,26 @@ const CourseCard = ({ course }) => {
 
     const handleBuyClick = () => {
         if (!currentUser) {
-            // Salvar intenção de compra ou redirecionar
-            navigate('/login', { state: { returnUrl: window.location.pathname } });
+            try {
+                const raw = localStorage.getItem('cart_items');
+                const arr = raw ? JSON.parse(raw) : [];
+                const item = {
+                    product_type: 'course',
+                    product_id: course.id,
+                    nome: course.nome,
+                    descricao: course.descricao,
+                    preco: course.preco,
+                    promotional_price: course.promotional_price,
+                    imagem_url: course.imagem_url,
+                    id: course.id
+                };
+                const exists = arr.find(it => String(it.product_id) === String(item.product_id));
+                if (!exists) arr.push(item);
+                localStorage.setItem('cart_items', JSON.stringify(arr));
+            } catch (e) {
+                console.error('Erro salvando carrinho local:', e);
+            }
+            navigate('/login', { state: { returnUrl: '/cart' } });
             return;
         }
         setDetailsOpen(false);

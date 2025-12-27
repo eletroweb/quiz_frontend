@@ -8,7 +8,7 @@ import {
 } from '@mui/icons-material';
 import { signInWithEmailAndPassword, createUserWithEmailAndPassword } from 'firebase/auth';
 import { auth } from '../config/firebase';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useLocation } from 'react-router-dom';
 import api from '../services/api';
 import { useAuth } from '../contexts/AuthContext';
 
@@ -22,6 +22,7 @@ export default function Login() {
     const [error, setError] = useState('');
     const [loading, setLoading] = useState(false);
     const navigate = useNavigate();
+    const location = useLocation();
     const { reloadProfile } = useAuth();
 
     const adminEmail = (import.meta.env.VITE_ADMIN_EMAIL || 'techmixsp@gmail.com').toLowerCase();
@@ -65,7 +66,10 @@ export default function Login() {
                     }
                 }
             }
-            navigate('/dashboard');
+            // Respect returnUrl passed in location.state (for cart/checkout flow)
+            const returnUrl = location.state?.returnUrl;
+            if (returnUrl) navigate(returnUrl);
+            else navigate('/dashboard');
         } catch (err) {
             console.error(err);
             if (err.code === 'auth/user-not-found') {
@@ -86,7 +90,10 @@ export default function Login() {
             setError('');
             setLoading(true);
             await createUserWithEmailAndPassword(auth, email, password);
-            navigate('/dashboard');
+            // After registration, respect redirect if provided
+            const returnUrl = location.state?.returnUrl;
+            if (returnUrl) navigate(returnUrl);
+            else navigate('/dashboard');
         } catch (err) {
             console.error(err);
             if (err.code === 'auth/email-already-in-use') {

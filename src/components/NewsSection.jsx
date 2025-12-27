@@ -3,6 +3,8 @@ import { Box, Container, Typography, Grid, Card, CardContent, CardMedia, Button,
 import { CalendarToday, Person } from '@mui/icons-material';
 import api from '../services/api';
 import CheckoutDialog from './CheckoutDialog';
+import { useAuth } from '../contexts/AuthContext';
+import { useNavigate } from 'react-router-dom';
 //fazendo teste
 const API_BASE_URL = import.meta.env.VITE_API_URL?.replace('/api', '') || 'http://localhost:3001';
 
@@ -14,6 +16,8 @@ const NewsSection = () => {
     const [openDialog, setOpenDialog] = useState(false);
     const [checkoutOpen, setCheckoutOpen] = useState(false);
     const [relatedCourse, setRelatedCourse] = useState(null);
+    const { currentUser } = useAuth();
+    const navigate = useNavigate();
 
     useEffect(() => {
         fetchNews();
@@ -221,7 +225,36 @@ const NewsSection = () => {
                             </DialogContent>
                             <DialogActions>
                                 {relatedCourse && (
-                                    <Button variant="contained" color="primary" onClick={() => setCheckoutOpen(true)}>
+                                    <Button variant="contained" color="primary" onClick={() => {
+                                        // If user is logged, open checkout; otherwise save to local cart and send to login
+                                        if (currentUser) {
+                                            setCheckoutOpen(true);
+                                        } else {
+                                            try {
+                                                const raw = localStorage.getItem('cart_items');
+                                                const arr = raw ? JSON.parse(raw) : [];
+                                                // store minimal course info so CheckoutDialog can use it
+                                                const item = {
+                                                    product_type: 'course',
+                                                    product_id: relatedCourse.id,
+                                                    nome: relatedCourse.nome,
+                                                    descricao: relatedCourse.descricao,
+                                                    promocional: relatedCourse.promotional_price,
+                                                    preco: relatedCourse.preco,
+                                                    imagem_url: relatedCourse.imagem_url,
+                                                    id: relatedCourse.id
+                                                };
+                                                // avoid duplicates
+                                                const exists = arr.find(it => String(it.product_id) === String(item.product_id));
+                                                if (!exists) arr.push(item);
+                                                localStorage.setItem('cart_items', JSON.stringify(arr));
+                                            } catch (e) {
+                                                console.error('Erro salvando carrinho local:', e);
+                                            }
+                                            // redirect to login and then to /cart
+                                            navigate('/login', { state: { returnUrl: '/cart' } });
+                                        }
+                                    }}>
                                         Adquirir curso agora
                                     </Button>
                                 )}
