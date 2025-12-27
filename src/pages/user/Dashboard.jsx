@@ -9,6 +9,9 @@ import {
 import { useAuth } from '../../contexts/AuthContext';
 import { useNavigate } from 'react-router-dom';
 import api from '../../services/api';
+import PlaylistAddIcon from '@mui/icons-material/PlaylistAdd';
+import PostAddIcon from '@mui/icons-material/PostAdd';
+import MenuBookIcon from '@mui/icons-material/MenuBook';
 
 export default function UserDashboard() {
     const { userProfile } = useAuth();
@@ -285,6 +288,24 @@ export default function UserDashboard() {
 
             {/* Ações Rápidas */}
             <Grid container spacing={3} sx={{ mt: 3 }}>
+                {/* Curator Panel */}
+                {userProfile?.role === 'curator' && (
+                    <Grid item xs={12}>
+                        <Paper sx={{ p: 2, borderRadius: 3, mb: 2 }}>
+                            <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                                <Box>
+                                    <Typography variant="h6" fontWeight="bold">Área do Curador</Typography>
+                                    <Typography variant="body2" color="text.secondary">Ferramentas para criar/editar conteúdo</Typography>
+                                </Box>
+                                <Stack direction="row" spacing={1}>
+                                    <Button startIcon={<PostAddIcon/>} variant="outlined" onClick={() => navigate('/admin/questoes')}>Questões</Button>
+                                    <Button startIcon={<MenuBookIcon/>} variant="outlined" onClick={() => navigate('/admin/materias')}>Matérias</Button>
+                                    <Button startIcon={<PlaylistAddIcon/>} variant="outlined" onClick={() => navigate('/admin/cursos')}>Cursos</Button>
+                                </Stack>
+                            </Box>
+                        </Paper>
+                    </Grid>
+                )}
                 <Grid item xs={12} md={6}>
                     <Card
                         sx={{
