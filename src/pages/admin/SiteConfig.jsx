@@ -17,15 +17,47 @@ export default function SiteConfig() {
     });
 
     useEffect(() => {
-        try {
-            const raw = localStorage.getItem('site_config');
-            if (raw) setConfig(JSON.parse(raw));
-        } catch (e) { /* ignore */ }
+        // Tenta carregar do backend, cai para localStorage se falhar
+        let canceled = false;
+        const load = async () => {
+            try {
+                const res = await fetch('/api/site-config');
+                if (!res.ok) throw new Error('no-backend');
+                const json = await res.json();
+                if (!canceled && json && Object.keys(json).length) setConfig(json);
+                else if (!canceled) {
+                    const raw = localStorage.getItem('site_config');
+                    if (raw) setConfig(JSON.parse(raw));
+                }
+            } catch (e) {
+                try {
+                    const raw = localStorage.getItem('site_config');
+                    if (raw && !canceled) setConfig(JSON.parse(raw));
+                } catch (er) { /* ignore */ }
+            }
+        };
+        load();
+        return () => { canceled = true; };
     }, []);
 
     const save = () => {
-        localStorage.setItem('site_config', JSON.stringify(config));
-        alert('Configurações salvas localmente.');
+        // Tenta salvar no backend, se falhar salva no localStorage como fallback
+        fetch('/api/site-config', {
+            method: 'PUT',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(config)
+        }).then(async (res) => {
+            if (res.ok) {
+                alert('Configurações salvas no servidor.');
+            } else {
+                // fallback
+                localStorage.setItem('site_config', JSON.stringify(config));
+                alert('Não foi possível salvar no servidor. Salvo localmente.');
+            }
+        }).catch(() => {
+            localStorage.setItem('site_config', JSON.stringify(config));
+            alert('Erro de rede. Salvo localmente.');
+        });
     };
 
     const updateLink = (section, idx, key, value) => {

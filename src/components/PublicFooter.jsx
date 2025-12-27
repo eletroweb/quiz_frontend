@@ -13,13 +13,27 @@ function PublicFooter() {
     const [config, setConfig] = useState(null);
 
     useEffect(() => {
-        try {
-            const raw = localStorage.getItem('site_config');
-            if (raw) setConfig(JSON.parse(raw));
-            else setConfig(null);
-        } catch (e) {
-            setConfig(null);
-        }
+        let canceled = false;
+        const load = async () => {
+            try {
+                const res = await fetch('/api/site-config');
+                if (res.ok) {
+                    const json = await res.json();
+                    if (!canceled && json && Object.keys(json).length) return setConfig(json);
+                }
+            } catch (e) {
+                // ignore
+            }
+            try {
+                const raw = localStorage.getItem('site_config');
+                if (raw && !canceled) setConfig(JSON.parse(raw));
+                else if (!canceled) setConfig(null);
+            } catch (e) {
+                if (!canceled) setConfig(null);
+            }
+        };
+        load();
+        return () => { canceled = true; };
     }, []);
 
     const defaults = {
