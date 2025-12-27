@@ -36,7 +36,7 @@ import Quiz from "./pages/user/Quiz";
 import Study from "./pages/user/Study";
 import Simulados from "./pages/user/Simulados";
 import Ranking from "./pages/user/Ranking";
-import Planos from "./pages/user/Planos";
+import PlanosUser from "./pages/user/Planos";
 import PlanosPublic from "./pages/PlanosPublic";
 import Perfil from "./pages/user/Perfil";
 import Curso from "./pages/user/Curso";
@@ -44,6 +44,12 @@ import PaymentSuccess from "./pages/payment/Success";
 import PaymentFailure from "./pages/payment/Failure";
 import PaymentPending from "./pages/payment/Pending";
 import CartPage from "./pages/Cart";
+import Sobre from "../public/Sobre";
+import Contato from "../public/Contato";
+import ComoFunciona from "../public/ComoFunciona";
+import Planos from "../public/Planos";
+import Blog from "../public/Blog";
+import Faq from "../public/Faq";  
 
 function PrivateRoute({ children }) {
   const { currentUser } = useAuth();
@@ -108,6 +114,12 @@ function AppRoutes() {
         <Route path="roles" element={<RolesConfig />} />
         <Route path="banners" element={<Banners />} />
         <Route path="noticias" element={<NewsAdmin />} />
+        <Route path="/sobre" element={<Sobre />} />
+        <Route path="/contato" element={<Contato />} />
+        <Route path="/como-funciona" element={<ComoFunciona />} />
+        <Route path="/planos" element={<Planos />} />
+        <Route path="/blog" element={<Blog />} />
+        <Route path="/faq" element={<Faq />} />
       </Route>
 
       {/* Rotas do Usuário */}
@@ -120,7 +132,7 @@ function AppRoutes() {
         }
       >
         <Route index element={<UserDashboard />} />
-        <Route path="planos" element={<Planos />} />
+        <Route path="planos" element={<PlanosUser />} />
       </Route>
 
       <Route
