@@ -11,10 +11,12 @@ import {
     Menu,
     MenuItem,
     useMediaQuery,
-    useTheme
+    useTheme,
+    Badge
 } from '@mui/material';
 import MenuIcon from '@mui/icons-material/Menu';
 import SchoolIcon from '@mui/icons-material/School';
+import ShoppingCartIcon from '@mui/icons-material/ShoppingCart';
 
 function PublicHeader() {
     const navigate = useNavigate();
@@ -123,6 +125,12 @@ function PublicHeader() {
                             >
                                 Cadastrar
                             </Button>
+                            {/* Cart icon */}
+                            <IconButton sx={{ ml: 1 }} onClick={() => navigate('/cart')} aria-label="carrinho">
+                                <Badge badgeContent={(() => { try { const raw = localStorage.getItem('cart_items'); const arr = raw?JSON.parse(raw):[]; return Array.isArray(arr)?arr.length:0;} catch {return 0;} })()} color="secondary">
+                                    <ShoppingCartIcon />
+                                </Badge>
+                            </IconButton>
                         </Box>
                     )}
 
@@ -157,6 +165,9 @@ function PublicHeader() {
                                 </MenuItem>
                                 <MenuItem onClick={() => { navigate('/login'); handleMenuClose(); }}>
                                     Cadastrar
+                                </MenuItem>
+                                <MenuItem onClick={() => { navigate('/cart'); handleMenuClose(); }}>
+                                    Carrinho
                                 </MenuItem>
                             </Menu>
                         </>

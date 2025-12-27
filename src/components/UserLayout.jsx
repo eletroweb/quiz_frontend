@@ -10,6 +10,8 @@ import {
 import { Outlet, useNavigate, useLocation } from 'react-router-dom';
 import { auth } from '../config/firebase';
 import { useAuth } from '../contexts/AuthContext';
+import ShoppingCartIcon from '@mui/icons-material/ShoppingCart';
+import { Badge } from '@mui/material';
 
 const drawerWidth = 260;
 
@@ -118,6 +120,11 @@ export default function UserLayout() {
                     <Typography variant="h6" noWrap component="div" sx={{ flexGrow: 1 }}>
                         {menuItems.find(item => item.path === location.pathname)?.text || 'Quiz Concursos'}
                     </Typography>
+                    <IconButton onClick={() => navigate('/cart')} sx={{ mr: 1 }}>
+                        <Badge badgeContent={(() => { try { const raw = localStorage.getItem('cart_items'); const arr = raw?JSON.parse(raw):[]; return Array.isArray(arr)?arr.length:0;} catch {return 0;} })()} color="secondary">
+                            <ShoppingCartIcon />
+                        </Badge>
+                    </IconButton>
                     <IconButton
                         onClick={(e) => setAnchorEl(e.currentTarget)}
                         size="small"

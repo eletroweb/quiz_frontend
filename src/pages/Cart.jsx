@@ -59,7 +59,8 @@ export default function CartPage() {
             <CheckoutDialog
                 open={checkoutOpen}
                 onClose={() => setCheckoutOpen(false)}
-                course={selectedItem}
+                plan={selectedItem?.product_type === 'plan' ? selectedItem : undefined}
+                course={selectedItem?.product_type === 'course' ? selectedItem : undefined}
                 onSuccess={() => {
                     setCheckoutOpen(false);
                     // limpar carrinho local ao finalizar

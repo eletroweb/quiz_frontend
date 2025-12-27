@@ -7,6 +7,8 @@ import { Check, Close, Star, Bolt, Rocket } from '@mui/icons-material';
 import api from '../../services/api';
 import CheckoutDialog from '../../components/CheckoutDialog';
 import CourseCard from '../../components/CourseCard';
+import { useAuth } from '../../contexts/AuthContext';
+import { useNavigate } from 'react-router-dom';
 
 export default function Planos() {
     const [plans, setPlans] = useState([]);
@@ -55,7 +57,32 @@ export default function Planos() {
         loadCourses();
     }, []);
 
+    const { currentUser } = useAuth();
+    const navigate = useNavigate();
+
     const handleSubscribeClick = (plan) => {
+        if (!currentUser) {
+            try {
+                const raw = localStorage.getItem('cart_items');
+                const arr = raw ? JSON.parse(raw) : [];
+                const item = {
+                    product_type: 'plan',
+                    product_id: plan.id,
+                    nome: plan.name || plan.nome || plan.title,
+                    descricao: plan.description || plan.descricao || '',
+                    preco: plan.price || plan.preco || 0,
+                    duration_days: plan.duration_days,
+                    id: plan.id
+                };
+                const exists = arr.find(it => String(it.product_id) === String(item.product_id) && it.product_type === 'plan');
+                if (!exists) arr.push(item);
+                localStorage.setItem('cart_items', JSON.stringify(arr));
+            } catch (e) {
+                console.error('Erro salvando plano no carrinho local:', e);
+            }
+            navigate('/login', { state: { returnUrl: '/cart' } });
+            return;
+        }
         setSelectedPlan(plan);
         setOpenCheckout(true);
     };

@@ -24,6 +24,42 @@ export default function Login() {
     const navigate = useNavigate();
     const location = useLocation();
     const { reloadProfile } = useAuth();
+    
+    async function syncLocalCartToServer() {
+        try {
+            const raw = localStorage.getItem('cart_items');
+            const items = raw ? JSON.parse(raw) : [];
+            if (!Array.isArray(items) || items.length === 0) return;
+    
+            // Ensure we have a fresh token
+            if (auth.currentUser) {
+                try {
+                    const token = await auth.currentUser.getIdToken();
+                    localStorage.setItem('token', token);
+                } catch (e) {
+                    console.warn('Não foi possível obter token atualizado:', e);
+                }
+            }
+    
+            await Promise.all(items.map(async (it) => {
+                try {
+                    const payload = {
+                        product_type: it.product_type || (it.duration_days ? 'plan' : 'course'),
+                        product_id: it.product_id || it.id,
+                        price: it.preco || it.price || it.promotional_price || 0,
+                    };
+                    await api.post('/cart/items', payload);
+                } catch (e) {
+                    console.debug('Falha ao sincronizar item do carrinho:', e?.response?.data || e.message || e);
+                }
+            }));
+    
+            // if reached here, clear local cart to avoid duplicates
+            localStorage.removeItem('cart_items');
+        } catch (e) {
+            console.error('Erro ao sincronizar carrinho local:', e);
+        }
+    }
 
     const adminEmail = (import.meta.env.VITE_ADMIN_EMAIL || 'techmixsp@gmail.com').toLowerCase();
     const isAdminEmailEntered = (email || '').toLowerCase() === adminEmail;
@@ -37,6 +73,8 @@ export default function Login() {
             const token = await auth.currentUser.getIdToken();
             localStorage.setItem('token', token);
             await reloadProfile();
+            // sync local cart to server if any
+            await syncLocalCartToServer();
             const me = await api.get('/users/me');
             const alreadyAdmin = Boolean(me.data?.is_admin === true || me.data?.is_admin === 1);
             if (alreadyAdmin) {
@@ -91,6 +129,16 @@ export default function Login() {
             setLoading(true);
             await createUserWithEmailAndPassword(auth, email, password);
             // After registration, respect redirect if provided
+            // ensure token is available and reload profile
+            if (auth.currentUser) {
+                try {
+                    const token = await auth.currentUser.getIdToken();
+                    localStorage.setItem('token', token);
+                } catch {}
+            }
+            await reloadProfile();
+            // sync any saved local cart to server
+            await syncLocalCartToServer();
             const returnUrl = location.state?.returnUrl;
             if (returnUrl) navigate(returnUrl);
             else navigate('/dashboard');

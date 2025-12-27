@@ -1,4 +1,6 @@
 import React from 'react';
+import { useAuth } from '../contexts/AuthContext';
+import { useNavigate } from 'react-router-dom';
 import {
     Dialog, DialogContent, Box, Typography, Button, Grid, Card, CardContent, Chip
 } from '@mui/material';
@@ -6,6 +8,8 @@ import { Lock, Rocket, Star } from '@mui/icons-material';
 
 export default function TrialExpiredDialog({ open, plans, onSelectPlan }) {
     const recommendedPlan = plans?.find(p => p.nome === 'Mensal') || plans?.[0];
+    const { currentUser } = useAuth();
+    const navigate = useNavigate();
 
     return (
         <Dialog
@@ -115,7 +119,31 @@ export default function TrialExpiredDialog({ open, plans, onSelectPlan }) {
                                         <Button
                                             variant={isRecommended ? 'contained' : 'outlined'}
                                             fullWidth
-                                            onClick={() => onSelectPlan(plan)}
+                                            onClick={() => {
+                                                if (currentUser) {
+                                                    onSelectPlan(plan);
+                                                } else {
+                                                    try {
+                                                        const raw = localStorage.getItem('cart_items');
+                                                        const arr = raw ? JSON.parse(raw) : [];
+                                                        const item = {
+                                                            product_type: 'plan',
+                                                            product_id: plan.id,
+                                                            nome: plan.name || plan.nome || plan.title,
+                                                            descricao: plan.description || plan.descricao || '',
+                                                            preco: plan.price || plan.preco || 0,
+                                                            duration_days: plan.duration_days,
+                                                            id: plan.id
+                                                        };
+                                                        const exists = arr.find(it => String(it.product_id) === String(item.product_id) && it.product_type === 'plan');
+                                                        if (!exists) arr.push(item);
+                                                        localStorage.setItem('cart_items', JSON.stringify(arr));
+                                                    } catch (e) {
+                                                        console.error('Erro salvando plano no carrinho local:', e);
+                                                    }
+                                                    navigate('/login', { state: { returnUrl: '/cart' } });
+                                                }
+                                            }}
                                             sx={{
                                                 mt: 2,
                                                 ...(isRecommended && {
