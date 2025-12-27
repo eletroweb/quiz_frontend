@@ -80,6 +80,22 @@ function AdminRoute({ children }) {
   return currentUser && isAdmin ? children : <Navigate to="/login" />;
 }
 
+function CuratorOrAdminRoute({ children }) {
+  const { currentUser, isAdmin, userProfile } = useAuth();
+
+  if (currentUser && !userProfile) {
+    return (
+      <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '100vh' }}>
+        Carregando...
+      </div>
+    );
+  }
+
+  const isCurator = userProfile && userProfile.role === 'curator';
+
+  return currentUser && (isAdmin || isCurator) ? children : <Navigate to="/login" />;
+}
+
 function AppRoutes() {
   return (
     <Routes>
@@ -101,12 +117,54 @@ function AppRoutes() {
       >
         <Route index element={<AdminDashboard />} />
         <Route path="usuarios" element={<Users />} />
-        <Route path="questoes" element={<Questions />} />
-        <Route path="materias" element={<Materias />} />
-        <Route path="concursos" element={<Concursos />} />
-        <Route path="conteudos" element={<Conteudos />} />
-        <Route path="cursos" element={<CursosAdmin />} />
-        <Route path="cursos/:id/editar" element={<CursoEditor />} />
+        <Route
+          path="questoes"
+          element={
+            <CuratorOrAdminRoute>
+              <Questions />
+            </CuratorOrAdminRoute>
+          }
+        />
+        <Route
+          path="materias"
+          element={
+            <CuratorOrAdminRoute>
+              <Materias />
+            </CuratorOrAdminRoute>
+          }
+        />
+        <Route
+          path="concursos"
+          element={
+            <CuratorOrAdminRoute>
+              <Concursos />
+            </CuratorOrAdminRoute>
+          }
+        />
+        <Route
+          path="conteudos"
+          element={
+            <CuratorOrAdminRoute>
+              <Conteudos />
+            </CuratorOrAdminRoute>
+          }
+        />
+        <Route
+          path="cursos"
+          element={
+            <CuratorOrAdminRoute>
+              <CursosAdmin />
+            </CuratorOrAdminRoute>
+          }
+        />
+        <Route
+          path="cursos/:id/editar"
+          element={
+            <CuratorOrAdminRoute>
+              <CursoEditor />
+            </CuratorOrAdminRoute>
+          }
+        />
         <Route path="planos" element={<Plans />} />
         <Route path="planos-config" element={<PlanosConfig />} />
           <Route path="site-config" element={<SiteConfig />} />
