@@ -17,11 +17,18 @@ export default function SiteConfig() {
     });
 
     useEffect(() => {
-        // Tenta carregar do backend, cai para localStorage se falhar
+        // Tenta carregar do backend (usa VITE_API_URL se definido), cai para localStorage se falhar
         let canceled = false;
+        const getBase = () => {
+            const env = (typeof import.meta !== 'undefined' && import.meta.env && import.meta.env.VITE_API_URL) ? import.meta.env.VITE_API_URL : '';
+            if (!env) return '';
+            return env.replace(/\/$/,'');
+        };
         const load = async () => {
+            const base = getBase();
+            const url = base ? `${base}/site-config` : '/api/site-config';
             try {
-                const res = await fetch('/api/site-config');
+                const res = await fetch(url);
                 if (!res.ok) throw new Error('no-backend');
                 const json = await res.json();
                 if (!canceled && json && Object.keys(json).length) setConfig(json);
@@ -41,8 +48,11 @@ export default function SiteConfig() {
     }, []);
 
     const save = () => {
-        // Tenta salvar no backend, se falhar salva no localStorage como fallback
-        fetch('/api/site-config', {
+        // Tenta salvar no backend (usa VITE_API_URL se disponível), se falhar salva no localStorage como fallback
+        const base = (typeof import.meta !== 'undefined' && import.meta.env && import.meta.env.VITE_API_URL) ? import.meta.env.VITE_API_URL.replace(/\/$/,'') : '';
+        const url = base ? `${base}/site-config` : '/api/site-config';
+
+        fetch(url, {
             method: 'PUT',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify(config)

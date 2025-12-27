@@ -14,9 +14,16 @@ function PublicFooter() {
 
     useEffect(() => {
         let canceled = false;
+        const getBase = () => {
+            const env = (typeof import.meta !== 'undefined' && import.meta.env && import.meta.env.VITE_API_URL) ? import.meta.env.VITE_API_URL : '';
+            if (!env) return '';
+            return env.replace(/\/$/,'');
+        };
         const load = async () => {
+            const base = getBase();
+            const url = base ? `${base}/site-config` : '/api/site-config';
             try {
-                const res = await fetch('/api/site-config');
+                const res = await fetch(url);
                 if (res.ok) {
                     const json = await res.json();
                     if (!canceled && json && Object.keys(json).length) return setConfig(json);
@@ -66,7 +73,15 @@ function PublicFooter() {
         ]
     };
 
-    const data = config || defaults;
+    // Merge defaults with saved config so missing links keep defaults
+    const data = {
+        description: (config && config.description) ? config.description : defaults.description,
+        footerLinks: {
+            ...defaults.footerLinks,
+            ...((config && config.footerLinks) ? config.footerLinks : {})
+        },
+        socialLinks: (config && config.socialLinks && config.socialLinks.length) ? config.socialLinks : defaults.socialLinks
+    };
 
     const renderSocialIcon = (name) => {
         if (name === 'facebook') return <FacebookIcon />;
