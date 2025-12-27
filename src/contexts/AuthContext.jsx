@@ -45,8 +45,21 @@ export function AuthProvider({ children }) {
                     const response = await api.get('/users/me');
                     console.log('✅ AuthContext: Perfil carregado:', response.data);
 
-                    setUserProfile(response.data);
-                    setIsAdmin(response.data.is_admin === 1 || response.data.is_admin === true);
+                    // Se backend não retornar role/permissions (ex: deploy antigo), buscar fallback /user-roles/me
+                    let profile = response.data;
+                    if (!profile.role) {
+                        try {
+                            const rr = await api.get('/user-roles/me');
+                            console.log('🔐 AuthContext: Role fallback carregada:', rr.data);
+                            profile = { ...profile, role: rr.data.role, permissions: rr.data.permissions };
+                        } catch (e) {
+                            console.warn('🔐 AuthContext: Não foi possível obter role fallback:', e?.message || e);
+                            profile = { ...profile, role: profile.role || 'user', permissions: profile.permissions || {} };
+                        }
+                    }
+
+                    setUserProfile(profile);
+                    setIsAdmin(profile.is_admin === 1 || profile.is_admin === true);
                     setError(null);
 
                     console.log('✅ AuthContext: isAdmin =', response.data.is_admin === 1 || response.data.is_admin === true);
