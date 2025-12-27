@@ -30,6 +30,9 @@ export default function AdminRolesConfig() {
   const [loading, setLoading] = useState(false);
   const [openDialog, setOpenDialog] = useState(false);
   const [usuarioSelecionado, setUsuarioSelecionado] = useState(null);
+  const [openSearchDialog, setOpenSearchDialog] = useState(false);
+  const [allUsers, setAllUsers] = useState([]);
+  const [userSearchTerm, setUserSearchTerm] = useState('');
   const [role, setRole] = useState("user");
   const [permissions, setPermissions] = useState({
     can_create_courses: false,
@@ -126,6 +129,10 @@ export default function AdminRolesConfig() {
         📌 <strong>Roles Disponíveis:</strong> Usuário (padrão) | Curator (criar
         conteúdo) | Admin (tudo)
       </Alert>
+
+      <Box sx={{ display: 'flex', justifyContent: 'flex-end', mb: 2 }}>
+        <Button startIcon={<Add />} variant="outlined" onClick={() => setOpenSearchDialog(true)}>Adicionar usuário</Button>
+      </Box>
 
       <TableContainer component={Paper}>
         <Table>
@@ -467,6 +474,95 @@ export default function AdminRolesConfig() {
           >
             {saving ? "Salvando..." : "Salvar"}
           </Button>
+        </DialogActions>
+      </Dialog>
+      {/* DIALOG DE BUSCA/ADICIONAR USUÁRIO */}
+      <Dialog open={openSearchDialog} onClose={() => setOpenSearchDialog(false)} maxWidth="md" fullWidth>
+        <DialogTitle>Adicionar usuário</DialogTitle>
+        <DialogContent>
+          <Box sx={{ display: 'flex', gap: 2, mb: 2 }}>
+            <TextField
+              placeholder="Buscar por email ou nome"
+              fullWidth
+              value={userSearchTerm}
+              onChange={(e) => setUserSearchTerm(e.target.value)}
+            />
+            <Button onClick={async () => {
+              try {
+                setLoading(true);
+                const resp = await api.get('/users');
+                setAllUsers(resp.data || []);
+              } catch (err) {
+                console.error('Erro ao buscar usuários:', err);
+                setAllUsers([]);
+              } finally {
+                setLoading(false);
+              }
+            }}>Buscar</Button>
+          </Box>
+
+          <TableContainer component={Paper}>
+            <Table size="small">
+              <TableHead>
+                <TableRow>
+                  <TableCell>Email</TableCell>
+                  <TableCell>Nome</TableCell>
+                  <TableCell>Plano</TableCell>
+                  <TableCell align="right">Ações</TableCell>
+                </TableRow>
+              </TableHead>
+              <TableBody>
+                {(allUsers || []).filter(u => {
+                  if (!userSearchTerm) return true;
+                  const t = userSearchTerm.toLowerCase();
+                  return (u.email || '').toLowerCase().includes(t) || (u.display_name || '').toLowerCase().includes(t);
+                }).map(u => (
+                  <TableRow key={u.id} hover>
+                    <TableCell>{u.email}</TableCell>
+                    <TableCell>{u.display_name || 'Sem nome'}</TableCell>
+                    <TableCell>{u.plan || 'Free'}</TableCell>
+                    <TableCell align="right">
+                      <Button size="small" onClick={async () => {
+                        try {
+                          setLoading(true);
+                          const resp = await api.get(`/user-roles/${u.id}`);
+                          setUsuarioSelecionado(u);
+                          setRole(resp.data.role || 'user');
+                          setPermissions(resp.data.permissions || {});
+                          setOpenDialog(true);
+                          setOpenSearchDialog(false);
+                        } catch (err) {
+                          console.error('Erro ao carregar permissões:', err);
+                          setUsuarioSelecionado(u);
+                          setRole('user');
+                          setPermissions({
+                            can_create_courses: false,
+                            can_edit_courses: false,
+                            can_create_questions: false,
+                            can_edit_questions: false,
+                            can_create_materias: false,
+                            can_edit_materias: false,
+                            can_create_concursos: false,
+                            can_edit_concursos: false,
+                            can_create_conteudos: false,
+                            can_access_payments: false,
+                            can_access_users: false,
+                          });
+                          setOpenDialog(true);
+                          setOpenSearchDialog(false);
+                        } finally {
+                          setLoading(false);
+                        }
+                      }}>Selecionar</Button>
+                    </TableCell>
+                  </TableRow>
+                ))}
+              </TableBody>
+            </Table>
+          </TableContainer>
+        </DialogContent>
+        <DialogActions>
+          <Button onClick={() => setOpenSearchDialog(false)}>Fechar</Button>
         </DialogActions>
       </Dialog>
     </Box>
