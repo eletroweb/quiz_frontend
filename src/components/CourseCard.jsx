@@ -251,7 +251,7 @@ const CourseCard = ({ course }) => {
                             <Button
                                 variant="contained"
                                 fullWidth
-                                onClick={() => setCheckoutOpen(true)}
+                                onClick={handleBuyClick}
                                 startIcon={<ShoppingCart sx={{ fontSize: 18 }} />}
                                 sx={{
                                     bgcolor: '#2563EB',
