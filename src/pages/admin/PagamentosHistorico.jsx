@@ -17,9 +17,11 @@ import {
   Dialog,
   DialogTitle,
   DialogContent,
+  DialogActions,
+  DialogContentText,
   Pagination,
 } from "@mui/material";
-import { Download, Search, Visibility } from "@mui/icons-material";
+import { Download, Search, Visibility, DeleteForever } from "@mui/icons-material";
 import api from "../../services/api";
 
 export default function AdminPagamentosHistorico() {
@@ -35,6 +37,8 @@ export default function AdminPagamentosHistorico() {
   const [relatorio, setRelatorio] = useState(null);
   const [detalhesOpen, setDetalhesOpen] = useState(false);
   const [detalhesSelecionado, setDetalhesSelecionado] = useState(null);
+  const [confirmClearOpen, setConfirmClearOpen] = useState(false);
+  const [clearing, setClearing] = useState(false);
 
     const carregarPagamentos = useCallback(async () => {
     try {
@@ -110,6 +114,22 @@ export default function AdminPagamentosHistorico() {
     a.click();
   };
 
+  const handleClearHistory = async () => {
+    try {
+      setClearing(true);
+      await api.delete("/pagamentos/historico/clear");
+      alert("Histórico zerado com sucesso!");
+      setConfirmClearOpen(false);
+      carregarPagamentos();
+      carregarRelatorio();
+    } catch (error) {
+      console.error("Erro ao zerar histórico:", error);
+      alert("Erro ao zerar histórico: " + (error.response?.data?.error || error.message));
+    } finally {
+      setClearing(false);
+    }
+  };
+
   const getStatusColor = (status) => {
     const colors = {
       approved: "success",
@@ -175,7 +195,42 @@ export default function AdminPagamentosHistorico() {
               {relatorio.clientes_unicos || 0}
             </Typography>
           </Paper>
-        </Box>
+          {/* MODAL DE CONFIRMAÇÃO PARA LIMPAR TUDO */}
+      <Dialog
+        open={confirmClearOpen}
+        onClose={() => !clearing && setConfirmClearOpen(false)}
+      >
+        <DialogTitle sx={{ color: "error.main", fontWeight: "bold" }}>
+          ⚠️ ATENÇÃO: Ação Irreversível
+        </DialogTitle>
+        <DialogContent>
+          <DialogContentText>
+            Você está prestes a <strong>ZERAR TODO O HISTÓRICO</strong> de pagamentos.
+            Esta ação removerá todos os registros de vendas, estatísticas e logs de pagamento do banco de dados.
+            <br /><br />
+            Deseja continuar?
+          </DialogContentText>
+        </DialogContent>
+        <DialogActions sx={{ p: 2 }}>
+          <Button
+            onClick={() => setConfirmClearOpen(false)}
+            disabled={clearing}
+          >
+            Cancelar
+          </Button>
+          <Button
+            onClick={handleClearHistory}
+            variant="contained"
+            color="error"
+            autoFocus
+            disabled={clearing}
+            startIcon={clearing ? <CircularProgress size={20} color="inherit" /> : <DeleteForever />}
+          >
+            {clearing ? "Limpando..." : "Sim, Zerar Histórico"}
+          </Button>
+        </DialogActions>
+      </Dialog>
+    </Box>
       )}
 
       {/* FILTROS */}
@@ -220,6 +275,16 @@ export default function AdminPagamentosHistorico() {
             onClick={exportarCSV}
           >
             Exportar CSV
+          </Button>
+
+          <Button
+            variant="outlined"
+            color="error"
+            startIcon={<DeleteForever />}
+            onClick={() => setConfirmClearOpen(true)}
+            sx={{ ml: "auto" }}
+          >
+            Zerar Histórico
           </Button>
         </Box>
       </Paper>
