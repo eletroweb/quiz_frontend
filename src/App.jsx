@@ -110,70 +110,98 @@ function AppRoutes() {
       <Route
         path="/admin"
         element={
-          <AdminRoute>
+          <CuratorOrAdminRoute>
             <AdminLayout />
-          </AdminRoute>
+          </CuratorOrAdminRoute>
         }
       >
         <Route index element={<AdminDashboard />} />
-        <Route path="usuarios" element={<Users />} />
         <Route
-          path="questoes"
+          path="usuarios"
           element={
-            <CuratorOrAdminRoute>
-              <Questions />
-            </CuratorOrAdminRoute>
+            <AdminRoute>
+              <Users />
+            </AdminRoute>
+          }
+        />
+        <Route path="questoes" element={<Questions />} />
+        <Route path="materias" element={<Materias />} />
+        <Route path="concursos" element={<Concursos />} />
+        <Route path="conteudos" element={<Conteudos />} />
+        <Route path="cursos" element={<CursosAdmin />} />
+        <Route path="cursos/:id/editar" element={<CursoEditor />} />
+        <Route
+          path="planos"
+          element={
+            <AdminRoute>
+              <Plans />
+            </AdminRoute>
           }
         />
         <Route
-          path="materias"
+          path="planos-config"
           element={
-            <CuratorOrAdminRoute>
-              <Materias />
-            </CuratorOrAdminRoute>
+            <AdminRoute>
+              <PlanosConfig />
+            </AdminRoute>
           }
         />
         <Route
-          path="concursos"
+          path="site-config"
           element={
-            <CuratorOrAdminRoute>
-              <Concursos />
-            </CuratorOrAdminRoute>
+            <AdminRoute>
+              <SiteConfig />
+            </AdminRoute>
           }
         />
         <Route
-          path="conteudos"
+          path="campanhas"
           element={
-            <CuratorOrAdminRoute>
-              <Conteudos />
-            </CuratorOrAdminRoute>
+            <AdminRoute>
+              <Campaigns />
+            </AdminRoute>
           }
         />
         <Route
-          path="cursos"
+          path="pagamentos"
           element={
-            <CuratorOrAdminRoute>
-              <CursosAdmin />
-            </CuratorOrAdminRoute>
+            <AdminRoute>
+              <Payments />
+            </AdminRoute>
           }
         />
         <Route
-          path="cursos/:id/editar"
+          path="pagamentos-historico"
           element={
-            <CuratorOrAdminRoute>
-              <CursoEditor />
-            </CuratorOrAdminRoute>
+            <AdminRoute>
+              <PagamentosHistorico />
+            </AdminRoute>
           }
         />
-        <Route path="planos" element={<Plans />} />
-        <Route path="planos-config" element={<PlanosConfig />} />
-          <Route path="site-config" element={<SiteConfig />} />
-        <Route path="campanhas" element={<Campaigns />} />
-        <Route path="pagamentos" element={<Payments />} />
-        <Route path="pagamentos-historico" element={<PagamentosHistorico />} />
-        <Route path="roles" element={<RolesConfig />} />
-        <Route path="banners" element={<Banners />} />
-        <Route path="noticias" element={<NewsAdmin />} />
+        <Route
+          path="roles"
+          element={
+            <AdminRoute>
+              <RolesConfig />
+            </AdminRoute>
+          }
+        />
+        <Route
+          path="banners"
+          element={
+            <AdminRoute>
+              <Banners />
+            </AdminRoute>
+          }
+        />
+        <Route
+          path="noticias"
+          element={
+            <AdminRoute>
+              <NewsAdmin />
+            </AdminRoute>
+          }
+        />
       </Route>
 
       {/* Rotas públicas */}
