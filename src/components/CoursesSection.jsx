@@ -37,6 +37,7 @@ function CoursesSection() {
         autoplay: true,
         autoplaySpeed: 3000,
         pauseOnHover: true,
+        arrows: true,
         responsive: [
             {
                 breakpoint: 1200,
@@ -56,22 +57,26 @@ function CoursesSection() {
                 breakpoint: 600,
                 settings: {
                     slidesToShow: 1,
-                    slidesToScroll: 1
+                    slidesToScroll: 1,
+                    arrows: false,
+                    centerMode: true,
+                    centerPadding: '20px'
                 }
             }
         ]
     };
 
     return (
-        <Box sx={{ py: 10, background: 'white' }}>
+        <Box sx={{ py: { xs: 6, md: 10 }, background: 'white', overflow: 'hidden' }}>
             <Container maxWidth="lg">
                 <Typography
                     variant="h3"
                     sx={{
                         fontWeight: 800,
-                        mb: 6,
+                        mb: { xs: 4, md: 6 },
                         color: '#1E293B',
-                        textAlign: 'left'
+                        textAlign: 'left',
+                        fontSize: { xs: '1.75rem', md: '3rem' }
                     }}
                 >
                     Concursos em Destaque
@@ -84,10 +89,25 @@ function CoursesSection() {
                 ) : (
                     <Box
                         sx={{
-                            '& .slick-slide': { px: 1.5 },
+                            '& .slick-list': {
+                                overflow: 'visible'
+                            },
+                            '& .slick-slide': { 
+                                px: { xs: 1, md: 1.5 },
+                                transition: 'opacity 0.3s ease',
+                                opacity: 1
+                            },
                             '& .slick-dots': { bottom: -40 },
-                            '& .slick-prev': { left: -35 },
-                            '& .slick-next': { right: -35 },
+                            '& .slick-prev': { 
+                                left: -35,
+                                zIndex: 1,
+                                display: { xs: 'none !important', md: 'block !important' }
+                            },
+                            '& .slick-next': { 
+                                right: -35,
+                                zIndex: 1,
+                                display: { xs: 'none !important', md: 'block !important' }
+                            },
                             '& .slick-prev:before, & .slick-next:before': {
                                 color: '#4F46E5',
                                 fontSize: 30

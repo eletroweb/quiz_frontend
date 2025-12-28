@@ -46,12 +46,12 @@ function FeaturesSection() {
                                     background: 'white',
                                     textAlign: 'center',
                                     border: '1px solid #E2E8F0',
-                                    boxShadow: '0 4px 6px -1px rgba(0, 0, 0, 0.05), 0 2px 4px -1px rgba(0, 0, 0, 0.03)', // Sombra sutil Tailwind style
+                                    boxShadow: '0 4px 6px -1px rgba(0, 0, 0, 0.05), 0 2px 4px -1px rgba(0, 0, 0, 0.03)',
                                     transition: 'all 0.3s ease',
                                     display: 'flex',
                                     flexDirection: 'column',
                                     alignItems: 'center',
-                                    maxWidth: '350px',
+                                    maxWidth: { xs: '100%', sm: '350px' },
                                     mx: 'auto',
                                     '&:hover': {
                                         transform: 'translateY(-10px)',
