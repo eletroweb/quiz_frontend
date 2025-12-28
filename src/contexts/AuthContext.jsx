@@ -52,7 +52,7 @@ export function AuthProvider({ children }) {
                             const rr = await api.get('/user-roles/me');
                             console.log('🔐 AuthContext: Role fallback carregada:', rr.data);
                             profile = { ...profile, role: rr.data.role, permissions: rr.data.permissions };
-                        } catch (e) {
+                        } catch (err) {
                             console.warn('🔐 AuthContext: Não foi possível obter role fallback:', e?.message || e);
                             profile = { ...profile, role: profile.role || 'user', permissions: profile.permissions || {} };
                         }
