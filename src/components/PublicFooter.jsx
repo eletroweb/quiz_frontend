@@ -1,12 +1,15 @@
 import React, { useEffect, useState } from 'react';
 import defaultConfig from '../config/site_config_default.json';
-import { Box, Container, Grid, Typography, Link, IconButton } from '@mui/material';
+import { Box, Container, Grid, Typography, Link, IconButton, Chip } from '@mui/material';
 import { useNavigate } from 'react-router-dom';
 import FacebookIcon from '@mui/icons-material/Facebook';
 import InstagramIcon from '@mui/icons-material/Instagram';
 import TwitterIcon from '@mui/icons-material/Twitter';
 import YouTubeIcon from '@mui/icons-material/YouTube';
 import SchoolIcon from '@mui/icons-material/School';
+import LockIcon from '@mui/icons-material/Lock';
+import SecurityIcon from '@mui/icons-material/Security';
+import CreditCardIcon from '@mui/icons-material/CreditCard';
 
 function PublicFooter() {
     const currentYear = new Date().getFullYear();
@@ -72,7 +75,8 @@ function PublicFooter() {
                 { label: 'Central de Ajuda', href: '/suporte' },
                 { label: 'Contato', href: '/contato' },
                 { label: 'FAQ', href: '/faq' },
-                { label: 'Termos de Uso', href: '/termos' }
+                { label: 'Termos de Uso', href: '/termos' },
+                { label: 'Política de Privacidade', href: '/politica' }
             ]
         },
         socialLinks: [
@@ -179,6 +183,32 @@ function PublicFooter() {
                         </Grid>
                     ))}
                 </Grid>
+
+                <Box sx={{ mt: 4 }}>
+                    <Grid container spacing={2} justifyContent="center">
+                        <Grid item>
+                            <Chip
+                                icon={<LockIcon />}
+                                label="Conexão Segura SSL/TLS"
+                                sx={{ background: 'rgba(255,255,255,0.08)', color: 'white' }}
+                            />
+                        </Grid>
+                        <Grid item>
+                            <Chip
+                                icon={<SecurityIcon />}
+                                label="Proteção de Dados (LGPD)"
+                                sx={{ background: 'rgba(255,255,255,0.08)', color: 'white' }}
+                            />
+                        </Grid>
+                        <Grid item>
+                            <Chip
+                                icon={<CreditCardIcon />}
+                                label="Pagamentos Seguros"
+                                sx={{ background: 'rgba(255,255,255,0.08)', color: 'white' }}
+                            />
+                        </Grid>
+                    </Grid>
+                </Box>
 
                 {/* Copyright */}
                 <Box

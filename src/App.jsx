@@ -52,6 +52,8 @@ import Blog from "../public/Blog";
 import Faq from "../public/Faq"; 
 import Suporte from "../public/Suporte";
 import Termos from "../public/Termos";
+import Politica from "../public/Politica";
+
 
 function PrivateRoute({ children }) {
   const { currentUser } = useAuth();
@@ -206,6 +208,7 @@ function AppRoutes() {
 
       {/* Rotas públicas */}
       <Route path="/sobre" element={<Sobre />} />
+      <Route path="/politica" element={<Politica />} />
       <Route path="/contato" element={<Contato />} />
       <Route path="/como-funciona" element={<ComoFunciona />} />
       <Route path="/suporte" element={<Suporte />} />
