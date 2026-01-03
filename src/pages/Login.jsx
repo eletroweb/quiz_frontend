@@ -36,8 +36,8 @@ export default function Login() {
                 try {
                     const token = await auth.currentUser.getIdToken();
                     localStorage.setItem('token', token);
-                } catch (e) {
-                    console.warn('Não foi possível obter token atualizado:', e);
+                } catch (err) {
+                    console.warn('Não foi possível obter token atualizado:', err);
                 }
             }
     
@@ -49,20 +49,22 @@ export default function Login() {
                         price: it.preco || it.price || it.promotional_price || 0,
                     };
                     await api.post('/cart/items', payload);
-                } catch (e) {
-                    console.debug('Falha ao sincronizar item do carrinho:', e?.response?.data || e.message || e);
+                } catch (err) {
+                    console.debug('Falha ao sincronizar item do carrinho:', err?.response?.data || err.message || err);
                 }
             }));
     
             // if reached here, clear local cart to avoid duplicates
             localStorage.removeItem('cart_items');
-        } catch (e) {
-            console.error('Erro ao sincronizar carrinho local:', e);
+        } catch (err) {
+            console.error('Erro ao sincronizar carrinho local:', err);
         }
     }
 
     const adminEmail = (import.meta.env.VITE_ADMIN_EMAIL || 'techmixsp@gmail.com').toLowerCase();
     const isAdminEmailEntered = (email || '').toLowerCase() === adminEmail;
+
+    
 
     async function handleLogin(e) {
         e.preventDefault();
@@ -87,8 +89,8 @@ export default function Login() {
                     await reloadProfile();
                     navigate('/admin');
                     return;
-                } catch (e) {
-                    const code = e?.response?.data?.code;
+                } catch (err) {
+                    const code = err?.response?.data?.code;
                     if (code === 'ADMIN_PIN_MISSING') {
                         try {
                             await api.post('/users/me/admin-pin', { pin: adminPin });
@@ -128,13 +130,16 @@ export default function Login() {
             setError('');
             setLoading(true);
             await createUserWithEmailAndPassword(auth, email, password);
+            
             // After registration, respect redirect if provided
             // ensure token is available and reload profile
             if (auth.currentUser) {
                 try {
                     const token = await auth.currentUser.getIdToken();
                     localStorage.setItem('token', token);
-                } catch {}
+                } catch (err) {
+                    console.warn('Falha ao obter token após cadastro:', err);
+                }
             }
             await reloadProfile();
             // sync any saved local cart to server
@@ -311,6 +316,7 @@ export default function Login() {
                                 <Link href="#" variant="body2" underline="hover">
                                     Esqueceu a senha?
                                 </Link>
+                                
                             </Box>
                         </Box>
                     )}

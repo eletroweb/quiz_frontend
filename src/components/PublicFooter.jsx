@@ -34,7 +34,7 @@ function PublicFooter() {
                         if (!canceled && json && Object.keys(json).length) return setConfig(json);
                     }
                 } catch (err) {
-                    // ignore
+                    console.warn('Falha ao carregar site-config do backend:', err?.message || err);
                 }
                 try {
                     const raw = localStorage.getItem('site_config');
@@ -45,6 +45,7 @@ function PublicFooter() {
                         setConfig(defaultConfig);
                     }
                 } catch (err) {
+                    console.warn('Falha ao carregar site_config do localStorage:', err?.message || err);
                     if (!canceled) setConfig(defaultConfig);
                 }
         };

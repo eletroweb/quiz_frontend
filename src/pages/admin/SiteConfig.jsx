@@ -17,18 +17,20 @@ export default function SiteConfig() {
         socialLinks: []
     });
 
+    // Utilitários de URL (escopo superior para uso em todo o componente)
+    const getBase = () => {
+        const env = (typeof import.meta !== 'undefined' && import.meta.env && import.meta.env.VITE_API_URL) ? import.meta.env.VITE_API_URL : '';
+        if (!env) return '';
+        return env.replace(/\/+$/,'');
+    };
+    const joinPath = (base, path) => {
+        if (!base) return path;
+        return base.replace(/\/+$/,'') + '/' + path.replace(/^\/+/, '');
+    };
+
     useEffect(() => {
         // Tenta carregar do backend (usa VITE_API_URL se definido), cai para localStorage se falhar
         let canceled = false;
-        const getBase = () => {
-            const env = (typeof import.meta !== 'undefined' && import.meta.env && import.meta.env.VITE_API_URL) ? import.meta.env.VITE_API_URL : '';
-            if (!env) return '';
-            return env.replace(/\/+$/,'');
-        };
-        const joinPath = (base, path) => {
-            if (!base) return path;
-            return base.replace(/\/+$/,'') + '/' + path.replace(/^\/+/, '');
-        };
         const load = async () => {
             const base = getBase();
             const url = base ? joinPath(base, 'site-config') : '/api/site-config';
@@ -43,11 +45,14 @@ export default function SiteConfig() {
                     else setConfig(defaultConfig);
                 }
             } catch (err) {
+                console.warn('Falha ao carregar site-config:', err?.message || err);
                 try {
                     const raw = localStorage.getItem('site_config');
                         if (raw && !canceled) setConfig(JSON.parse(raw));
                         else if (!canceled) setConfig(defaultConfig);
-                } catch (err) { /* ignore */ }
+                } catch (err) {
+                    console.warn('Falha ao carregar fallback do localStorage:', err?.message || err);
+                }
             }
         };
         load();

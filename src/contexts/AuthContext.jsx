@@ -53,7 +53,7 @@ export function AuthProvider({ children }) {
                             console.log('🔐 AuthContext: Role fallback carregada:', rr.data);
                             profile = { ...profile, role: rr.data.role, permissions: rr.data.permissions };
                         } catch (err) {
-                            console.warn('🔐 AuthContext: Não foi possível obter role fallback:', e?.message || e);
+                            console.warn('🔐 AuthContext: Não foi possível obter role fallback:', err?.message || err);
                             profile = { ...profile, role: profile.role || 'user', permissions: profile.permissions || {} };
                         }
                     }
@@ -114,8 +114,8 @@ export function AuthProvider({ children }) {
             } catch {
                 setNeedsAdminPin(false);
             }
-        } catch (e) {
-            console.error('reloadProfile falhou:', e);
+        } catch (err) {
+            console.error('reloadProfile falhou:', err);
         }
     }
 
