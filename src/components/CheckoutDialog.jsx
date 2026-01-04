@@ -150,15 +150,19 @@ export default function CheckoutDialog({
       }
 
       const response = await api.post("/payments/preference", payload);
-      window.location.href = response.data.initPoint;
+      const url =
+        response?.data?.init_point ||
+        response?.data?.sandbox_init_point ||
+        response?.data?.initPoint;
+      if (!url) {
+        throw new Error("URL de checkout não retornada pelo servidor");
+      }
+      window.location.href = url;
     } catch (err) {
       console.error("Erro ao criar preferência:", err);
 
       if (err.response?.status === 401) {
-        setError("Sessão expirada. Por favor, faça login novamente.");
-        setTimeout(() => {
-          navigate('/login');
-        }, 2000);
+        setError("Sessão expirada. Faça login novamente e tente de novo.");
       } else {
         const errorMsg =
           err.response?.data?.error ||
