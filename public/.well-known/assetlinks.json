@@ -1,0 +1,22 @@
+[
+  {
+    "relation": ["delegate_permission/common.handle_all_urls"],
+    "target": {
+      "namespace": "android_app",
+      "package_name": "com.quizconcursos.app",
+      "sha256_cert_fingerprints": [
+        "93504C9AFA68E5E02E84397144B38E80CBD2CD2D9B2857787E86D5E4CAFFA6D9"
+      ]
+    }
+  },
+  {
+    "relation": ["delegate_permission/common.handle_all_urls"],
+    "target": {
+      "namespace": "android_app",
+      "package_name": "com.quizconcursos.app.debug",
+      "sha256_cert_fingerprints": [
+        "93504C9AFA68E5E02E84397144B38E80CBD2CD2D9B2857787E86D5E4CAFFA6D9"
+      ]
+    }
+  }
+]
