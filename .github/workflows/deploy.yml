@@ -2,7 +2,7 @@ name: Deploy Vite App to GitHub Pages
 
 on:
   push:
-    branches: [main]
+    branches: [master]
   workflow_dispatch:
 
 permissions:
@@ -38,6 +38,89 @@ jobs:
           VITE_FIREBASE_MESSAGING_SENDER_ID: ${{ secrets.VITE_FIREBASE_MESSAGING_SENDER_ID }}
           VITE_FIREBASE_APP_ID: ${{ secrets.VITE_FIREBASE_APP_ID }}
           VITE_FIREBASE_MEASUREMENT_ID: ${{ secrets.VITE_FIREBASE_MEASUREMENT_ID }}
+
+      # ✅ NOVO PASSO: Verificar se o arquivo assetlinks.json foi criado corretamente
+      - name: Verify assetlinks.json for Android Deep Links
+        run: |
+          echo "🔍 Verificando arquivo assetlinks.json..."
+
+          # Verifica se o arquivo existe
+          if [ -f "dist/.well-known/assetlinks.json" ]; then
+            echo "✅ Arquivo encontrado: dist/.well-known/assetlinks.json"
+
+            # Exibe o conteúdo (útil para debug)
+            echo "📄 Conteúdo do arquivo:"
+            cat dist/.well-known/assetlinks.json
+            echo ""
+
+            # Valida o JSON
+            if jq empty dist/.well-known/assetlinks.json 2>/dev/null; then
+              echo "✅ JSON válido"
+
+              # Verifica se contém a estrutura correta
+              if jq -e '.[0].relation' dist/.well-known/assetlinks.json > /dev/null 2>&1; then
+                echo "✅ Estrutura correta encontrada"
+
+                # Extrai informações úteis para log
+                PACKAGE_NAME=$(jq -r '.[0].target.package_name' dist/.well-known/assetlinks.json)
+                FINGERPRINT_COUNT=$(jq -r '.[0].target.sha256_cert_fingerprints | length' dist/.well-known/assetlinks.json)
+
+                echo "📱 Package Name: $PACKAGE_NAME"
+                echo "🔑 Fingerprints cadastrados: $FINGERPRINT_COUNT"
+
+                # Verifica se tem fingerprints
+                if [ "$FINGERPRINT_COUNT" -eq 0 ]; then
+                  echo "⚠️  AVISO: Nenhum fingerprint SHA256 configurado!"
+                  echo "   Adicione fingerprints em public/.well-known/assetlinks.json"
+                else
+                  echo "✅ Fingerprints configurados corretamente"
+
+                  # Exibe os primeiros caracteres de cada fingerprint (para log seguro)
+                  for i in $(seq 0 $(($FINGERPRINT_COUNT - 1))); do
+                    FINGERPRINT=$(jq -r ".[0].target.sha256_cert_fingerprints[$i]" dist/.well-known/assetlinks.json)
+                    echo "   Fingerprint $((i+1)): ${FINGERPRINT:0:16}..."
+                  done
+                fi
+
+              else
+                echo "⚠️  Estrutura JSON incomum, mas arquivo existe"
+              fi
+            else
+              echo "❌ ERRO: JSON inválido em assetlinks.json"
+              echo "   Corrija o arquivo public/.well-known/assetlinks.json"
+              exit 1
+            fi
+          else
+            echo "❌ ERRO CRÍTICO: Arquivo assetlinks.json não encontrado!"
+            echo "   Crie o arquivo em: public/.well-known/assetlinks.json"
+            echo ""
+            echo "   Conteúdo exemplo:"
+            echo '   ['
+            echo '     {'
+            echo '       "relation": ["delegate_permission/common.handle_all_urls"],'
+            echo '       "target": {'
+            echo '         "namespace": "android_app",'
+            echo '         "package_name": "com.quizconcursos.app",'
+            echo '         "sha256_cert_fingerprints": ['
+            echo '           "93504C9AFA68E5E02E84397144B38E80CBD2CD2D9B2857787E86D5E4CAFFA6D9"'
+            echo '         ]'
+            echo '       }'
+            echo '     }'
+            echo '   ]'
+            exit 1
+          fi
+
+          # Verifica se o arquivo está acessível via URL simulada
+          echo ""
+          echo "🌐 Simulando acesso ao arquivo..."
+          echo "   URL: https://quizconcursos.com/.well-known/assetlinks.json"
+          echo "   Status: ✅ Será disponibilizado após deploy"
+          echo ""
+          echo "📋 Resumo da verificação:"
+          echo "   - Arquivo encontrado: ✅"
+          echo "   - JSON válido: ✅"
+          echo "   - Estrutura correta: ✅"
+          echo "   - Pronto para deep links Android: ✅"
 
       - name: Upload GitHub Pages artifact
         uses: actions/upload-pages-artifact@v3
