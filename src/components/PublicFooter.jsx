@@ -21,36 +21,36 @@ function PublicFooter() {
         const getBase = () => {
             const env = (typeof import.meta !== 'undefined' && import.meta.env && import.meta.env.VITE_API_URL) ? import.meta.env.VITE_API_URL : '';
             if (!env) return '';
-            return env.replace(/\/+$/,'');
+            return env.replace(/\/+$/, '');
         };
         const joinPath = (base, path) => {
             if (!base) return path;
-            return base.replace(/\/+$/,'') + '/' + path.replace(/^\/+/, '');
+            return base.replace(/\/+$/, '') + '/' + path.replace(/^\/+/, '');
         };
         const load = async () => {
             const base = getBase();
             const url = base ? joinPath(base, 'site-config') : '/api/site-config';
-                try {
-                    const res = await fetch(url);
-                    if (res.ok) {
-                        const json = await res.json();
-                        if (!canceled && json && Object.keys(json).length) return setConfig(json);
-                    }
-                } catch (err) {
-                    console.warn('Falha ao carregar site-config do backend:', err?.message || err);
+            try {
+                const res = await fetch(url);
+                if (res.ok) {
+                    const json = await res.json();
+                    if (!canceled && json && Object.keys(json).length) return setConfig(json);
                 }
-                try {
-                    const raw = localStorage.getItem('site_config');
-                    if (raw && !canceled) {
-                        setConfig(JSON.parse(raw));
-                    } else if (!canceled) {
-                        // final fallback: bundled default so static builds always show footer content
-                        setConfig(defaultConfig);
-                    }
-                } catch (err) {
-                    console.warn('Falha ao carregar site_config do localStorage:', err?.message || err);
-                    if (!canceled) setConfig(defaultConfig);
+            } catch (err) {
+                console.warn('Falha ao carregar site-config do backend:', err?.message || err);
+            }
+            try {
+                const raw = localStorage.getItem('site_config');
+                if (raw && !canceled) {
+                    setConfig(JSON.parse(raw));
+                } else if (!canceled) {
+                    // final fallback: bundled default so static builds always show footer content
+                    setConfig(defaultConfig);
                 }
+            } catch (err) {
+                console.warn('Falha ao carregar site_config do localStorage:', err?.message || err);
+                if (!canceled) setConfig(defaultConfig);
+            }
         };
         load();
         return () => { canceled = true; };
@@ -120,12 +120,12 @@ function PublicFooter() {
                     {/* Logo e Descrição */}
                     <Grid item xs={12} md={4}>
                         <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: 2 }}>
-                            <SchoolIcon sx={{ fontSize: 36, color: '#4F46E5' }} />
-                            <Typography variant="h5" sx={{ fontWeight: 700 }}>
+                            <SchoolIcon sx={{ fontSize: 36, color: '#818CF8' }} />
+                            <Typography variant="h5" sx={{ fontWeight: 700, color: '#F8FAFC' }}>
                                 Quiz Concursos
                             </Typography>
                         </Box>
-                        <Typography sx={{ color: '#9ca3af', mb: 3, lineHeight: 1.7 }}>
+                        <Typography sx={{ color: '#E2E8F0', mb: 3, lineHeight: 1.7 }}>
                             {data.description}
                         </Typography>
                         <Box sx={{ display: 'flex', gap: 1 }}>
@@ -153,7 +153,7 @@ function PublicFooter() {
                     {/* Links */}
                     {Object.entries(data.footerLinks).map(([title, links]) => (
                         <Grid item xs={6} md={2.66} key={title}>
-                            <Typography variant="h6" sx={{ fontWeight: 700, mb: 2, fontSize: '1rem' }}>
+                            <Typography variant="h6" sx={{ fontWeight: 700, mb: 2, fontSize: '1rem', color: '#F8FAFC' }}>
                                 {title}
                             </Typography>
                             <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1.5 }}>
@@ -166,11 +166,11 @@ function PublicFooter() {
                                             else if (link.href) window.open(link.href, '_blank');
                                         }}
                                         sx={{
-                                            color: '#9ca3af',
+                                            color: '#CBD5E1',
                                             textDecoration: 'none',
                                             fontSize: '0.9rem',
                                             '&:hover': {
-                                                color: '#4F46E5',
+                                                color: '#818CF8',
                                                 textDecoration: 'none'
                                             },
                                             transition: 'color 0.2s ease'

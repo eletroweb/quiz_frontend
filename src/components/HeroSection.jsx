@@ -1,17 +1,8 @@
 import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
-import {
-  Box,
-  Container,
-  Typography,
-  Button,
-  IconButton,
-  Grid,
-} from "@mui/material";
-import { KeyboardArrowLeft, KeyboardArrowRight } from "@mui/icons-material";
-
+import { Box, Container, Typography, Button, IconButton, Grid } from "@mui/material";
+import { KeyboardArrowLeft, KeyboardArrowRight, CheckCircle, TrendingUp, EmojiEvents } from "@mui/icons-material";
 import api from "../services/api";
-import homePageDesign from "../assets/home_page_design.png";
 
 const API_BASE_URL =
   import.meta.env.VITE_API_URL?.replace("/api", "") || "http://localhost:3001";
@@ -19,7 +10,6 @@ const API_BASE_URL =
 function HeroSection() {
   const [banners, setBanners] = useState([]);
   const [currentBanner, setCurrentBanner] = useState(0);
-  
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -31,10 +21,8 @@ function HeroSection() {
       const response = await api.get("/banners/ativos");
       const data = Array.isArray(response.data) ? response.data : [];
       setBanners(data.filter((b) => b.tipo === "hero"));
-     
     } catch (error) {
       console.error("Erro ao carregar banners:", error);
-     
     }
   };
 
@@ -57,10 +45,9 @@ function HeroSection() {
 
   const defaultBanner = {
     titulo: "Prepare-se para Concursos Públicos",
-    descricao:
-      "A sua plataforma completa para alcançar a aprovação com questões, simulados e cursos focados.",
+    descricao: "A sua plataforma completa para alcançar a aprovação com questões, simulados e cursos focados.",
     texto_botao: "Começar Agora",
-    imagem_url: null, // Se tiver imagem, usa, senão usa o layout padrão
+    imagem_url: null,
   };
 
   const banner = banners.length > 0 ? banners[currentBanner] : defaultBanner;
@@ -70,17 +57,15 @@ function HeroSection() {
       sx={{
         position: "relative",
         width: "100%",
-        minHeight: { xs: "400px", md: "auto" }, // Mobile mantém altura mínima
-        height: { xs: "auto", md: "auto" },
-        aspectRatio: { md: "16/9" }, // Desktop: Proporção 16:9 (ex: 1280x720)
+        minHeight: { xs: "500px", md: "600px" },
         display: "flex",
         alignItems: "center",
-        background: "linear-gradient(135deg, #4F46E5 0%, #7C3AED 100%)", // Gradiente Roxo/Azul vibrante
+        background: "linear-gradient(135deg, #2563EB 0%, #1E40AF 100%)",
         overflow: "hidden",
-        pt: { xs: 8, md: 0 }, // Espaço para o header fixo em mobile
+        pt: { xs: 10, md: 0 },
       }}
     >
-      {/* Elementos Decorativos de Fundo (Círculos/Blur) */}
+      {/* Elementos Decorativos Modernos */}
       <Box
         sx={{
           position: "absolute",
@@ -102,53 +87,67 @@ function HeroSection() {
           width: "400px",
           height: "400px",
           borderRadius: "50%",
-          background: "rgba(79, 70, 229, 0.4)",
+          background: "rgba(16, 185, 129, 0.2)",
           filter: "blur(60px)",
           zIndex: 0,
         }}
       />
 
       <Container maxWidth="lg" sx={{ position: "relative", zIndex: 1 }}>
-        <Grid
-          container
-          spacing={4}
-          alignItems="center"
-          sx={{ minHeight: "400px", py: 4 }}
-        >
+        <Grid container spacing={4} alignItems="center" sx={{ minHeight: "500px", py: 4 }}>
           {/* Texto do Banner */}
           <Grid item xs={12} md={6}>
             <Box
               sx={{
                 textAlign: { xs: "center", md: "left" },
-                animation: "fadeInLeft 0.8s ease-out",
-                "@keyframes fadeInLeft": {
-                  from: { opacity: 0, transform: "translateX(-30px)" },
-                  to: { opacity: 1, transform: "translateX(0)" },
-                },
+                animation: "fadeInLeft 0.8s cubic-bezier(0.34, 1.56, 0.64, 1)",
               }}
             >
+              {/* Badge Superior */}
+              <Box
+                sx={{
+                  display: "inline-flex",
+                  alignItems: "center",
+                  gap: 1,
+                  px: 3,
+                  py: 1,
+                  mb: 3,
+                  background: "rgba(255, 255, 255, 0.2)",
+                  backdropFilter: "blur(10px)",
+                  borderRadius: "var(--radius-full)",
+                  border: "1px solid rgba(255, 255, 255, 0.3)",
+                  color: "white",
+                  fontSize: "var(--text-sm)",
+                  fontWeight: 600,
+                }}
+              >
+                <CheckCircle sx={{ fontSize: 18 }} />
+                Plataforma #1 em Aprovações
+              </Box>
+
+              {/* Título */}
               <Typography
                 variant="h1"
                 sx={{
+                  fontFamily: "var(--font-display)",
                   color: "white",
-                  fontWeight: 800,
-                  mb: 2,
-                  fontSize: { xs: "2.5rem", md: "3.5rem", lg: "4rem" },
-                  lineHeight: 1.1,
+                  fontWeight: 700,
+                  mb: 3,
+                  fontSize: { xs: "2.5rem", md: "3rem", lg: "3.5rem" },
+                  lineHeight: 1.2,
                   letterSpacing: "-0.02em",
-                  textShadow: "0 4px 20px rgba(0,0,0,0.15)",
                 }}
               >
                 {banner.titulo}
               </Typography>
 
+              {/* Descrição */}
               <Typography
-                variant="h5"
                 sx={{
                   color: "rgba(255,255,255,0.9)",
                   mb: 4,
-                  fontSize: { xs: "1rem", md: "1.25rem" },
-                  lineHeight: 1.6,
+                  fontSize: { xs: "var(--text-base)", md: "var(--text-lg)" },
+                  lineHeight: 1.7,
                   fontWeight: 400,
                   maxWidth: "500px",
                   mx: { xs: "auto", md: 0 },
@@ -157,87 +156,132 @@ function HeroSection() {
                 {banner.descricao}
               </Typography>
 
-              <Button
-                variant="contained"
-                size="large"
-                onClick={() => {
-                  if (banner.link_url) {
-                    // Validação: apenas permitir rotas válidas
-                    const validRoutes = [
-                      "/login",
-                      "/quiz",
-                      "/estudar",
-                      "/simulados",
-                      "/ranking",
-                      "/planos",
-                      "/perfil",
-                      "/dashboard",
-                    ];
-                    const isValidRoute =
-                      validRoutes.includes(banner.link_url) ||
-                      banner.link_url.startsWith("/curso/");
+              {/* Botões */}
+              <Box sx={{ display: "flex", gap: 2, flexWrap: "wrap", justifyContent: { xs: "center", md: "flex-start" } }}>
+                <Button
+                  variant="contained"
+                  size="large"
+                  onClick={() => {
+                    if (banner.link_url) {
+                      const validRoutes = ["/login", "/quiz", "/estudar", "/simulados", "/ranking", "/planos", "/perfil", "/dashboard"];
+                      const isValidRoute = validRoutes.includes(banner.link_url) || banner.link_url.startsWith("/curso/");
 
-                    if (banner.link_url.startsWith("http")) {
-                      window.location.href = banner.link_url;
-                    } else if (isValidRoute) {
-                      navigate(banner.link_url);
+                      if (banner.link_url.startsWith("http")) {
+                        window.location.href = banner.link_url;
+                      } else if (isValidRoute) {
+                        navigate(banner.link_url);
+                      } else {
+                        console.warn(`⚠️ Rota inválida no banner: ${banner.link_url}`);
+                        navigate("/login");
+                      }
                     } else {
-                      // Se rota não é válida, redireciona para login (padrão seguro)
-                      console.warn(
-                        `⚠️ Rota inválida no banner: ${banner.link_url}`
-                      );
                       navigate("/login");
                     }
-                  } else {
-                    navigate("/login");
-                  }
-                }}
+                  }}
+                  sx={{
+                    background: "white",
+                    color: "var(--color-primary)",
+                    px: 5,
+                    py: 1.8,
+                    fontSize: "var(--text-base)",
+                    fontWeight: 600,
+                    borderRadius: "var(--radius-lg)",
+                    textTransform: "none",
+                    boxShadow: "var(--shadow-xl)",
+                    "&:hover": {
+                      background: "rgba(255, 255, 255, 0.95)",
+                      transform: "translateY(-2px)",
+                      boxShadow: "var(--shadow-2xl)",
+                    },
+                    transition: "all 0.3s ease",
+                  }}
+                >
+                  {banner.texto_botao || "Começar Agora"}
+                </Button>
+
+                <Button
+                  variant="outlined"
+                  size="large"
+                  onClick={() => navigate("/planos")}
+                  sx={{
+                    borderColor: "white",
+                    color: "white",
+                    px: 4,
+                    py: 1.8,
+                    fontSize: "var(--text-base)",
+                    fontWeight: 600,
+                    borderRadius: "var(--radius-lg)",
+                    textTransform: "none",
+                    borderWidth: "2px",
+                    "&:hover": {
+                      borderColor: "white",
+                      background: "rgba(255, 255, 255, 0.1)",
+                      borderWidth: "2px",
+                    },
+                    transition: "all 0.3s ease",
+                  }}
+                >
+                  Ver Planos
+                </Button>
+              </Box>
+
+              {/* Stats */}
+              <Box
                 sx={{
-                  background: "#F97316", // Laranja vibrante
-                  color: "white",
-                  px: 5,
-                  py: 1.8,
-                  fontSize: "1.1rem",
-                  fontWeight: 700,
-                  borderRadius: "50px", // Botão arredondado moderno
-                  textTransform: "none",
-                  boxShadow: "0 10px 25px rgba(249, 115, 22, 0.4)",
-                  "&:hover": {
-                    background: "#EA580C",
-                    boxShadow: "0 15px 35px rgba(249, 115, 22, 0.5)",
-                    transform: "translateY(-2px)",
-                  },
-                  transition: "all 0.3s ease",
+                  display: "flex",
+                  gap: 4,
+                  mt: 5,
+                  pt: 4,
+                  borderTop: "1px solid rgba(255,255,255,0.2)",
+                  justifyContent: { xs: "center", md: "flex-start" },
                 }}
               >
-                {banner.texto_botao || "Começar Agora"}
-              </Button>
+                {[
+                  { value: "10.000+", label: "Questões" },
+                  { value: "5.000+", label: "Aprovados" },
+                  { value: "98%", label: "Satisfação" },
+                ].map((stat, idx) => (
+                  <Box key={idx} sx={{ textAlign: "center" }}>
+                    <Typography
+                      sx={{
+                        fontFamily: "var(--font-display)",
+                        fontSize: "var(--text-2xl)",
+                        fontWeight: 700,
+                        color: "white",
+                        lineHeight: 1,
+                        mb: 0.5,
+                      }}
+                    >
+                      {stat.value}
+                    </Typography>
+                    <Typography
+                      sx={{
+                        fontSize: "var(--text-xs)",
+                        color: "rgba(255,255,255,0.7)",
+                        textTransform: "uppercase",
+                        letterSpacing: "0.05em",
+                      }}
+                    >
+                      {stat.label}
+                    </Typography>
+                  </Box>
+                ))}
+              </Box>
             </Box>
           </Grid>
 
-          {/* Imagem/Ilustração do Banner */}
-          <Grid
-            item
-            xs={12}
-            md={6}
-            sx={{ display: { xs: "none", md: "block" } }}
-          >
+          {/* Imagem do Banner */}
+          <Grid item xs={12} md={6} sx={{ display: { xs: "none", md: "block" } }}>
             <Box
               sx={{
                 position: "relative",
                 height: "100%",
-                maxHeight: "80%",
                 display: "flex",
                 alignItems: "center",
                 justifyContent: "center",
-                animation: "fadeInRight 0.8s ease-out",
-                "@keyframes fadeInRight": {
-                  from: { opacity: 0, transform: "translateX(30px)" },
-                  to: { opacity: 1, transform: "translateX(0)" },
-                },
+                animation: "fadeInRight 0.8s cubic-bezier(0.34, 1.56, 0.64, 1)",
               }}
             >
-              {/* Placeholder Ilustrativo ou Imagem do Banner */}
               {banner.imagem_url ? (
                 <Box
                   component="img"
@@ -249,44 +293,53 @@ function HeroSection() {
                   alt={banner.titulo}
                   sx={{
                     maxWidth: "100%",
-                    maxHeight: "100%",
+                    maxHeight: "450px",
                     objectFit: "contain",
-                    filter: "drop-shadow(0 20px 40px rgba(0,0,0,0.2))",
+                    filter: "drop-shadow(0 20px 40px rgba(0,0,0,0.3))",
+                    borderRadius: "var(--radius-xl)",
                   }}
                 />
               ) : (
-                // Ilustração CSS Pura (Placeholder Estiloso)
-                <Box
-                  sx={{
-                    width: "100%",
-                    height: "100%",
-                    background: `url(${homePageDesign})`, // Tenta usar a imagem salva se disponível, ou fallback
-                    backgroundSize: "contain",
-                    backgroundRepeat: "no-repeat",
-                    backgroundPosition: "center",
-                    // Fallback visual se a imagem não carregar bem
-                    display: "flex",
-                    alignItems: "center",
-                    justifyContent: "center",
-                  }}
-                >
-                  {/* Se não tiver imagem, mostra um card flutuante simulando a interface */}
+                // Cards Flutuantes (quando não há imagem)
+                <Box sx={{ display: "flex", flexDirection: "column", gap: 2, width: "100%" }}>
                   <Box
                     sx={{
-                      width: "80%",
-                      height: "60%",
-                      background: "rgba(255,255,255,0.1)",
+                      background: "rgba(255, 255, 255, 0.15)",
                       backdropFilter: "blur(20px)",
-                      borderRadius: 4,
-                      border: "1px solid rgba(255,255,255,0.2)",
-                      boxShadow: "0 25px 50px rgba(0,0,0,0.2)",
-                      display: "flex",
-                      alignItems: "center",
-                      justifyContent: "center",
+                      borderRadius: "var(--radius-xl)",
+                      border: "1px solid rgba(255, 255, 255, 0.2)",
+                      p: 3,
                       color: "white",
+                      boxShadow: "var(--shadow-xl)",
                     }}
                   >
-                    <Typography variant="h6">Ilustração do Concurso</Typography>
+                    <TrendingUp sx={{ fontSize: 40, mb: 1 }} />
+                    <Typography sx={{ fontWeight: 600, fontSize: "var(--text-lg)", mb: 0.5 }}>
+                      Evolução Garantida
+                    </Typography>
+                    <Typography sx={{ fontSize: "var(--text-sm)", opacity: 0.9 }}>
+                      Acompanhe seu progresso em tempo real
+                    </Typography>
+                  </Box>
+
+                  <Box
+                    sx={{
+                      background: "rgba(16, 185, 129, 0.2)",
+                      backdropFilter: "blur(20px)",
+                      borderRadius: "var(--radius-xl)",
+                      border: "1px solid rgba(255, 255, 255, 0.2)",
+                      p: 3,
+                      color: "white",
+                      boxShadow: "var(--shadow-xl)",
+                    }}
+                  >
+                    <EmojiEvents sx={{ fontSize: 40, mb: 1 }} />
+                    <Typography sx={{ fontWeight: 600, fontSize: "var(--text-lg)", mb: 0.5 }}>
+                      Ranking Nacional
+                    </Typography>
+                    <Typography sx={{ fontSize: "var(--text-sm)", opacity: 0.9 }}>
+                      Compare-se com milhares de candidatos
+                    </Typography>
                   </Box>
                 </Box>
               )}
@@ -295,7 +348,7 @@ function HeroSection() {
         </Grid>
       </Container>
 
-      {/* Navegação do Carrossel (Se houver mais de um) */}
+      {/* Navegação do Carrossel */}
       {banners.length > 1 && (
         <>
           <IconButton
@@ -305,10 +358,14 @@ function HeroSection() {
               left: { xs: 10, md: 40 },
               top: "50%",
               transform: "translateY(-50%)",
-              background: "rgba(255,255,255,0.1)",
+              background: "rgba(255,255,255,0.2)",
+              backdropFilter: "blur(10px)",
               color: "white",
-              backdropFilter: "blur(5px)",
-              "&:hover": { background: "rgba(255,255,255,0.2)" },
+              border: "1px solid rgba(255,255,255,0.3)",
+              "&:hover": {
+                background: "rgba(255,255,255,0.3)",
+              },
+              transition: "all 0.3s ease",
             }}
           >
             <KeyboardArrowLeft />
@@ -320,10 +377,14 @@ function HeroSection() {
               right: { xs: 10, md: 40 },
               top: "50%",
               transform: "translateY(-50%)",
-              background: "rgba(255,255,255,0.1)",
+              background: "rgba(255,255,255,0.2)",
+              backdropFilter: "blur(10px)",
               color: "white",
-              backdropFilter: "blur(5px)",
-              "&:hover": { background: "rgba(255,255,255,0.2)" },
+              border: "1px solid rgba(255,255,255,0.3)",
+              "&:hover": {
+                background: "rgba(255,255,255,0.3)",
+              },
+              transition: "all 0.3s ease",
             }}
           >
             <KeyboardArrowRight />

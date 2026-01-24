@@ -46,7 +46,6 @@ function StatsSection() {
             sx={{
                 py: 8,
                 background: 'linear-gradient(90deg, #6366F1 0%, #8B5CF6 100%)', // Gradiente Indigo to Violet
-                color: 'white',
                 mt: 8,
                 borderRadius: { xs: 0, md: 4 }, // Bordas arredondadas se não for mobile full width
                 mx: { xs: 0, md: 4 }, // Margem lateral em desktop
@@ -66,7 +65,7 @@ function StatsSection() {
                                     gap: 1
                                 }}
                             >
-                                <Box sx={{ opacity: 0.9, mb: 1 }}>
+                                <Box sx={{ opacity: 1, mb: 1, color: '#FEF08A' }}>
                                     {stat.icon}
                                 </Box>
                                 <Typography
@@ -74,7 +73,9 @@ function StatsSection() {
                                     sx={{
                                         fontWeight: 800,
                                         fontSize: { xs: '2rem', md: '2.5rem' },
-                                        lineHeight: 1
+                                        lineHeight: 1,
+                                        color: '#1e293b',
+                                        textShadow: '0 2px 0px rgba(255,255,255,0.2)'
                                     }}
                                 >
                                     {inView ? (
@@ -87,9 +88,10 @@ function StatsSection() {
                                 <Typography
                                     variant="body1"
                                     sx={{
-                                        fontWeight: 500,
-                                        opacity: 0.9,
-                                        fontSize: '0.95rem'
+                                        fontWeight: 700,
+                                        opacity: 1,
+                                        fontSize: '1rem',
+                                        color: '#334155'
                                     }}
                                 >
                                     {stat.label}

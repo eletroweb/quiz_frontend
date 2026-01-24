@@ -1,13 +1,144 @@
-@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap');
+/* ========================================
+   🎨 MODERN EDUCATIONAL DESIGN SYSTEM
+   Quiz Concursos - 2026
+   ======================================== */
+
+/* Tipografia Premium */
+@import url('https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700;800&family=Inter:wght@300;400;500;600;700&display=swap');
 
 :root {
-  font-family: 'Inter', system-ui, Avenir, Helvetica, Arial, sans-serif;
-  line-height: 1.5;
+  /* === PALETA MODERNA EDUCACIONAL === */
+  --color-primary: #2563EB;
+  /* Azul Confiança */
+  --color-primary-dark: #1E40AF;
+  /* Azul Escuro */
+  --color-primary-light: #DBEAFE;
+  /* Azul Claro */
+
+  --color-secondary: #10B981;
+  /* Verde Sucesso */
+  --color-secondary-dark: #059669;
+  /* Verde Escuro */
+  --color-secondary-light: #D1FAE5;
+  /* Verde Claro */
+
+  --color-accent: #F59E0B;
+  /* Laranja Energia */
+  --color-accent-dark: #D97706;
+  /* Laranja Escuro */
+  --color-accent-light: #FEF3C7;
+  /* Laranja Claro */
+
+  --color-text-primary: #1F2937;
+  /* Texto Principal */
+  --color-text-secondary: #6B7280;
+  /* Texto Secundário */
+  --color-text-muted: #9CA3AF;
+  /* Texto Suave */
+
+  --color-bg-primary: #FFFFFF;
+  /* Fundo Branco */
+  --color-bg-secondary: #F9FAFB;
+  /* Cinza Clarissimo */
+  --color-bg-dark: #111827;
+  /* Fundo Escuro */
+
+  --color-border: #E5E7EB;
+  /* Borda Padrão */
+  --color-border-dark: #374151;
+  /* Borda Escura */
+
+  /* === TIPOGRAFIA === */
+  --font-display: 'Poppins', system-ui, sans-serif;
+  --font-body: 'Inter', system-ui, sans-serif;
+
+  /* Scale Tipográfica (Major Third - 1.200) */
+  --text-xs: 0.75rem;
+  /* 12px */
+  --text-sm: 0.875rem;
+  /* 14px */
+  --text-base: 1rem;
+  /* 16px */
+  --text-lg: 1.125rem;
+  /* 18px */
+  --text-xl: 1.25rem;
+  /* 20px */
+  --text-2xl: 1.5rem;
+  /* 24px */
+  --text-3xl: 1.875rem;
+  /* 30px */
+  --text-4xl: 2.25rem;
+  /* 36px */
+  --text-5xl: 3rem;
+  /* 48px */
+  --text-6xl: 3.75rem;
+  /* 60px */
+  --text-7xl: 4.5rem;
+  /* 72px */
+
+  /* === ESPAÇAMENTO (8-point grid) === */
+  --space-1: 0.5rem;
+  /* 8px */
+  --space-2: 1rem;
+  /* 16px */
+  --space-3: 1.5rem;
+  /* 24px */
+  --space-4: 2rem;
+  /* 32px */
+  --space-5: 2.5rem;
+  /* 40px */
+  --space-6: 3rem;
+  /* 48px */
+  --space-8: 4rem;
+  /* 64px */
+  --space-10: 5rem;
+  /* 80px */
+  --space-12: 6rem;
+  /* 96px */
+
+  /* === GEOMETRIA MODERNA (Amigável) === */
+  --radius-sm: 0.375rem;
+  /* 6px */
+  --radius-md: 0.5rem;
+  /* 8px */
+  --radius-lg: 0.75rem;
+  /* 12px */
+  --radius-xl: 1rem;
+  /* 16px */
+  --radius-2xl: 1.5rem;
+  /* 24px */
+  --radius-full: 9999px;
+  /* Circular */
+
+  /* === SOMBRAS MODERNAS (Suaves) === */
+  --shadow-sm: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
+  --shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+  --shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+  --shadow-xl: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+  --shadow-2xl: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
+
+  /* === ANIMAÇÕES (Spring Physics) === */
+  --transition-fast: 150ms cubic-bezier(0.34, 1.56, 0.64, 1);
+  --transition-base: 250ms cubic-bezier(0.34, 1.56, 0.64, 1);
+  --transition-slow: 400ms cubic-bezier(0.34, 1.56, 0.64, 1);
+
+  /* === Z-INDEX === */
+  --z-base: 1;
+  --z-dropdown: 1000;
+  --z-sticky: 1100;
+  --z-fixed: 1200;
+  --z-modal: 1300;
+  --z-popover: 1400;
+  --z-tooltip: 1500;
+
+  /* Configurações de Fonte */
+  font-family: var(--font-body);
+  line-height: 1.6;
   font-weight: 400;
 
   color-scheme: light;
-  color: #1E293B;
-  background-color: #ffffff;
+  color: var(--color-text-primary);
+  background-color: var(--color-bg-primary);
 
   font-synthesis: none;
   text-rendering: optimizeLegibility;
@@ -15,28 +146,192 @@
   -moz-osx-font-smoothing: grayscale;
 }
 
+/* === RESET & BASE === */
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
 body {
   margin: 0;
   padding: 0;
   min-width: 320px;
   min-height: 100vh;
-  background-color: #ffffff;
+  background-color: var(--color-bg-primary);
+  overflow-x: hidden;
 }
 
-/* Scrollbar personalizada */
+/* === TIPOGRAFIA GLOBAL === */
+h1,
+h2,
+h3,
+h4,
+h5,
+h6 {
+  font-family: var(--font-display);
+  font-weight: 700;
+  line-height: 1.1;
+  letter-spacing: -0.02em;
+  color: var(--color-text-primary);
+}
+
+h1 {
+  font-size: var(--text-6xl);
+}
+
+h2 {
+  font-size: var(--text-5xl);
+}
+
+h3 {
+  font-size: var(--text-4xl);
+}
+
+h4 {
+  font-size: var(--text-3xl);
+}
+
+h5 {
+  font-size: var(--text-2xl);
+}
+
+h6 {
+  font-size: var(--text-xl);
+}
+
+p {
+  font-family: var(--font-body);
+  line-height: 1.7;
+  color: var(--color-text-secondary);
+}
+
+/* === SCROLLBAR BRUTALIST === */
 ::-webkit-scrollbar {
-  width: 8px;
+  width: 12px;
+  height: 12px;
 }
 
 ::-webkit-scrollbar-track {
-  background: #f1f1f1;
+  background: var(--color-bg-secondary);
+  border-left: 1px solid var(--color-border);
 }
 
 ::-webkit-scrollbar-thumb {
-  background: #cbd5e1;
-  border-radius: 4px;
+  background: var(--color-primary);
+  border-radius: var(--radius-none);
+  border: 2px solid var(--color-bg-secondary);
 }
 
 ::-webkit-scrollbar-thumb:hover {
-  background: #94a3b8;
+  background: var(--color-primary-dark);
+}
+
+/* === ANIMAÇÕES KEYFRAMES === */
+@keyframes fadeInUp {
+  from {
+    opacity: 0;
+    transform: translateY(30px);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes fadeInLeft {
+  from {
+    opacity: 0;
+    transform: translateX(-30px);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
+@keyframes fadeInRight {
+  from {
+    opacity: 0;
+    transform: translateX(30px);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
+@keyframes scaleIn {
+  from {
+    opacity: 0;
+    transform: scale(0.9);
+  }
+
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+@keyframes slideDown {
+  from {
+    opacity: 0;
+    transform: translateY(-20px);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* === UTILITY CLASSES === */
+.brutalist-shadow {
+  box-shadow: var(--shadow-md);
+  transition: box-shadow var(--transition-base);
+}
+
+.brutalist-shadow:hover {
+  box-shadow: var(--shadow-lg);
+  transform: translate(-2px, -2px);
+}
+
+.grain-texture {
+  position: relative;
+}
+
+.grain-texture::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 400 400' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noiseFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noiseFilter)'/%3E%3C/svg%3E");
+  opacity: 0.03;
+  pointer-events: none;
+  z-index: 1;
+}
+
+/* === ACESSIBILIDADE === */
+@media (prefers-reduced-motion: reduce) {
+
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+}
+
+/* === SELEÇÃO DE TEXTO === */
+::selection {
+  background-color: var(--color-primary);
+  color: white;
+}
+
+::-moz-selection {
+  background-color: var(--color-primary);
+  color: white;
 }

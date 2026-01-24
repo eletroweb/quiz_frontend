@@ -42,29 +42,56 @@ function PublicHeader() {
     return (
         <AppBar
             position="fixed"
+            elevation={0}
             sx={{
-                background: 'rgba(255, 255, 255, 0.95)',
+                background: 'rgba(255, 255, 255, 0.98)',
                 backdropFilter: 'blur(10px)',
-                boxShadow: '0 2px 20px rgba(0,0,0,0.05)',
-                color: '#1a1a1a'
+                borderBottom: '1px solid var(--color-border)',
+                color: 'var(--color-text-primary)',
+                boxShadow: 'var(--shadow-sm)',
             }}
         >
             <Container maxWidth="lg">
-                <Toolbar sx={{ justifyContent: 'space-between', py: 1 }}>
+                <Toolbar sx={{ justifyContent: 'space-between', py: 1, px: { xs: 0, md: 2 } }}>
                     {/* Logo */}
                     <Box
-                        sx={{ display: 'flex', alignItems: 'center', gap: 1, cursor: 'pointer' }}
+                        sx={{
+                            display: 'flex',
+                            alignItems: 'center',
+                            gap: 1.5,
+                            cursor: 'pointer',
+                            transition: 'all 0.3s ease',
+                            '&:hover': {
+                                transform: 'scale(1.05)',
+                            },
+                        }}
                         onClick={() => navigate('/')}
                     >
-                        <SchoolIcon sx={{ fontSize: 32, color: '#4F46E5' }} />
+                        <Box
+                            sx={{
+                                display: 'flex',
+                                alignItems: 'center',
+                                justifyContent: 'center',
+                                width: 40,
+                                height: 40,
+                                background: 'linear-gradient(135deg, var(--color-primary) 0%, var(--color-primary-dark) 100%)',
+                                color: 'white',
+                                borderRadius: 'var(--radius-md)',
+                                boxShadow: 'var(--shadow-md)',
+                            }}
+                        >
+                            <SchoolIcon sx={{ fontSize: 24 }} />
+                        </Box>
                         <Typography
                             variant="h6"
                             sx={{
+                                fontFamily: 'var(--font-display)',
                                 fontWeight: 700,
-                                background: 'linear-gradient(135deg, #4F46E5 0%, #7C3AED 100%)',
+                                fontSize: 'var(--text-lg)',
+                                background: 'linear-gradient(135deg, var(--color-primary) 0%, var(--color-primary-dark) 100%)',
                                 WebkitBackgroundClip: 'text',
                                 WebkitTextFillColor: 'transparent',
-                                display: { xs: 'none', sm: 'block' }
+                                display: { xs: 'none', sm: 'block' },
                             }}
                         >
                             Quiz Concursos
@@ -73,7 +100,7 @@ function PublicHeader() {
 
                     {/* Desktop Menu */}
                     {!isMobile && (
-                        <Box sx={{ display: 'flex', gap: 3, alignItems: 'center' }}>
+                        <Box sx={{ display: 'flex', gap: 1, alignItems: 'center' }}>
                             {menuItems.map((item) => (
                                 <Button
                                     key={item.label}
@@ -83,51 +110,100 @@ function PublicHeader() {
                                             : navigate(item.path)
                                     }
                                     sx={{
-                                        color: '#1a1a1a',
+                                        color: 'var(--color-text-primary)',
                                         fontWeight: 500,
+                                        fontSize: 'var(--text-sm)',
+                                        px: 2,
+                                        py: 1,
+                                        borderRadius: 'var(--radius-md)',
+                                        transition: 'all 0.3s ease',
                                         '&:hover': {
-                                            color: '#4F46E5',
-                                            background: 'transparent'
-                                        }
+                                            background: 'var(--color-primary-light)',
+                                            color: 'var(--color-primary)',
+                                        },
                                     }}
                                 >
                                     {item.label}
                                 </Button>
                             ))}
+
+                            <Box sx={{ width: '1px', height: '24px', background: 'var(--color-border)', mx: 1 }} />
+
                             <Button
                                 variant="outlined"
                                 onClick={() => navigate('/login')}
                                 sx={{
-                                    borderColor: '#4F46E5',
-                                    color: '#4F46E5',
+                                    borderColor: 'var(--color-primary)',
+                                    color: 'var(--color-primary)',
                                     fontWeight: 600,
+                                    fontSize: 'var(--text-sm)',
+                                    px: 3,
+                                    py: 1,
+                                    borderRadius: 'var(--radius-md)',
+                                    transition: 'all 0.3s ease',
                                     '&:hover': {
-                                        borderColor: '#4F46E5',
-                                        background: 'rgba(79, 70, 229, 0.05)'
-                                    }
+                                        borderColor: 'var(--color-primary)',
+                                        background: 'var(--color-primary-light)',
+                                    },
                                 }}
                             >
                                 Entrar
                             </Button>
+
                             <Button
                                 variant="contained"
                                 onClick={() => navigate('/login')}
                                 sx={{
-                                    background: 'linear-gradient(135deg, #F97316 0%, #EA580C 100%)',
+                                    background: 'linear-gradient(135deg, var(--color-primary) 0%, var(--color-primary-dark) 100%)',
+                                    color: 'white',
                                     fontWeight: 600,
+                                    fontSize: 'var(--text-sm)',
                                     px: 3,
-                                    boxShadow: '0 4px 14px rgba(249, 115, 22, 0.3)',
+                                    py: 1,
+                                    borderRadius: 'var(--radius-md)',
+                                    boxShadow: 'var(--shadow-md)',
+                                    transition: 'all 0.3s ease',
                                     '&:hover': {
-                                        background: 'linear-gradient(135deg, #EA580C 0%, #C2410C 100%)',
-                                        boxShadow: '0 6px 20px rgba(249, 115, 22, 0.4)',
-                                    }
+                                        transform: 'translateY(-2px)',
+                                        boxShadow: 'var(--shadow-lg)',
+                                    },
                                 }}
                             >
                                 Cadastrar
                             </Button>
+
                             {/* Cart icon */}
-                            <IconButton sx={{ ml: 1 }} onClick={() => navigate('/cart')} aria-label="carrinho">
-                                <Badge badgeContent={(() => { try { const raw = localStorage.getItem('cart_items'); const arr = raw?JSON.parse(raw):[]; return Array.isArray(arr)?arr.length:0;} catch {return 0;} })()} color="secondary">
+                            <IconButton
+                                sx={{
+                                    ml: 1,
+                                    borderRadius: 'var(--radius-md)',
+                                    transition: 'all 0.3s ease',
+                                    '&:hover': {
+                                        background: 'var(--color-primary-light)',
+                                        color: 'var(--color-primary)',
+                                    },
+                                }}
+                                onClick={() => navigate('/cart')}
+                                aria-label="carrinho"
+                            >
+                                <Badge
+                                    badgeContent={(() => {
+                                        try {
+                                            const raw = localStorage.getItem('cart_items');
+                                            const arr = raw ? JSON.parse(raw) : [];
+                                            return Array.isArray(arr) ? arr.length : 0;
+                                        } catch {
+                                            return 0;
+                                        }
+                                    })()}
+                                    sx={{
+                                        '& .MuiBadge-badge': {
+                                            background: 'var(--color-accent)',
+                                            color: 'white',
+                                            fontWeight: 700,
+                                        },
+                                    }}
+                                >
                                     <ShoppingCartIcon />
                                 </Badge>
                             </IconButton>
@@ -137,13 +213,27 @@ function PublicHeader() {
                     {/* Mobile Menu */}
                     {isMobile && (
                         <>
-                            <IconButton onClick={handleMenuOpen} sx={{ color: '#1a1a1a' }}>
+                            <IconButton
+                                onClick={handleMenuOpen}
+                                sx={{
+                                    color: 'var(--color-text-primary)',
+                                    borderRadius: 'var(--radius-md)',
+                                }}
+                            >
                                 <MenuIcon />
                             </IconButton>
                             <Menu
                                 anchorEl={anchorEl}
                                 open={Boolean(anchorEl)}
                                 onClose={handleMenuClose}
+                                PaperProps={{
+                                    sx: {
+                                        mt: 1,
+                                        borderRadius: 'var(--radius-lg)',
+                                        border: '1px solid var(--color-border)',
+                                        boxShadow: 'var(--shadow-xl)',
+                                    },
+                                }}
                             >
                                 {menuItems.map((item) => (
                                     <MenuItem
@@ -156,17 +246,57 @@ function PublicHeader() {
                                             }
                                             handleMenuClose();
                                         }}
+                                        sx={{
+                                            fontWeight: 500,
+                                            fontSize: 'var(--text-sm)',
+                                            '&:hover': {
+                                                background: 'var(--color-primary-light)',
+                                                color: 'var(--color-primary)',
+                                            },
+                                        }}
                                     >
                                         {item.label}
                                     </MenuItem>
                                 ))}
-                                <MenuItem onClick={() => { navigate('/login'); handleMenuClose(); }}>
+                                <MenuItem
+                                    onClick={() => {
+                                        navigate('/login');
+                                        handleMenuClose();
+                                    }}
+                                    sx={{
+                                        fontWeight: 500,
+                                        fontSize: 'var(--text-sm)',
+                                        '&:hover': { background: 'var(--color-primary-light)' },
+                                    }}
+                                >
                                     Entrar
                                 </MenuItem>
-                                <MenuItem onClick={() => { navigate('/login'); handleMenuClose(); }}>
+                                <MenuItem
+                                    onClick={() => {
+                                        navigate('/login');
+                                        handleMenuClose();
+                                    }}
+                                    sx={{
+                                        fontWeight: 600,
+                                        fontSize: 'var(--text-sm)',
+                                        background: 'var(--color-primary)',
+                                        color: 'white',
+                                        '&:hover': { background: 'var(--color-primary-dark)' },
+                                    }}
+                                >
                                     Cadastrar
                                 </MenuItem>
-                                <MenuItem onClick={() => { navigate('/cart'); handleMenuClose(); }}>
+                                <MenuItem
+                                    onClick={() => {
+                                        navigate('/cart');
+                                        handleMenuClose();
+                                    }}
+                                    sx={{
+                                        fontWeight: 500,
+                                        fontSize: 'var(--text-sm)',
+                                        '&:hover': { background: 'var(--color-primary-light)' },
+                                    }}
+                                >
                                     Carrinho
                                 </MenuItem>
                             </Menu>
@@ -174,7 +304,7 @@ function PublicHeader() {
                     )}
                 </Toolbar>
             </Container>
-        </AppBar>
+        </AppBar >
     );
 }
 

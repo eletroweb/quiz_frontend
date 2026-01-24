@@ -12,8 +12,9 @@ function CTASection() {
                     sx={{
                         fontWeight: 800,
                         mb: 3,
-                        color: '#1E293B',
-                        fontSize: { xs: '2rem', md: '3rem' }
+                        color: '#0F172A',
+                        fontSize: { xs: '2rem', md: '3rem' },
+                        textShadow: '0 2px 4px rgba(0, 0, 0, 0.1)'
                     }}
                 >
                     Pronto para começar sua jornada?
@@ -22,10 +23,11 @@ function CTASection() {
                 <Typography
                     variant="h6"
                     sx={{
-                        color: '#64748B',
+                        color: '#475569',
                         mb: 6,
-                        fontWeight: 400,
-                        lineHeight: 1.6
+                        fontWeight: 500,
+                        lineHeight: 1.6,
+                        textShadow: '0 1px 2px rgba(0, 0, 0, 0.05)'
                     }}
                 >
                     Junte-se a milhares de estudantes que já estão transformando seus sonhos em realidade com o Quiz Concursos.
