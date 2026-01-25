@@ -71,107 +71,132 @@ const NewsSection = () => {
     return (
         <Box sx={{ py: 8, bgcolor: '#F8FAFC' }}>
             <Container maxWidth="lg">
-                <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 4, borderBottom: '2px solid #000', pb: 1 }}>
-                    <Typography variant="h4" fontWeight="900" sx={{ textTransform: 'uppercase', letterSpacing: 1 }}>
-                        Últimas Notícias
-                    </Typography>
+                <Box sx={{ display: 'flex', justifyContent: 'center', mb: 6 }}>
+                    <Box sx={{ textAlign: 'center' }}>
+                        <Typography
+                            sx={{
+                                fontFamily: 'var(--font-display)',
+                                fontSize: 'var(--text-sm)',
+                                fontWeight: 600,
+                                color: 'var(--color-primary)',
+                                textTransform: 'uppercase',
+                                letterSpacing: '0.1em',
+                                mb: 2,
+                            }}
+                        >
+                            Fique por dentro
+                        </Typography>
+                        <Typography
+                            variant="h2"
+                            sx={{
+                                fontFamily: 'var(--font-display)',
+                                fontSize: { xs: 'var(--text-3xl)', md: 'var(--text-4xl)' },
+                                fontWeight: 700,
+                                color: '#1e293b',
+                            }}
+                        >
+                            Últimas Notícias
+                        </Typography>
+                    </Box>
                 </Box>
 
-                <Grid container spacing={4}>
-                    {/* Destaque Principal (Spotlight) */}
-                    {featured && (
-                        <Grid item xs={12} md={5}>
-                            <Box
-                                onClick={() => handleOpenNews(featured)}
+                <Grid container spacing={4} justifyContent="center">
+                    {/* Juntar destaque e outras notícias em uma única lista */}
+                    {(featured ? [featured, ...news] : news).map((item) => (
+                        <Grid item xs={12} sm={6} md={4} key={item.id} sx={{ display: 'flex', justifyContent: 'center' }}>
+                            <Card
+                                elevation={0}
                                 sx={{
-                                    position: 'relative',
-                                    height: '100%',
-                                    minHeight: 400,
-                                    cursor: 'pointer',
-                                    transition: 'transform 0.2s',
-                                    '&:hover': { transform: 'translateY(-4px)' }
+                                    width: '100%',
+                                    maxWidth: '382px',
+                                    height: '282px',
+                                    display: 'flex',
+                                    flexDirection: 'column',
+                                    background: '#1F2937',
+                                    borderRadius: 3,
+                                    overflow: 'hidden',
+                                    transition: 'transform 0.3s ease, box-shadow 0.3s ease',
+                                    border: '1px solid rgba(255,255,255,0.05)',
+                                    '&:hover': {
+                                        transform: 'translateY(-4px)',
+                                        boxShadow: '0 10px 15px -3px rgba(0, 0, 0, 0.3)',
+                                    }
                                 }}
                             >
-                                <Typography variant="h6" sx={{ bgcolor: 'black', color: 'white', display: 'inline-block', px: 2, py: 0.5, mb: 2, fontWeight: 'bold' }}>
-                                    DESTAQUE
-                                </Typography>
-                                {featured.imagem_url && (
-                                    <Box
-                                        component="img"
-                                        src={featured.imagem_url.startsWith('http') ? featured.imagem_url : `${API_BASE_URL}${featured.imagem_url}`}
-                                        alt={featured.titulo}
-                                        sx={{ width: '100%', height: 300, objectFit: 'cover', mb: 2, display: 'block' }}
-                                    />
-                                )}
-                                <Typography variant="h5" fontWeight="bold" gutterBottom sx={{ lineHeight: 1.2 }}>
-                                    {featured.titulo}
-                                </Typography>
-                                <Typography variant="body2" color="text.secondary" paragraph>
-                                    {featured.resumo}
-                                </Typography>
-                                <Box sx={{ display: 'flex', alignItems: 'center', color: '#9CA3AF', fontSize: '0.8rem', gap: 2 }}>
-                                    <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5 }}>
-                                        <CalendarToday sx={{ fontSize: 14 }} />
-                                        {formatDate(featured.data_publicacao)}
-                                    </Box>
-                                    <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5 }}>
-                                        <Person sx={{ fontSize: 14 }} />
-                                        ADMIN
-                                    </Box>
-                                </Box>
-                            </Box>
-                        </Grid>
-                    )}
-
-                    {/* Notícias Recentes em Álbum */}
-                    <Grid item xs={12} md={7}>
-                        {featured && <Box sx={{ borderTop: { xs: '1px solid #e5e7eb', md: 'none' }, mb: 3 }} />}
-                        <Typography variant="h6" fontWeight="bold" gutterBottom sx={{ textTransform: 'uppercase', borderBottom: '1px solid #000', pb: 1, mb: 3 }}>
-                            Recentes
-                        </Typography>
-                        <Grid container spacing={3}>
-                            {news.map((item) => (
-                                <Grid item xs={12} sm={6} md={4} key={item.id}>
-                                    <Card sx={{ height: '100%', display: 'flex', flexDirection: 'column' }}>
-                                        {item.imagem_url ? (
-                                            <CardMedia
-                                                component="img"
-                                                height="140"
-                                                image={item.imagem_url.startsWith('http') ? item.imagem_url : `${API_BASE_URL}${item.imagem_url}`}
-                                                alt={item.titulo}
-                                            />
-                                        ) : (
-                                            <Box sx={{ height: 140, bgcolor: '#E2E8F0' }} />
-                                        )}
-                                        <CardContent sx={{ flexGrow: 1 }}>
-                                            <Typography variant="subtitle1" fontWeight="bold" sx={{ lineHeight: 1.3, mb: 1 }}>
-                                                {item.titulo}
-                                            </Typography>
-                                            <Typography variant="body2" color="text.secondary" sx={{
-                                                display: '-webkit-box',
-                                                WebkitLineClamp: 3,
-                                                WebkitBoxOrient: 'vertical',
-                                                overflow: 'hidden'
-                                            }}>
-                                                {item.resumo}
-                                            </Typography>
-                                            <Box sx={{ display: 'flex', alignItems: 'center', color: '#9CA3AF', fontSize: '0.75rem', gap: 2, mt: 1 }}>
-                                                <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5 }}>
-                                                    <CalendarToday sx={{ fontSize: 12 }} />
-                                                    {formatDate(item.data_publicacao)}
-                                                </Box>
-                                            </Box>
-                                        </CardContent>
-                                        <Box sx={{ p: 2, pt: 0, display: 'flex', gap: 1 }}>
-                                            <Button variant="outlined" fullWidth onClick={() => handleOpenNews(item)}>
-                                                Mais detalhes
-                                            </Button>
+                                {/* Imagem com altura fixa menor */}
+                                <Box sx={{ position: 'relative', height: '140px', flexShrink: 0 }}>
+                                    {item.imagem_url ? (
+                                        <CardMedia
+                                            component="img"
+                                            image={item.imagem_url.startsWith('http') ? item.imagem_url : `${API_BASE_URL}${item.imagem_url}`}
+                                            alt={item.titulo}
+                                            sx={{
+                                                width: '100%',
+                                                height: '100%',
+                                                objectFit: 'cover'
+                                            }}
+                                        />
+                                    ) : (
+                                        <Box sx={{
+                                            width: '100%',
+                                            height: '100%',
+                                            bgcolor: '#374151',
+                                            display: 'flex',
+                                            alignItems: 'center',
+                                            justifyContent: 'center'
+                                        }}>
+                                            <Typography sx={{ color: '#9CA3AF', fontSize: '0.8rem' }}>Sem imagem</Typography>
                                         </Box>
-                                    </Card>
-                                </Grid>
-                            ))}
+                                    )}
+                                </Box>
+
+                                <CardContent sx={{
+                                    flexGrow: 1,
+                                    p: 2,
+                                    display: 'flex',
+                                    flexDirection: 'column',
+                                    justifyContent: 'space-between'
+                                }}>
+                                    <Typography
+                                        variant="subtitle1"
+                                        fontWeight="700"
+                                        sx={{
+                                            color: '#F9FAFB',
+                                            lineHeight: 1.3,
+                                            fontSize: '1rem',
+                                            display: '-webkit-box',
+                                            WebkitLineClamp: 3,
+                                            WebkitBoxOrient: 'vertical',
+                                            overflow: 'hidden',
+                                        }}
+                                    >
+                                        {item.titulo}
+                                    </Typography>
+
+                                    <Button
+                                        onClick={() => handleOpenNews(item)}
+                                        sx={{
+                                            alignSelf: 'flex-start',
+                                            color: '#3B82F6',
+                                            fontWeight: 700,
+                                            fontSize: '0.75rem',
+                                            padding: 0,
+                                            mt: 0.5,
+                                            minWidth: 'auto',
+                                            '&:hover': {
+                                                background: 'transparent',
+                                                color: '#60A5FA',
+                                                textDecoration: 'underline'
+                                            }
+                                        }}
+                                        endIcon={<span style={{ fontSize: '1.1em' }}>→</span>}
+                                    >
+                                        SAIBA MAIS
+                                    </Button>
+                                </CardContent>
+                            </Card>
                         </Grid>
-                    </Grid>
+                    ))}
                 </Grid>
 
                 {/* Dialog de Leitura */}
