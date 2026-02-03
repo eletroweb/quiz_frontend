@@ -21,6 +21,11 @@ import {
   Dialog,
   DialogTitle,
   DialogContent,
+  Alert,
+  Radio,
+  RadioGroup,
+  FormControl,
+  FormControlLabel,
 } from "@mui/material";
 import {
   PlayCircle,
@@ -47,6 +52,28 @@ export default function Study() {
   const [loading, setLoading] = useState(true);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [userCourses, setUserCourses] = useState([]);
+  const [showAllCourses, setShowAllCourses] = useState(true);
+  const [lessonCompleted, setLessonCompleted] = useState(false);
+  const [quizLoading, setQuizLoading] = useState(false);
+  const [quizQuestions, setQuizQuestions] = useState([]);
+  const [quizAnswers, setQuizAnswers] = useState({});
+  const [quizSubmitted, setQuizSubmitted] = useState(false);
+  const [quizScore, setQuizScore] = useState(null);
+  const [quizError, setQuizError] = useState("");
+
+  const normalizeMaterias = (rows) => {
+    if (!Array.isArray(rows)) return [];
+    const map = new Map();
+    rows.forEach((row) => {
+      const materiaId = row?.materia_id ?? row?.id;
+      const materiaNome = row?.materia_nome ?? row?.nome;
+      if (!materiaId || !materiaNome) return;
+      if (!map.has(materiaId)) {
+        map.set(materiaId, { id: materiaId, nome: materiaNome });
+      }
+    });
+    return Array.from(map.values());
+  };
 
   const loadUserCourses = useCallback(async () => {
     setLoading(true);
@@ -56,13 +83,20 @@ export default function Study() {
       const first = response.data[0];
       if (first) {
         setSelectedCurso(first);
-        const matRes = await api.get(`/cursos/curso-materias/${first.id}`).then(r => r).catch(() => null);
+        const matRes = await api
+          .get(`/cursos/curso-materias/${first.id}`)
+          .then((r) => r)
+          .catch(() => null);
         if (matRes && Array.isArray(matRes.data)) {
-          setMaterias(matRes.data);
-          const firstMat = matRes.data[0];
+          const normalized = normalizeMaterias(matRes.data);
+          setMaterias(normalized);
+          const firstMat = normalized[0];
           if (firstMat) {
             setSelectedMateria(firstMat.id);
-            const contRes = await api.get(`/conteudos?materia_id=${firstMat.id}`).then(r => r).catch(() => null);
+            const contRes = await api
+              .get(`/conteudos?materia_id=${firstMat.id}`)
+              .then((r) => r)
+              .catch(() => null);
             if (contRes && Array.isArray(contRes.data)) {
               setConteudos(contRes.data);
               setSelectedConteudo(null);
@@ -79,13 +113,20 @@ export default function Study() {
       const first2 = response2.data[0];
       if (first2) {
         setSelectedCurso(first2);
-        const matRes2 = await api.get(`/cursos/curso-materias/${first2.id}`).then(r => r).catch(() => null);
+        const matRes2 = await api
+          .get(`/cursos/curso-materias/${first2.id}`)
+          .then((r) => r)
+          .catch(() => null);
         if (matRes2 && Array.isArray(matRes2.data)) {
-          setMaterias(matRes2.data);
-          const firstMat2 = matRes2.data[0];
+          const normalized = normalizeMaterias(matRes2.data);
+          setMaterias(normalized);
+          const firstMat2 = normalized[0];
           if (firstMat2) {
             setSelectedMateria(firstMat2.id);
-            const contRes2 = await api.get(`/conteudos?materia_id=${firstMat2.id}`).then(r => r).catch(() => null);
+            const contRes2 = await api
+              .get(`/conteudos?materia_id=${firstMat2.id}`)
+              .then((r) => r)
+              .catch(() => null);
             if (contRes2 && Array.isArray(contRes2.data)) {
               setConteudos(contRes2.data);
               setSelectedConteudo(null);
@@ -108,10 +149,11 @@ export default function Study() {
   const loadCursoMaterias = async (cursoId) => {
     try {
       const response = await api.get(`/cursos/curso-materias/${cursoId}`);
-      setMaterias(response.data);
-      if (response.data.length > 0) {
-        setSelectedMateria(response.data[0].id);
-        loadConteudos(response.data[0].id);
+      const normalized = normalizeMaterias(response.data);
+      setMaterias(normalized);
+      if (normalized.length > 0) {
+        setSelectedMateria(normalized[0].id);
+        loadConteudos(normalized[0].id);
       }
     } catch (error) {
       console.error("Erro ao carregar matérias do curso:", error);
@@ -144,6 +186,13 @@ export default function Study() {
   const handleCursoChange = (curso) => {
     setSelectedCurso(curso);
     setSelectedConteudo(null);
+    setLessonCompleted(false);
+    setQuizQuestions([]);
+    setQuizAnswers({});
+    setQuizSubmitted(false);
+    setQuizScore(null);
+    setQuizError("");
+    setShowAllCourses(false);
     setMobileMenuOpen(false);
     loadCursoMaterias(curso.id);
   };
@@ -151,7 +200,123 @@ export default function Study() {
   const handleMateriaChange = (materia) => {
     setSelectedMateria(materia.id);
     setSelectedConteudo(null);
+    setLessonCompleted(false);
+    setQuizQuestions([]);
+    setQuizAnswers({});
+    setQuizSubmitted(false);
+    setQuizScore(null);
+    setQuizError("");
+    setTab(0);
     loadConteudos(materia.id);
+  };
+
+  const handleConteudoSelect = (conteudo) => {
+    setSelectedConteudo(conteudo);
+    setLessonCompleted(false);
+    setQuizQuestions([]);
+    setQuizAnswers({});
+    setQuizSubmitted(false);
+    setQuizScore(null);
+    setQuizError("");
+  };
+
+  const handleConteudoBack = () => {
+    setSelectedConteudo(null);
+    setLessonCompleted(false);
+    setQuizQuestions([]);
+    setQuizAnswers({});
+    setQuizSubmitted(false);
+    setQuizScore(null);
+    setQuizError("");
+  };
+
+  const visibleCourses = showAllCourses
+    ? (userCourses.length > 0 ? userCourses : cursos)
+    : (selectedCurso ? [selectedCurso] : []);
+
+  const loadQuizForMateria = async (materiaId) => {
+    if (!materiaId) return;
+    setQuizLoading(true);
+    setQuizError("");
+    try {
+      const res = await api.get(`/questoes?materia_id=${materiaId}&limit=3`);
+      const items = Array.isArray(res.data) ? res.data : [];
+      const normalized = items.map((q) => ({
+        ...q,
+        choices: Array.isArray(q.choices)
+          ? q.choices
+          : typeof q.choices === "string"
+            ? JSON.parse(q.choices)
+            : [],
+      }));
+      setQuizQuestions(normalized.slice(0, 3));
+    } catch (error) {
+      console.error("Erro ao carregar quiz:", error);
+      setQuizError("Não foi possível carregar o quiz desta matéria.");
+    } finally {
+      setQuizLoading(false);
+    }
+  };
+
+  const handleLessonComplete = () => {
+    const materiaId = selectedConteudo?.materia_id || selectedMateria;
+    setLessonCompleted(true);
+    setQuizQuestions([]);
+    setQuizAnswers({});
+    setQuizSubmitted(false);
+    setQuizScore(null);
+    setQuizError("");
+    loadQuizForMateria(materiaId);
+  };
+
+  const handleQuizAnswerChange = (questionId, selectedIndex) => {
+    if (quizSubmitted) return;
+    setQuizAnswers((prev) => ({
+      ...prev,
+      [questionId]: selectedIndex,
+    }));
+  };
+
+  const handleSubmitQuiz = async () => {
+    if (quizQuestions.length === 0) return;
+    const unanswered = quizQuestions.filter(
+      (q) => quizAnswers[q.id] === undefined
+    );
+    if (unanswered.length > 0) {
+      setQuizError("Responda todas as 3 questões para finalizar.");
+      return;
+    }
+    setQuizError("");
+    const total = quizQuestions.length;
+    const correct = quizQuestions.reduce((acc, q) => {
+      return acc + (Number(quizAnswers[q.id]) === Number(q.correct_index) ? 1 : 0);
+    }, 0);
+    setQuizScore({ correct, total });
+    setQuizSubmitted(true);
+
+    try {
+      await Promise.all(
+        quizQuestions.map((q) =>
+          api.post("/stats/answer", {
+            questao_id: q.id,
+            selected_index: Number(quizAnswers[q.id]),
+            correct: Number(quizAnswers[q.id]) === Number(q.correct_index),
+          })
+        )
+      );
+    } catch (error) {
+      console.error("Erro ao registrar respostas do quiz:", error);
+    }
+  };
+
+  const handleRetryQuiz = () => {
+    const materiaId = selectedConteudo?.materia_id || selectedMateria;
+    setQuizQuestions([]);
+    setQuizAnswers({});
+    setQuizSubmitted(false);
+    setQuizScore(null);
+    setQuizError("");
+    loadQuizForMateria(materiaId);
   };
 
   return (
@@ -187,10 +352,20 @@ export default function Study() {
             <School />
             <Typography variant="h6">Meus Cursos</Typography>
           </Box>
+          {!showAllCourses && (
+            <Button
+              size="small"
+              variant="outlined"
+              sx={{ mt: 1, borderColor: "rgba(255,255,255,0.7)", color: "white" }}
+              onClick={() => setShowAllCourses(true)}
+            >
+              Trocar curso
+            </Button>
+          )}
         </Box>
 
         <List sx={{ overflow: "auto", flex: 1 }}>
-          {(userCourses.length > 0 ? userCourses : cursos).map((curso) => (
+          {visibleCourses.map((curso) => (
             <ListItemButton
               key={curso.id}
               selected={selectedCurso?.id === curso.id}
@@ -379,7 +554,7 @@ export default function Study() {
                   >
                     <Button
                       startIcon={<ArrowBack />}
-                      onClick={() => setSelectedConteudo(null)}
+                      onClick={handleConteudoBack}
                       sx={{ textTransform: "none" }}
                     >
                       Voltar
@@ -466,6 +641,103 @@ export default function Study() {
                         </ReactMarkdown>
                       </Box>
                     )}
+
+                  <Box sx={{ mt: 3 }}>
+                    {!lessonCompleted ? (
+                      <Button
+                        variant="contained"
+                        onClick={handleLessonComplete}
+                        sx={{ textTransform: "none" }}
+                      >
+                        Concluir aula e fazer quiz
+                      </Button>
+                    ) : (
+                      <Box sx={{ mt: 2 }}>
+                        <Typography variant="h6" fontWeight={600} gutterBottom>
+                          Quiz rápido (3 questões)
+                        </Typography>
+                        {quizLoading && <LinearProgress sx={{ mb: 2 }} />}
+                        {quizError && (
+                          <Alert severity="warning" sx={{ mb: 2 }}>
+                            {quizError}
+                          </Alert>
+                        )}
+                        {quizQuestions.length === 0 && !quizLoading ? (
+                          <Alert severity="info">
+                            Nenhuma questão encontrada para esta matéria.
+                          </Alert>
+                        ) : (
+                          <Box sx={{ display: "flex", flexDirection: "column", gap: 2 }}>
+                            {quizQuestions.map((q, idx) => (
+                              <Paper key={q.id} sx={{ p: 2, borderRadius: 2 }}>
+                                <Typography variant="subtitle2" fontWeight={600} gutterBottom>
+                                  {`Questão ${idx + 1}`}
+                                </Typography>
+                                <Typography sx={{ mb: 1 }}>{q.text}</Typography>
+                                <FormControl component="fieldset" fullWidth>
+                                  <RadioGroup
+                                    value={quizAnswers[q.id] ?? ""}
+                                    onChange={(e) =>
+                                      handleQuizAnswerChange(q.id, Number(e.target.value))
+                                    }
+                                  >
+                                    {q.choices.map((choice, cIndex) => {
+                                      const isSelected = Number(quizAnswers[q.id]) === cIndex;
+                                      const isCorrect = Number(q.correct_index) === cIndex;
+                                      const showResult = quizSubmitted && (isSelected || isCorrect);
+                                      return (
+                                        <FormControlLabel
+                                          key={`${q.id}-${cIndex}`}
+                                          value={cIndex}
+                                          control={<Radio />}
+                                          label={choice}
+                                          sx={{
+                                            alignItems: "flex-start",
+                                            ...(showResult && isCorrect && {
+                                              bgcolor: "rgba(46, 125, 50, 0.12)",
+                                              borderRadius: 1,
+                                              px: 1,
+                                            }),
+                                            ...(showResult && isSelected && !isCorrect && {
+                                              bgcolor: "rgba(211, 47, 47, 0.12)",
+                                              borderRadius: 1,
+                                              px: 1,
+                                            }),
+                                          }}
+                                        />
+                                      );
+                                    })}
+                                  </RadioGroup>
+                                </FormControl>
+                                {quizSubmitted && q.explanation && (
+                                  <Typography variant="body2" color="text.secondary" sx={{ mt: 1 }}>
+                                    {q.explanation}
+                                  </Typography>
+                                )}
+                              </Paper>
+                            ))}
+                            <Box sx={{ display: "flex", gap: 2, alignItems: "center" }}>
+                              {!quizSubmitted ? (
+                                <Button variant="contained" onClick={handleSubmitQuiz}>
+                                  Enviar respostas
+                                </Button>
+                              ) : (
+                                <>
+                                  <Chip
+                                    color="success"
+                                    label={`Acertos: ${quizScore?.correct ?? 0}/${quizScore?.total ?? 3}`}
+                                  />
+                                  <Button variant="outlined" onClick={handleRetryQuiz}>
+                                    Refazer quiz
+                                  </Button>
+                                </>
+                              )}
+                            </Box>
+                          </Box>
+                        )}
+                      </Box>
+                    )}
+                  </Box>
                 </Box>
               ) : (
                 /* GRID DE CONTEÚDOS */
@@ -523,7 +795,7 @@ export default function Study() {
                                 boxShadow: "0 12px 24px rgba(0,0,0,0.12)",
                               },
                             }}
-                            onClick={() => setSelectedConteudo(conteudo)}
+                            onClick={() => handleConteudoSelect(conteudo)}
                           >
                             <CardContent>
                               <Box
