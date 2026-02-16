@@ -5,7 +5,8 @@ import {
 } from '@mui/material';
 import {
     Menu as MenuIcon, Dashboard, School, Quiz, Assessment,
-    AccountCircle, Logout, CardMembership, EmojiEvents
+    AccountCircle, Logout, CardMembership, EmojiEvents,
+    MenuBook, LiveTv, HelpOutline, SupportAgent
 } from '@mui/icons-material';
 import { Outlet, useNavigate, useLocation } from 'react-router-dom';
 import { auth } from '../config/firebase';
@@ -27,8 +28,12 @@ export default function UserLayout() {
     };
 
     const menuItems = [
-        { text: 'Dashboard', icon: <Dashboard />, path: '/dashboard' },
-        { text: 'Estudar', icon: <School />, path: '/estudar' },
+        { text: 'Início', icon: <Dashboard />, path: '/dashboard' },
+        { text: 'Cursos', icon: <School />, path: '/estudar' },
+        { text: 'Apostilas e livros', icon: <MenuBook />, path: '/apostilas' },
+        { text: 'Aulas ao vivo', icon: <LiveTv />, path: '/aulas-ao-vivo' },
+        { text: 'Mentorias', icon: <SupportAgent />, path: '/mentorias' },
+        { text: 'Dúvidas Frequentes', icon: <HelpOutline />, path: '/duvidas-frequentes' },
         { text: 'Quiz', icon: <Quiz />, path: '/quiz' },
         { text: 'Simulados', icon: <Assessment />, path: '/simulados' },
         { text: 'Ranking', icon: <EmojiEvents />, path: '/ranking' },

@@ -33,7 +33,12 @@ import AdminLayout from "./components/AdminLayout";
 import UserLayout from "./components/UserLayout";
 import UserDashboard from "./pages/user/Dashboard";
 import Quiz from "./pages/user/Quiz";
-import Study from "./pages/user/Study";
+import Study, {
+  MaterialsPage,
+  LiveClassesPage,
+  MentoriasPage,
+  FaqAlunoPage,
+} from "./pages/user/Study";
 import Simulados from "./pages/user/Simulados";
 import Ranking from "./pages/user/Ranking";
 import PlanosUser from "./pages/user/Planos";
@@ -250,6 +255,50 @@ function AppRoutes() {
         }
       >
         <Route index element={<Study />} />
+      </Route>
+
+      <Route
+        path="/apostilas"
+        element={
+          <PrivateRoute>
+            <UserLayout />
+          </PrivateRoute>
+        }
+      >
+        <Route index element={<MaterialsPage />} />
+      </Route>
+
+      <Route
+        path="/aulas-ao-vivo"
+        element={
+          <PrivateRoute>
+            <UserLayout />
+          </PrivateRoute>
+        }
+      >
+        <Route index element={<LiveClassesPage />} />
+      </Route>
+
+      <Route
+        path="/mentorias"
+        element={
+          <PrivateRoute>
+            <UserLayout />
+          </PrivateRoute>
+        }
+      >
+        <Route index element={<MentoriasPage />} />
+      </Route>
+
+      <Route
+        path="/duvidas-frequentes"
+        element={
+          <PrivateRoute>
+            <UserLayout />
+          </PrivateRoute>
+        }
+      >
+        <Route index element={<FaqAlunoPage />} />
       </Route>
 
       <Route

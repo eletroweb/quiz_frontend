@@ -26,6 +26,7 @@ import {
   RadioGroup,
   FormControl,
   FormControlLabel,
+  CircularProgress,
 } from "@mui/material";
 import {
   PlayCircle,
@@ -37,6 +38,10 @@ import {
   CheckCircle,
   ArrowBack,
   Menu as MenuIcon,
+  LiveTv,
+  MenuBook,
+  HelpOutline,
+  SupportAgent,
 } from "@mui/icons-material";
 import ReactMarkdown from "react-markdown";
 import api from "../../services/api";
@@ -862,6 +867,313 @@ export default function Study() {
           </Grid>
         </Grid>
       </Box>
+    </Box>
+  );
+}
+
+export function MaterialsPage() {
+  const [items, setItems] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState("");
+
+  useEffect(() => {
+    const load = async () => {
+      try {
+        const res = await api.get("/conteudos");
+        const data = Array.isArray(res.data) ? res.data : [];
+        setItems(data.filter((c) => c.tipo === "pdf"));
+      } catch (e) {
+        setError("Erro ao carregar materiais.");
+      } finally {
+        setLoading(false);
+      }
+    };
+    load();
+  }, []);
+
+  return (
+    <Box sx={{ maxWidth: 1200, mx: "auto" }}>
+      <Typography variant="h4" fontWeight="bold" gutterBottom>
+        Apostilas e livros
+      </Typography>
+      {loading && (
+        <Box sx={{ display: "flex", justifyContent: "center", py: 4 }}>
+          <CircularProgress />
+        </Box>
+      )}
+      {error && (
+        <Alert severity="error" sx={{ mb: 2 }}>
+          {error}
+        </Alert>
+      )}
+      {!loading && !error && items.length === 0 && (
+        <Alert severity="info">Nenhum material encontrado.</Alert>
+      )}
+      <Grid container spacing={2} sx={{ mt: 1 }}>
+        {items.map((c) => (
+          <Grid item xs={12} sm={6} md={4} key={c.id}>
+            <Card
+              sx={{
+                height: "100%",
+                display: "flex",
+                flexDirection: "column",
+              }}
+            >
+              <CardContent sx={{ flexGrow: 1 }}>
+                <Box sx={{ display: "flex", alignItems: "center", gap: 1, mb: 1 }}>
+                  <PictureAsPdf color="error" />
+                  <Chip
+                    label={c.materia_nome || "Material"}
+                    size="small"
+                    variant="outlined"
+                  />
+                </Box>
+                <Typography variant="subtitle1" fontWeight="bold" gutterBottom>
+                  {c.titulo}
+                </Typography>
+                {c.descricao && (
+                  <Typography variant="body2" color="text.secondary">
+                    {c.descricao}
+                  </Typography>
+                )}
+              </CardContent>
+              <Box sx={{ p: 2 }}>
+                <Button
+                  fullWidth
+                  variant="contained"
+                  startIcon={<PictureAsPdf />}
+                  href={c.file_url || c.conteudo}
+                  target="_blank"
+                  disabled={!c.file_url && !c.conteudo}
+                >
+                  Abrir PDF
+                </Button>
+              </Box>
+            </Card>
+          </Grid>
+        ))}
+      </Grid>
+    </Box>
+  );
+}
+
+export function LiveClassesPage() {
+  const [items, setItems] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState("");
+
+  useEffect(() => {
+    const load = async () => {
+      try {
+        const res = await api.get("/conteudos");
+        const data = Array.isArray(res.data) ? res.data : [];
+        setItems(data.filter((c) => c.tipo === "video"));
+      } catch (e) {
+        setError("Erro ao carregar aulas.");
+      } finally {
+        setLoading(false);
+      }
+    };
+    load();
+  }, []);
+
+  const getYouTubeEmbedUrl = (url) => {
+    if (!url) return "";
+    const id = url.split("v=")[1] || url.split("/").pop();
+    return `https://www.youtube.com/embed/${id}`;
+  };
+
+  return (
+    <Box sx={{ maxWidth: 1200, mx: "auto" }}>
+      <Typography variant="h4" fontWeight="bold" gutterBottom>
+        Aulas ao vivo
+      </Typography>
+      {loading && (
+        <Box sx={{ display: "flex", justifyContent: "center", py: 4 }}>
+          <CircularProgress />
+        </Box>
+      )}
+      {error && (
+        <Alert severity="error" sx={{ mb: 2 }}>
+          {error}
+        </Alert>
+      )}
+      {!loading && !error && items.length === 0 && (
+        <Alert severity="info">Nenhuma aula encontrada.</Alert>
+      )}
+      <Grid container spacing={2} sx={{ mt: 1 }}>
+        {items.map((c) => (
+          <Grid item xs={12} md={6} key={c.id}>
+            <Card>
+              <CardContent>
+                <Box sx={{ display: "flex", alignItems: "center", gap: 1, mb: 1 }}>
+                  <LiveTv color="primary" />
+                  <Chip
+                    label={c.materia_nome || "Aula"}
+                    size="small"
+                    variant="outlined"
+                  />
+                </Box>
+                <Typography variant="subtitle1" fontWeight="bold" gutterBottom>
+                  {c.titulo}
+                </Typography>
+                {c.descricao && (
+                  <Typography variant="body2" color="text.secondary" sx={{ mb: 2 }}>
+                    {c.descricao}
+                  </Typography>
+                )}
+                {c.youtube_url || c.conteudo ? (
+                  <Box
+                    sx={{
+                      position: "relative",
+                      paddingBottom: "56.25%",
+                      height: 0,
+                      overflow: "hidden",
+                      borderRadius: 2,
+                      bgcolor: "#000",
+                    }}
+                  >
+                    <iframe
+                      src={getYouTubeEmbedUrl(c.youtube_url || c.conteudo)}
+                      style={{
+                        position: "absolute",
+                        top: 0,
+                        left: 0,
+                        width: "100%",
+                        height: "100%",
+                        border: 0,
+                      }}
+                      allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                      allowFullScreen
+                    />
+                  </Box>
+                ) : null}
+              </CardContent>
+            </Card>
+          </Grid>
+        ))}
+      </Grid>
+    </Box>
+  );
+}
+
+export function MentoriasPage() {
+  return (
+    <Box sx={{ maxWidth: 900, mx: "auto" }}>
+      <Typography variant="h4" fontWeight="bold" gutterBottom>
+        Mentorias
+      </Typography>
+      <Paper sx={{ p: 3, borderRadius: 2 }}>
+        <Box sx={{ display: "flex", alignItems: "center", gap: 2, mb: 2 }}>
+          <SupportAgent color="primary" />
+          <Typography variant="h6" fontWeight={600}>
+            Acompanhamento personalizado
+          </Typography>
+        </Box>
+        <Typography sx={{ mb: 2 }}>
+          Tenha acesso a um plano de estudo guiado, com orientações da equipe do
+          Quiz Concursos para organizar sua rotina e acompanhar sua evolução.
+        </Typography>
+        <Typography sx={{ mb: 3 }}>
+          Envie suas dúvidas e receba indicações de aulas, materiais e
+          simulados focados no seu objetivo.
+        </Typography>
+        <Button
+          variant="contained"
+          startIcon={<SupportAgent />}
+          href="mailto:contato@quizconcursos.com?subject=Mentoria%20Quiz%20Concursos"
+        >
+          Falar com um mentor
+        </Button>
+      </Paper>
+    </Box>
+  );
+}
+
+export function FaqAlunoPage() {
+  const [items, setItems] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState("");
+
+  useEffect(() => {
+    const load = async () => {
+      try {
+        const res = await api.get("/news?limit=50");
+        const data = Array.isArray(res.data) ? res.data : [];
+        const filtered = data.filter((n) => {
+          const cat = (n.categoria || "").toString().toLowerCase();
+          const title = (n.titulo || "").toString().toLowerCase();
+          return (
+            cat.includes("dúvida") ||
+            cat.includes("duvida") ||
+            cat.includes("faq") ||
+            title.includes("dúvida") ||
+            title.includes("duvida")
+          );
+        });
+        setItems(filtered.length > 0 ? filtered : data);
+      } catch (e) {
+        setError("Erro ao carregar dúvidas frequentes.");
+      } finally {
+        setLoading(false);
+      }
+    };
+    load();
+  }, []);
+
+  return (
+    <Box sx={{ maxWidth: 1200, mx: "auto" }}>
+      <Typography variant="h4" fontWeight="bold" gutterBottom>
+        Dúvidas Frequentes
+      </Typography>
+      {loading && (
+        <Box sx={{ display: "flex", justifyContent: "center", py: 4 }}>
+          <CircularProgress />
+        </Box>
+      )}
+      {error && (
+        <Alert severity="error" sx={{ mb: 2 }}>
+          {error}
+        </Alert>
+      )}
+      {!loading && !error && items.length === 0 && (
+        <Alert severity="info">Nenhum conteúdo encontrado.</Alert>
+      )}
+      <Grid container spacing={2} sx={{ mt: 1 }}>
+        {items.map((n) => (
+          <Grid item xs={12} sm={6} md={4} key={n.id}>
+            <Card
+              sx={{
+                height: "100%",
+                display: "flex",
+                flexDirection: "column",
+              }}
+            >
+              <CardContent sx={{ flexGrow: 1 }}>
+                <Box sx={{ display: "flex", alignItems: "center", gap: 1, mb: 1 }}>
+                  <HelpOutline color="primary" />
+                  <Chip label={n.categoria || "Geral"} size="small" variant="outlined" />
+                </Box>
+                <Typography variant="subtitle1" fontWeight="bold" gutterBottom>
+                  {n.titulo}
+                </Typography>
+                {n.resumo && (
+                  <Typography variant="body2" color="text.secondary">
+                    {n.resumo}
+                  </Typography>
+                )}
+              </CardContent>
+              {n.conteudo && (
+                <Box sx={{ p: 2, pt: 0 }}>
+                  <Typography variant="body2" color="text.secondary">
+                    {n.conteudo}
+                  </Typography>
+                </Box>
+              )}
+            </Card>
+          </Grid>
+        ))}
+      </Grid>
     </Box>
   );
 }
