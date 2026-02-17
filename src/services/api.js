@@ -34,6 +34,7 @@ else {
 const api = axios.create({
   baseURL,
   headers: { "Content-Type": "application/json" },
+  timeout: 15000,
 });
 
 console.log("🔌 API Base URL:", baseURL);
@@ -66,7 +67,7 @@ api.interceptors.request.use(
 // Interceptor para tratar erros
 api.interceptors.response.use(
   (response) => response,
-  (error) => {
+  async (error) => {
     if (error.response?.status === 401) {
       const originalRequest = error.config;
       if (!originalRequest._retry) {
@@ -96,6 +97,19 @@ api.interceptors.response.use(
           detail: error.response.data,
         })
       );
+    } else if (!error.response) {
+      const config = error.config || {};
+      if (!config._warmupTried) {
+        config._warmupTried = true;
+        try {
+          await axios.get(baseURL.replace(/\/api$/, "") + "/health", {
+            timeout: 10000,
+          });
+        } catch {
+          // ignore, pode estar apenas acordando
+        }
+        return api(config);
+      }
     }
     return Promise.reject(error);
   }
