@@ -882,7 +882,7 @@ export function MaterialsPage() {
         const res = await api.get("/conteudos");
         const data = Array.isArray(res.data) ? res.data : [];
         setItems(data.filter((c) => c.tipo === "pdf"));
-      } catch (e) {
+      } catch {
         setError("Erro ao carregar materiais.");
       } finally {
         setLoading(false);
@@ -968,7 +968,7 @@ export function LiveClassesPage() {
         const res = await api.get("/conteudos");
         const data = Array.isArray(res.data) ? res.data : [];
         setItems(data.filter((c) => c.tipo === "video"));
-      } catch (e) {
+      } catch {
         setError("Erro ao carregar aulas.");
       } finally {
         setLoading(false);
@@ -1112,7 +1112,7 @@ export function FaqAlunoPage() {
           );
         });
         setItems(filtered.length > 0 ? filtered : data);
-      } catch (e) {
+      } catch {
         setError("Erro ao carregar dúvidas frequentes.");
       } finally {
         setLoading(false);

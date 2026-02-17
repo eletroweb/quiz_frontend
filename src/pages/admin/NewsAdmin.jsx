@@ -3,7 +3,7 @@ import {
     Box, Container, Typography, Button, Card, CardContent, CardActions,
     Grid, IconButton, Dialog, DialogTitle, DialogContent, DialogActions,
     TextField, Alert, FormControlLabel, Switch, CircularProgress, CardMedia,
-    FormControl, InputLabel, Select, MenuItem
+    FormControl, InputLabel, Select, MenuItem, Chip
 } from '@mui/material';
 import {
     Add as AddIcon,
@@ -31,6 +31,7 @@ export default function NewsAdmin() {
     });
     const [uploadingImage, setUploadingImage] = useState(false);
     const [cursos, setCursos] = useState([]);
+    const [categoryFilter, setCategoryFilter] = useState('todas');
 
     useEffect(() => {
         loadNews();
@@ -146,24 +147,59 @@ export default function NewsAdmin() {
 
     return (
         <Container maxWidth="lg" sx={{ mt: 4, mb: 4 }}>
-            <Box display="flex" justifyContent="space-between" alignItems="center" mb={3}>
-                <Typography variant="h4" fontWeight="bold">
-                    <ArticleIcon sx={{ mr: 1, verticalAlign: 'middle' }} />
-                    Gerenciar Notícias
-                </Typography>
-                <Button
-                    variant="contained"
-                    startIcon={<AddIcon />}
-                    onClick={() => handleOpenDialog()}
-                >
-                    Nova Notícia
-                </Button>
+            <Box display="flex" justifyContent="space-between" alignItems="center" mb={3} flexWrap="wrap" gap={2}>
+                <Box>
+                    <Typography variant="h4" fontWeight="bold">
+                        <ArticleIcon sx={{ mr: 1, verticalAlign: 'middle' }} />
+                        Gerenciar Notícias
+                    </Typography>
+                    <Typography variant="body2" color="text.secondary">
+                        Notícias com categoria "faq" ou contendo "dúvida" aparecem na área "Dúvidas Frequentes" do aluno.
+                    </Typography>
+                </Box>
+                <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                    <FormControl size="small" sx={{ minWidth: 180 }}>
+                        <InputLabel>Filtrar categoria</InputLabel>
+                        <Select
+                            value={categoryFilter}
+                            label="Filtrar categoria"
+                            onChange={(e) => setCategoryFilter(e.target.value)}
+                        >
+                            <MenuItem value="todas">Todas</MenuItem>
+                            <MenuItem value="faq">FAQ / Dúvidas</MenuItem>
+                            <MenuItem value="geral">Geral</MenuItem>
+                            <MenuItem value="outros">Outras</MenuItem>
+                        </Select>
+                    </FormControl>
+                    <Button
+                        variant="contained"
+                        startIcon={<AddIcon />}
+                        onClick={() => handleOpenDialog()}
+                    >
+                        Nova Notícia
+                    </Button>
+                </Box>
             </Box>
 
             {error && <Alert severity="error" sx={{ mb: 2 }} onClose={() => setError('')}>{error}</Alert>}
 
             <Grid container spacing={3}>
-                {news.map((item) => (
+                {news
+                    .filter((item) => {
+                        if (categoryFilter === 'todas') return true;
+                        const cat = (item.categoria || '').toString().toLowerCase();
+                        const title = (item.titulo || '').toString().toLowerCase();
+                        const isFaq =
+                            cat.includes('faq') ||
+                            cat.includes('dúvida') ||
+                            cat.includes('duvida') ||
+                            title.includes('dúvida') ||
+                            title.includes('duvida');
+                        if (categoryFilter === 'faq') return isFaq;
+                        if (categoryFilter === 'geral') return cat === 'geral';
+                        return !isFaq && cat !== 'geral';
+                    })
+                    .map((item) => (
                     <Grid item xs={12} sm={6} md={4} key={item.id}>
                         <Card sx={{ height: '100%', display: 'flex', flexDirection: 'column' }}>
                             {item.imagem_url && (
@@ -179,11 +215,22 @@ export default function NewsAdmin() {
                                 <Typography variant="body2" color="text.secondary" noWrap>
                                     {item.resumo}
                                 </Typography>
-                                {item.destaque && (
-                                    <Typography variant="caption" color="primary" fontWeight="bold" display="block" mt={1}>
-                                        ★ DESTAQUE
-                                    </Typography>
-                                )}
+                                <Box sx={{ mt: 1, display: 'flex', gap: 1, flexWrap: 'wrap' }}>
+                                    {item.categoria && (
+                                        <Chip
+                                            size="small"
+                                            label={item.categoria}
+                                            variant="outlined"
+                                        />
+                                    )}
+                                    {item.destaque && (
+                                        <Chip
+                                            size="small"
+                                            color="primary"
+                                            label="DESTAQUE"
+                                        />
+                                    )}
+                                </Box>
                             </CardContent>
                             <CardActions>
                                 <IconButton onClick={() => handleOpenDialog(item)} color="primary"><EditIcon /></IconButton>
@@ -220,6 +267,20 @@ export default function NewsAdmin() {
                             value={formData.conteudo}
                             onChange={(e) => setFormData({ ...formData, conteudo: e.target.value })}
                         />
+
+                        <FormControl fullWidth>
+                            <InputLabel>Categoria</InputLabel>
+                            <Select
+                                label="Categoria"
+                                value={formData.categoria || 'geral'}
+                                onChange={(e) => setFormData({ ...formData, categoria: e.target.value })}
+                            >
+                                <MenuItem value="geral">Geral</MenuItem>
+                                <MenuItem value="faq">FAQ / Dúvidas Frequentes</MenuItem>
+                                <MenuItem value="aovivo">Aulas ao vivo / Avisos</MenuItem>
+                                <MenuItem value="outros">Outros</MenuItem>
+                            </Select>
+                        </FormControl>
 
                         <FormControl fullWidth>
                             <InputLabel>Curso vinculado (opcional)</InputLabel>

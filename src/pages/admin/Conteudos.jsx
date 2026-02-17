@@ -10,6 +10,7 @@ import api from '../../services/api';
 
 export default function Conteudos() {
     const [conteudos, setConteudos] = useState([]);
+    const [filterTipo, setFilterTipo] = useState('todos');
     const [materias, setMaterias] = useState([]);
     const [openDialog, setOpenDialog] = useState(false);
     const [editingId, setEditingId] = useState(null);
@@ -119,22 +120,47 @@ export default function Conteudos() {
         return <Article color="action" />;
     };
 
+    const filteredConteudos = conteudos.filter((c) => {
+        if (filterTipo === 'todos') return true;
+        return c.tipo === filterTipo;
+    });
+
     return (
         <Box>
-            <Box sx={{ display: 'flex', justifyContent: 'space-between', mb: 3 }}>
-                <Typography variant="h4" fontWeight="bold">
-                    Gerenciar Conteúdos
-                </Typography>
-                <Button
-                    variant="contained"
-                    startIcon={<Add />}
-                    onClick={() => handleOpenDialog()}
-                    sx={{
-                        background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
-                    }}
-                >
-                    Novo Conteúdo
-                </Button>
+            <Box sx={{ display: 'flex', justifyContent: 'space-between', mb: 3, flexWrap: 'wrap', gap: 2 }}>
+                <Box>
+                    <Typography variant="h4" fontWeight="bold">
+                        Gerenciar Conteúdos
+                    </Typography>
+                    <Typography variant="body2" color="text.secondary">
+                        Vídeos aparecem em "Aulas ao vivo", PDFs em "Apostilas e livros" e Textos em "Estudar".
+                    </Typography>
+                </Box>
+                <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                    <FormControl size="small" sx={{ minWidth: 160 }}>
+                        <InputLabel>Filtrar por tipo</InputLabel>
+                        <Select
+                            value={filterTipo}
+                            label="Filtrar por tipo"
+                            onChange={(e) => setFilterTipo(e.target.value)}
+                        >
+                            <MenuItem value="todos">Todos</MenuItem>
+                            <MenuItem value="video">Aulas ao vivo (Vídeos)</MenuItem>
+                            <MenuItem value="pdf">Apostilas e livros (PDF)</MenuItem>
+                            <MenuItem value="texto">Textos / Teoria</MenuItem>
+                        </Select>
+                    </FormControl>
+                    <Button
+                        variant="contained"
+                        startIcon={<Add />}
+                        onClick={() => handleOpenDialog()}
+                        sx={{
+                            background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
+                        }}
+                    >
+                        Novo Conteúdo
+                    </Button>
+                </Box>
             </Box>
 
             {success && (
@@ -161,7 +187,7 @@ export default function Conteudos() {
                         </TableRow>
                     </TableHead>
                     <TableBody>
-                        {conteudos.map((conteudo) => (
+                        {filteredConteudos.map((conteudo) => (
                             <TableRow key={conteudo.id} hover>
                                 <TableCell>{conteudo.id}</TableCell>
                                 <TableCell>
