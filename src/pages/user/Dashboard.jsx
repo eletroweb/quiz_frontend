@@ -1,10 +1,11 @@
 import React, { useEffect, useState } from 'react';
 import {
     Box, Grid, Card, CardContent, Typography, LinearProgress,
-    Paper, Avatar, Chip, Button, Stack
+    Paper, Avatar, Chip, Button, Stack, Divider
 } from '@mui/material';
 import {
-    TrendingUp, CheckCircle, Timer, EmojiEvents
+    TrendingUp, CheckCircle, Timer, EmojiEvents, School, 
+    PictureAsPdf, PlayCircle, AutoFixHigh
 } from '@mui/icons-material';
 import { useAuth } from '../../contexts/AuthContext';
 import { useNavigate } from 'react-router-dom';
@@ -17,23 +18,27 @@ export default function UserDashboard() {
     const { userProfile } = useAuth();
     const navigate = useNavigate();
     const [stats, setStats] = useState(null);
+    const [dashStats, setDashStats] = useState(null);
     const [loading, setLoading] = useState(true);
     const [myCourses, setMyCourses] = useState([]);
     const [courseStats, setCourseStats] = useState({});
 
     useEffect(() => {
-        loadStats();
-        loadMyCourses();
+        loadData();
     }, []);
 
-    const loadStats = async () => {
+    const loadData = async () => {
+        setLoading(true);
         try {
-            const response = await api.get('/stats/me');
-            setStats(response.data);
+            const [oldStats, newDashStats] = await Promise.all([
+                api.get('/stats/me'),
+                api.get('/stats/dashboard')
+            ]);
+            setStats(oldStats.data);
+            setDashStats(newDashStats.data);
+            await loadMyCourses();
         } catch (error) {
-            console.error('Erro ao carregar estatísticas:', error);
-            // Se der erro, usar dados vazios
-            setStats({});
+            console.error('Erro ao carregar dados do dashboard:', error);
         } finally {
             setLoading(false);
         }
@@ -61,64 +66,73 @@ export default function UserDashboard() {
         }
     };
 
+    const formatTime = (seconds) => {
+        const hours = Math.floor(seconds / 3600);
+        const minutes = Math.floor((seconds % 3600) / 60);
+        if (hours > 0) return `${hours}h ${minutes}min`;
+        return `${minutes}min`;
+    };
+
     const statCards = [
         {
             title: 'Questões Respondidas',
-            value: stats?.total_answered || 0,
-            icon: <CheckCircle sx={{ fontSize: 40 }} />,
+            value: dashStats?.general?.total_questions || 0,
+            icon: <CheckCircle sx={{ fontSize: 32 }} />,
             color: '#10b981',
             bgColor: '#d1fae5',
         },
         {
             title: 'Taxa de Acerto',
-            value: stats?.accuracy ? `${Math.round(stats.accuracy)}%` : '0%',
-            icon: <TrendingUp sx={{ fontSize: 40 }} />,
+            value: dashStats?.general?.accuracy ? `${Math.round(dashStats.general.accuracy)}%` : '0%',
+            icon: <TrendingUp sx={{ fontSize: 32 }} />,
             color: '#6366f1',
             bgColor: '#e0e7ff',
         },
         {
-            title: 'Tempo de Estudo',
-            value: stats?.study_time ? `${Math.round(stats.study_time / 60)}h` : '0h',
-            icon: <Timer sx={{ fontSize: 40 }} />,
+            title: 'Tempo na Semana',
+            value: formatTime(dashStats?.weekly_seconds || 0),
+            icon: <Timer sx={{ fontSize: 32 }} />,
             color: '#f59e0b',
             bgColor: '#fef3c7',
         },
         {
-            title: 'Ranking',
+            title: 'Ranking Geral',
             value: `#${stats?.rank || '-'}`,
-            icon: <EmojiEvents sx={{ fontSize: 40 }} />,
+            icon: <EmojiEvents sx={{ fontSize: 32 }} />,
             color: '#ec4899',
             bgColor: '#fce7f3',
         },
     ];
 
     if (loading) {
-    return (
-        <Box sx={{ display: 'flex', justifyContent: 'center', mt: 4 }}>
-            <LinearProgress sx={{ width: '100%' }} />
-        </Box>
-    );
-  }
+        return (
+            <Box sx={{ display: 'flex', justifyContent: 'center', mt: 4 }}>
+                <LinearProgress sx={{ width: '100%' }} />
+            </Box>
+        );
+    }
 
     return (
-        <Box>
+        <Box sx={{ pb: 4 }}>
             {/* Cabeçalho de Boas-vindas */}
             <Paper
                 sx={{
                     p: 3,
-                    mb: 3,
+                    mb: 4,
                     background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
                     color: 'white',
-                    borderRadius: 3,
+                    borderRadius: 4,
+                    boxShadow: '0 8px 32px rgba(102, 126, 234, 0.2)',
                 }}
             >
-                <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
+                <Box sx={{ display: 'flex', alignItems: 'center', gap: 3 }}>
                     <Avatar
                         sx={{
-                            width: 64,
-                            height: 64,
+                            width: 80,
+                            height: 80,
                             bgcolor: 'rgba(255,255,255,0.2)',
-                            fontSize: '1.5rem',
+                            fontSize: '2rem',
+                            border: '4px solid rgba(255,255,255,0.1)',
                         }}
                     >
                         {userProfile?.display_name?.[0]?.toUpperCase() || 'U'}
@@ -127,113 +141,174 @@ export default function UserDashboard() {
                         <Typography variant="h4" fontWeight="bold">
                             Olá, {userProfile?.display_name || 'Estudante'}!
                         </Typography>
-                        <Typography variant="body1" sx={{ opacity: 0.9 }}>
-                            Continue seus estudos e alcance seus objetivos
+                        <Typography variant="h6" sx={{ opacity: 0.9, fontWeight: 400 }}>
+                            Sua evolução está incrível hoje.
                         </Typography>
                         <Chip
                             label={userProfile?.plan === 'premium' ? 'Plano Premium' : 'Plano Gratuito'}
                             sx={{
-                                mt: 1,
+                                mt: 1.5,
                                 bgcolor: 'rgba(255,255,255,0.2)',
                                 color: 'white',
                                 fontWeight: 'bold',
+                                backdropFilter: 'blur(4px)',
                             }}
                         />
                     </Box>
                 </Box>
             </Paper>
 
-            {/* Cards de Estatísticas */}
-            <Grid container spacing={3} sx={{ mb: 3 }}>
+            {/* Painel de Evolução do Usuário */}
+            <Typography variant="h5" fontWeight="bold" sx={{ mb: 2 }}>Painel de Evolução</Typography>
+            <Grid container spacing={3} sx={{ mb: 4 }}>
                 {statCards.map((card, index) => (
                     <Grid item xs={12} sm={6} md={3} key={index}>
-                        <Card
-                            sx={{
-                                height: '100%',
-                                borderRadius: 3,
-                                transition: 'transform 0.2s',
-                                '&:hover': {
-                                    transform: 'translateY(-4px)',
-                                    boxShadow: 4,
-                                },
-                            }}
-                        >
+                        <Card sx={{ borderRadius: 4, boxShadow: '0 4px 20px rgba(0,0,0,0.05)' }}>
                             <CardContent>
-                                <Box
-                                    sx={{
-                                        display: 'flex',
-                                        alignItems: 'center',
-                                        justifyContent: 'space-between',
-                                        mb: 2,
-                                    }}
-                                >
-                                    <Box
-                                        sx={{
-                                            width: 56,
-                                            height: 56,
-                                            borderRadius: 2,
-                                            bgcolor: card.bgColor,
-                                            display: 'flex',
-                                            alignItems: 'center',
-                                            justifyContent: 'center',
-                                            color: card.color,
-                                        }}
-                                    >
+                                <Box sx={{ display: 'flex', alignItems: 'center', gap: 2, mb: 1.5 }}>
+                                    <Box sx={{ p: 1, borderRadius: 2, bgcolor: card.bgColor, color: card.color, display: 'flex' }}>
                                         {card.icon}
                                     </Box>
+                                    <Typography variant="body2" color="text.secondary" fontWeight="500">
+                                        {card.title}
+                                    </Typography>
                                 </Box>
-                                <Typography variant="h4" fontWeight="bold" gutterBottom>
+                                <Typography variant="h4" fontWeight="bold">
                                     {card.value}
-                                </Typography>
-                                <Typography variant="body2" color="text.secondary">
-                                    {card.title}
                                 </Typography>
                             </CardContent>
                         </Card>
                     </Grid>
                 ))}
+
+                {/* Domínio por Matéria */}
+                {dashStats?.subjects?.map((subj, idx) => {
+                    const percent = subj.total > 0 ? Math.round((subj.acertos / subj.total) * 100) : 0;
+                    return (
+                        <Grid item xs={12} sm={6} key={idx}>
+                            <Paper sx={{ p: 3, borderRadius: 4, boxShadow: '0 4px 20px rgba(0,0,0,0.05)' }}>
+                                <Box sx={{ display: 'flex', justifyContent: 'space-between', mb: 1 }}>
+                                    <Typography variant="subtitle1" fontWeight="bold">
+                                        % domínio {subj.materia}
+                                    </Typography>
+                                    <Typography variant="subtitle1" fontWeight="bold" color="primary">
+                                        {percent}%
+                                    </Typography>
+                                </Box>
+                                <LinearProgress 
+                                    variant="determinate" 
+                                    value={percent} 
+                                    sx={{ height: 12, borderRadius: 6, bgcolor: '#f0f2f5' }} 
+                                />
+                                <Typography variant="caption" color="text.secondary" sx={{ mt: 1, display: 'block' }}>
+                                    {subj.acertos} acertos de {subj.total} questões
+                                </Typography>
+                            </Paper>
+                        </Grid>
+                    );
+                })}
             </Grid>
 
-            {/* Progresso Semanal */}
-            <Paper sx={{ p: 3, borderRadius: 3 }}>
-                <Typography variant="h6" fontWeight="bold" gutterBottom>
-                    Progresso desta Semana
-                </Typography>
-                <Box sx={{ mt: 2 }}>
-                    <Box sx={{ display: 'flex', justifyContent: 'space-between', mb: 1 }}>
-                        <Typography variant="body2" color="text.secondary">
-                            Meta: 50 questões
+            {/* Sistema de Reforço Inteligente */}
+            {dashStats?.recommendations && (
+                <Card sx={{ 
+                    mb: 4, 
+                    borderRadius: 4, 
+                    border: '1px solid #e0e7ff',
+                    background: 'linear-gradient(to right, #ffffff, #f8faff)',
+                    boxShadow: '0 10px 30px rgba(99, 102, 241, 0.05)'
+                }}>
+                    <CardContent sx={{ p: 4 }}>
+                        <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5, mb: 3 }}>
+                            <AutoFixHigh color="primary" />
+                            <Typography variant="h5" fontWeight="bold">Reforço Inteligente</Typography>
+                            <Chip label="IA Recomendação" color="primary" size="small" variant="outlined" />
+                        </Box>
+                        
+                        <Typography variant="body1" sx={{ mb: 3 }}>
+                            Identificamos que seu desempenho em <strong>{dashStats.recommendations.materia}</strong> está abaixo do esperado ({Math.round(dashStats.recommendations.taxa_acerto)}% de acerto). 
+                            Preparamos um plano de ação para você:
                         </Typography>
-                        <Typography variant="body2" fontWeight="bold">
-                            {stats?.weekly_answered || 0} / 50
-                        </Typography>
-                    </Box>
-                    <LinearProgress
-                        variant="determinate"
-                        value={Math.min(((stats?.weekly_answered || 0) / 50) * 100, 100)}
-                        sx={{
-                            height: 10,
-                            borderRadius: 5,
-                            bgcolor: '#e5e7eb',
-                            '& .MuiLinearProgress-bar': {
-                                borderRadius: 5,
-                                background: 'linear-gradient(90deg, #667eea 0%, #764ba2 100%)',
-                            },
-                        }}
-                    />
-                </Box>
-            </Paper>
+
+                        <Grid container spacing={3}>
+                            {dashStats.recommendations.video && (
+                                <Grid item xs={12} md={4}>
+                                    <Paper variant="outlined" sx={{ p: 2, borderRadius: 3, textAlign: 'center' }}>
+                                        <PlayCircle color="primary" sx={{ fontSize: 40, mb: 1 }} />
+                                        <Typography variant="subtitle2" fontWeight="bold" gutterBottom>Videoaula Recomendada</Typography>
+                                        <Typography variant="caption" display="block" sx={{ mb: 2, height: 40, overflow: 'hidden' }}>
+                                            {dashStats.recommendations.video.titulo}
+                                        </Typography>
+                                        <Button 
+                                            size="small" 
+                                            variant="contained" 
+                                            onClick={() => navigate('/estudar')}
+                                            fullWidth
+                                        >
+                                            Assistir Agora
+                                        </Button>
+                                    </Paper>
+                                </Grid>
+                            )}
+                            
+                            {dashStats.recommendations.pdf && (
+                                <Grid item xs={12} md={4}>
+                                    <Paper variant="outlined" sx={{ p: 2, borderRadius: 3, textAlign: 'center' }}>
+                                        <PictureAsPdf color="error" sx={{ fontSize: 40, mb: 1 }} />
+                                        <Typography variant="subtitle2" fontWeight="bold" gutterBottom>PDF de Apoio</Typography>
+                                        <Typography variant="caption" display="block" sx={{ mb: 2, height: 40, overflow: 'hidden' }}>
+                                            {dashStats.recommendations.pdf.titulo}
+                                        </Typography>
+                                        <Button 
+                                            size="small" 
+                                            variant="outlined" 
+                                            component="a" 
+                                            href={dashStats.recommendations.pdf.file_url} 
+                                            target="_blank"
+                                            fullWidth
+                                        >
+                                            Ler Material
+                                        </Button>
+                                    </Paper>
+                                </Grid>
+                            )}
+
+                            <Grid item xs={12} md={4}>
+                                <Paper variant="outlined" sx={{ p: 2, borderRadius: 3, textAlign: 'center' }}>
+                                    <TrendingUp color="success" sx={{ fontSize: 40, mb: 1 }} />
+                                    <Typography variant="subtitle2" fontWeight="bold" gutterBottom>Mini-Simulado Focado</Typography>
+                                    <Typography variant="caption" display="block" sx={{ mb: 2, height: 40 }}>
+                                        5 questões selecionadas de {dashStats.recommendations.materia}
+                                    </Typography>
+                                    <Button 
+                                        size="small" 
+                                        variant="contained" 
+                                        color="success"
+                                        onClick={() => navigate('/quiz', { state: { materiaId: dashStats.recommendations.materia_id }})}
+                                        fullWidth
+                                    >
+                                        Gerar Simulado
+                                    </Button>
+                                </Paper>
+                            </Grid>
+                        </Grid>
+                    </CardContent>
+                </Card>
+            )}
 
             {/* Meus Cursos */}
-            <Paper sx={{ p: 3, mt: 3, borderRadius: 3 }}>
-                <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 2 }}>
-                    <Typography variant="h6" fontWeight="bold">Seus Cursos</Typography>
-                    <Button variant="text" onClick={() => navigate('/estudar')}>Ver todos</Button>
+            <Paper sx={{ p: 3, borderRadius: 4, boxShadow: '0 4px 20px rgba(0,0,0,0.05)' }}>
+                <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 3 }}>
+                    <Typography variant="h6" fontWeight="bold">Seus Cursos em Estudo</Typography>
+                    <Button variant="text" onClick={() => navigate('/estudar')}>Explorar todos</Button>
                 </Box>
                 {myCourses.length === 0 ? (
-                    <Typography variant="body2" color="text.secondary">Nenhum curso adquirido ainda.</Typography>
+                    <Box sx={{ textAlign: 'center', py: 4 }}>
+                        <School sx={{ fontSize: 48, color: 'text.disabled', mb: 2 }} />
+                        <Typography variant="body2" color="text.secondary">Nenhum curso adquirido ainda.</Typography>
+                    </Box>
                 ) : (
-                    <Grid container spacing={2}>
+                    <Grid container spacing={3}>
                         {myCourses.map((c) => {
                             const s = courseStats[c.id];
                             const overallPercent = s
@@ -248,35 +323,25 @@ export default function UserDashboard() {
                                 : 0;
                             return (
                                 <Grid item xs={12} md={6} key={c.id}>
-                                    <Card sx={{ borderRadius: 3 }}>
+                                    <Card variant="outlined" sx={{ borderRadius: 3, p: 1 }}>
                                         <CardContent>
-                                            <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 1 }}>
-                                                <Typography variant="h6" fontWeight="bold">{c.nome}</Typography>
-                                                <Button variant="contained" onClick={() => navigate(`/curso/${c.id}`)}>Continuar</Button>
+                                            <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', mb: 2 }}>
+                                                <Typography variant="h6" fontWeight="bold" sx={{ maxWidth: '60%' }}>{c.nome}</Typography>
+                                                <Button size="small" variant="contained" onClick={() => navigate(`/curso/${c.id}`)}>Estudar</Button>
                                             </Box>
-                                            <Typography variant="body2" color="text.secondary">
-                                                Progresso geral: {overallPercent}%
-                                            </Typography>
-                                            <LinearProgress value={overallPercent} variant="determinate" sx={{ my: 1 }} />
+                                            <Box sx={{ mb: 2 }}>
+                                                <Box sx={{ display: 'flex', justifyContent: 'space-between', mb: 0.5 }}>
+                                                    <Typography variant="caption" color="text.secondary">Progresso</Typography>
+                                                    <Typography variant="caption" fontWeight="bold">{overallPercent}%</Typography>
+                                                </Box>
+                                                <LinearProgress value={overallPercent} variant="determinate" sx={{ height: 6, borderRadius: 3 }} />
+                                            </Box>
                                             {s?.proximo_conteudo && (
-                                                <Box sx={{ mb: 1 }}>
-                                                    <Typography variant="body2">Próximo conteúdo:</Typography>
-                                                    <Stack direction="row" spacing={1} alignItems="center">
-                                                        <Chip label={s.proximo_conteudo.modulo_nome} size="small" />
-                                                        <Typography variant="body2" fontWeight="500">{s.proximo_conteudo.titulo}</Typography>
-                                                    </Stack>
+                                                <Box sx={{ p: 1.5, bgcolor: '#f8faff', borderRadius: 2 }}>
+                                                    <Typography variant="caption" color="text.secondary" display="block" gutterBottom>Próxima Aula:</Typography>
+                                                    <Typography variant="body2" fontWeight="bold" noWrap>{s.proximo_conteudo.titulo}</Typography>
                                                 </Box>
                                             )}
-                                            <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 1, mt: 1 }}>
-                                                {(s?.progresso_por_modulo || []).map((m) => (
-                                                    <Chip
-                                                        key={m.modulo_id}
-                                                        label={`${m.modulo_nome}: ${Math.round(Number(m.percentual || 0))}%`}
-                                                        variant="outlined"
-                                                        size="small"
-                                                    />
-                                                ))}
-                                            </Box>
                                         </CardContent>
                                     </Card>
                                 </Grid>
@@ -286,71 +351,22 @@ export default function UserDashboard() {
                 )}
             </Paper>
 
-            {/* Ações Rápidas */}
-            <Grid container spacing={3} sx={{ mt: 3 }}>
-                {/* Curator Panel */}
-                {userProfile?.role === 'curator' && (
-                    <Grid item xs={12}>
-                        <Paper sx={{ p: 2, borderRadius: 3, mb: 2 }}>
-                            <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                                <Box>
-                                    <Typography variant="h6" fontWeight="bold">Área do Curador</Typography>
-                                    <Typography variant="body2" color="text.secondary">Ferramentas para criar/editar conteúdo</Typography>
-                                </Box>
-                                <Stack direction="row" spacing={1}>
-                                    <Button startIcon={<PostAddIcon/>} variant="outlined" onClick={() => navigate('/admin/questoes')}>Questões</Button>
-                                    <Button startIcon={<MenuBookIcon/>} variant="outlined" onClick={() => navigate('/admin/materias')}>Matérias</Button>
-                                    <Button startIcon={<PlaylistAddIcon/>} variant="outlined" onClick={() => navigate('/admin/cursos')}>Cursos</Button>
-                                </Stack>
-                            </Box>
-                        </Paper>
-                    </Grid>
-                )}
-                <Grid item xs={12} md={6}>
-                    <Card
-                        sx={{
-                            p: 3,
-                            borderRadius: 3,
-                            cursor: 'pointer',
-                            transition: 'all 0.2s',
-                            '&:hover': {
-                                transform: 'translateY(-4px)',
-                                boxShadow: 4,
-                            },
-                        }}
-                        onClick={() => navigate('/quiz')}
-                    >
-                        <Typography variant="h6" fontWeight="bold" gutterBottom>
-                            🎯 Fazer Quiz
-                        </Typography>
-                        <Typography variant="body2" color="text.secondary">
-                            Responda questões e teste seus conhecimentos
-                        </Typography>
-                    </Card>
-                </Grid>
-                <Grid item xs={12} md={6}>
-                    <Card
-                        sx={{
-                            p: 3,
-                            borderRadius: 3,
-                            cursor: 'pointer',
-                            transition: 'all 0.2s',
-                            '&:hover': {
-                                transform: 'translateY(-4px)',
-                                boxShadow: 4,
-                            },
-                        }}
-                        onClick={() => navigate('/estudar')}
-                    >
-                        <Typography variant="h6" fontWeight="bold" gutterBottom>
-                            📚 Estudar
-                        </Typography>
-                        <Typography variant="body2" color="text.secondary">
-                            Acesse vídeos, PDFs e conteúdos de estudo
-                        </Typography>
-                    </Card>
-                </Grid>
-            </Grid>
+            {/* Áreas Administrativas (se houver) */}
+            {userProfile?.role === 'curator' && (
+                <Paper sx={{ p: 3, mt: 4, borderRadius: 4, bgcolor: '#fcfcfc', border: '1px dashed #ddd' }}>
+                    <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                        <Box>
+                            <Typography variant="h6" fontWeight="bold">Painel do Curador</Typography>
+                            <Typography variant="body2" color="text.secondary">Gestão de Conteúdo e Questões</Typography>
+                        </Box>
+                        <Stack direction="row" spacing={2}>
+                            <Button startIcon={<PostAddIcon/>} variant="outlined" size="small" onClick={() => navigate('/admin/questoes')}>Questões</Button>
+                            <Button startIcon={<MenuBookIcon/>} variant="outlined" size="small" onClick={() => navigate('/admin/materias')}>Matérias</Button>
+                            <Button startIcon={<PlaylistAddIcon/>} variant="outlined" size="small" onClick={() => navigate('/admin/cursos')}>Cursos</Button>
+                        </Stack>
+                    </Box>
+                </Paper>
+            )}
         </Box>
     );
 }
