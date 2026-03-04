@@ -2,9 +2,9 @@ import React, { useState, useEffect } from 'react';
 import {
     Box, Grid, Card, CardContent, Typography, Button, Chip,
     FormControl, InputLabel, Select, MenuItem, LinearProgress,
-    Radio, RadioGroup, FormControlLabel, Alert, Paper
+    Radio, RadioGroup, FormControlLabel, Alert, Paper, Dialog, DialogTitle, DialogContent, DialogActions, IconButton, CircularProgress
 } from '@mui/material';
-import { CheckCircle, Cancel, Timer, NavigateNext } from '@mui/icons-material';
+import { CheckCircle, Cancel, Timer, NavigateNext, Close as CloseIcon, AutoFixHigh } from '@mui/icons-material';
 import ReactMarkdown from 'react-markdown';
 import api from '../../services/api';
 
@@ -19,6 +19,9 @@ export default function Quiz() {
     const [showResult, setShowResult] = useState(false);
     const [score, setScore] = useState(0);
     const [loading, setLoading] = useState(false);
+    const [loadingAI, setLoadingAI] = useState(false);
+    const [aiExplanation, setAiExplanation] = useState(null);
+    const [openAIDialog, setOpenAIDialog] = useState(false);
 
     useEffect(() => {
         loadFilters();
@@ -49,6 +52,7 @@ export default function Quiz() {
             setCurrentIndex(0);
             setScore(0);
             setShowResult(false);
+            setAiExplanation(null);
         } catch (error) {
             console.error('Erro ao carregar questões:', error);
         } finally {
@@ -81,6 +85,37 @@ export default function Quiz() {
             setCurrentIndex(currentIndex + 1);
             setSelectedAnswer(null);
             setShowResult(false);
+            setAiExplanation(null);
+        }
+    };
+
+    const handleExplain = async () => {
+        setLoadingAI(true);
+        setOpenAIDialog(true);
+        setAiExplanation(null);
+        try {
+            const question = questions[currentIndex];
+            const prompt = `
+                A questão é: "${question.text}"
+                As alternativas são: ${JSON.stringify(question.choices)}
+                A resposta correta é a alternativa de índice ${question.correct_index}: "${question.choices[question.correct_index]}"
+                Eu respondi a alternativa de índice ${selectedAnswer}: "${question.choices[selectedAnswer]}"
+                Por que minha resposta está errada e qual a lógica para chegar na resposta correta?
+            `;
+
+            const response = await api.post('/ia/professor', {
+                questao_id: question.id,
+                prompt: prompt
+            });
+
+            setAiExplanation(response.data.resposta);
+
+        } catch (error) {
+            console.error('Erro ao buscar explicação da IA:', error);
+            const errorMessage = error.response?.data?.error || 'Não foi possível obter a explicação. Tente novamente mais tarde.';
+            setAiExplanation(errorMessage);
+        } finally {
+            setLoadingAI(false);
         }
     };
 
@@ -184,35 +219,54 @@ export default function Quiz() {
                     value={selectedAnswer}
                     onChange={(e) => setSelectedAnswer(parseInt(e.target.value))}
                 >
-                    {currentQuestion.choices.map((choice, index) => (
-                        <FormControlLabel
-                            key={index}
-                            value={index}
-                            control={<Radio />}
-                            label={choice}
-                            disabled={showResult}
-                            sx={{
-                                p: 2,
-                                mb: 1,
-                                borderRadius: 2,
-                                border: '1px solid',
-                                borderColor: showResult
-                                    ? index === currentQuestion.correct_index
-                                        ? 'success.main'
-                                        : index === selectedAnswer
-                                            ? 'error.main'
-                                            : 'divider'
-                                    : 'divider',
-                                bgcolor: showResult
-                                    ? index === currentQuestion.correct_index
-                                        ? 'success.light'
-                                        : index === selectedAnswer
-                                            ? 'error.light'
-                                            : 'transparent'
-                                    : 'transparent',
-                            }}
-                        />
-                    ))}
+                    {currentQuestion.choices.map((choice, index) => {
+                        const isCorrect = index === currentQuestion.correct_index;
+                        const isSelected = index === selectedAnswer;
+                        const isWrong = isSelected && !isCorrect;
+
+                        return (
+                            <Box key={index}>
+                                <FormControlLabel
+                                    value={index}
+                                    control={<Radio />}
+                                    label={choice}
+                                    disabled={showResult}
+                                    sx={{
+                                        width: '100%',
+                                        p: 2,
+                                        mb: 1,
+                                        borderRadius: 2,
+                                        border: '1px solid',
+                                        borderColor: showResult
+                                            ? isCorrect
+                                                ? 'success.main'
+                                                : isWrong
+                                                    ? 'error.main'
+                                                    : 'divider'
+                                            : 'divider',
+                                        bgcolor: showResult
+                                            ? isCorrect
+                                                ? 'success.light'
+                                                : isWrong
+                                                    ? 'error.light'
+                                                    : 'transparent'
+                                            : 'transparent',
+                                    }}
+                                />
+                                {showResult && isWrong && (
+                                    <Button
+                                        startIcon={<AutoFixHigh />}
+                                        onClick={handleExplain}
+                                        size="small"
+                                        sx={{ ml: 2, mb: 1 }}
+                                        disabled={loadingAI}
+                                    >
+                                        {loadingAI ? 'Analisando...' : 'Explicar com IA'}
+                                    </Button>
+                                )}
+                            </Box>
+                        );
+                    })}
                 </RadioGroup>
 
                 {showResult && currentQuestion.explanation && (
@@ -311,6 +365,60 @@ export default function Quiz() {
                     </Button>
                 </Paper>
             )}
+
+            {/* Diálogo da IA */}
+            <Dialog open={openAIDialog} onClose={() => setOpenAIDialog(false)} fullWidth maxWidth="md">
+                <DialogTitle sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                    Explicação do Professor IA
+                    <IconButton onClick={() => setOpenAIDialog(false)}><CloseIcon /></IconButton>
+                </DialogTitle>
+                <DialogContent dividers>
+                    {loadingAI ? (
+                        <Box sx={{ display: 'flex', justifyContent: 'center', my: 4 }}>
+                            <CircularProgress />
+                        </Box>
+                    ) : (
+                        <Box sx={{
+                            '& p': { mb: 1.5, lineHeight: 1.7 },
+                            '& strong': { fontWeight: 'bold', color: 'primary.main' },
+                            '& em': { fontStyle: 'italic' },
+                            '& ul, & ol': { pl: 3, mb: 1.5 },
+                            '& li': { mb: 0.5 },
+                            '& code': {
+                                bgcolor: 'grey.100',
+                                px: 0.5,
+                                py: 0.25,
+                                borderRadius: 0.5,
+                                fontFamily: 'monospace',
+                                fontSize: '0.9em'
+                            },
+                            '& pre': {
+                                bgcolor: 'grey.100',
+                                p: 1.5,
+                                borderRadius: 1,
+                                overflow: 'auto',
+                                '& code': {
+                                    bgcolor: 'transparent',
+                                    p: 0
+                                }
+                            },
+                            '& blockquote': {
+                                borderLeft: '4px solid',
+                                borderColor: 'primary.main',
+                                pl: 2,
+                                ml: 0,
+                                fontStyle: 'italic',
+                                color: 'text.secondary'
+                            }
+                        }}>
+                            <ReactMarkdown>{aiExplanation}</ReactMarkdown>
+                        </Box>
+                    )}
+                </DialogContent>
+                <DialogActions>
+                    <Button onClick={() => setOpenAIDialog(false)}>Fechar</Button>
+                </DialogActions>
+            </Dialog>
         </Box>
     );
 }
